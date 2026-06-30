@@ -933,6 +933,147 @@
     height: 11px;
   }
 
+  /* ===== 发送状态：发送中 / 失败重发（B1/B2）===== */
+  .msg-status.sending svg { display: none; }
+  .msg-status.sending::before {
+    content: "";
+    width: 11px; height: 11px;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-top-color: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    animation: msg-spin 0.7s linear infinite;
+  }
+  @keyframes msg-spin { to { transform: rotate(360deg); } }
+  .msg-status.sent svg { color: rgba(255,255,255,0.55); }
+  .msg-status.failed { cursor: pointer; }
+  .msg-status.failed svg { display: none; }
+  .msg-status.failed::before {
+    content: "!";
+    width: 14px; height: 14px;
+    background: #ff4d4f; color: #fff;
+    border-radius: 50%;
+    font-size: 10px; font-weight: 700; line-height: 14px;
+    text-align: center;
+  }
+  .msg-fail-tip {
+    font-size: 10px; color: #ff6b6b;
+    margin-right: 2px;
+  }
+
+  /* ===== 媒体上传进度（B3）===== */
+  .msg-media-uploading { position: relative; }
+  .msg-media-uploading::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.45);
+    border-radius: 14px;
+  }
+  .msg-upload-ring {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+  }
+  .msg-upload-ring svg { width: 40px; height: 40px; transform: rotate(-90deg); }
+  .msg-upload-ring .ring-bg { stroke: rgba(255,255,255,0.25); }
+  .msg-upload-ring .ring-fg { stroke: #fff; transition: stroke-dashoffset 0.2s linear; }
+  .msg-upload-pct {
+    position: absolute; z-index: 3;
+    font-size: 11px; color: #fff; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== 语音转文字（A2）===== */
+  .voice-transcript {
+    margin-top: 6px;
+    background: rgba(255,255,255,0.95);
+    color: #1d1d1f;
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-size: 13.5px;
+    line-height: 1.45;
+    max-width: 220px;
+    margin-left: auto;
+    position: relative;
+    animation: vt-in 0.2s ease;
+  }
+  .msg-bot .voice-transcript { margin-left: 0; margin-right: auto; }
+  @keyframes vt-in { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
+  .voice-transcript-tag {
+    display: block;
+    font-size: 10px; color: #8e8e93;
+    margin-top: 5px;
+    border-top: 0.5px solid rgba(0,0,0,0.08);
+    padding-top: 4px;
+  }
+  .voice-transcript.loading {
+    color: #8e8e93;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .voice-transcript.loading::before {
+    content: "";
+    width: 11px; height: 11px;
+    border: 1.5px solid rgba(0,0,0,0.15);
+    border-top-color: #8e8e93;
+    border-radius: 50%;
+    animation: msg-spin 0.7s linear infinite;
+  }
+
+  /* ===== 语音播放进度（H）===== */
+  .msg-voice.playing .voice-icon { color: #fff; }
+  .voice-wave span.played { background: #fff !important; }
+  .msg-voice .voice-wave span { transition: background 0.1s; }
+
+  /* ===== 长按菜单：复制（C）===== */
+  .msg-ctx-mask {
+    position: fixed; inset: 0;
+    z-index: 400;
+    display: none;
+  }
+  .msg-ctx-mask.show { display: block; }
+  .msg-ctx-menu {
+    position: fixed;
+    z-index: 401;
+    background: #2c2c2e;
+    border-radius: 12px;
+    padding: 5px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    display: flex;
+    overflow: hidden;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: transform 0.13s, opacity 0.13s;
+  }
+  .msg-ctx-menu.show { transform: scale(1); opacity: 1; }
+  .msg-ctx-item {
+    padding: 9px 16px;
+    color: #fff; font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+    border-radius: 8px;
+  }
+  .msg-ctx-item:active { background: rgba(255,255,255,0.12); }
+  .msg-ctx-item svg { width: 15px; height: 15px; }
+
+  /* ===== 断网提示条（B4）===== */
+  .agent-net-banner {
+    flex-shrink: 0;
+    display: none;
+    background: rgba(255,77,79,0.12);
+    border-bottom: 0.5px solid rgba(255,77,79,0.22);
+    color: #ff8a8c;
+    font-size: 12px;
+    text-align: center;
+    padding: 8px 12px;
+    align-items: center; justify-content: center; gap: 6px;
+  }
+  .agent-net-banner svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .agent-net-banner.show { display: flex; animation: net-banner-in 0.22s ease; }
+  @keyframes net-banner-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   /* 消息来源标签（明显区分当面/App） */
   .msg-source-tag {
     display: inline-flex;
@@ -1169,32 +1310,6 @@
   /* ============================================ */
 
   /* —— 快捷指令胶囊（横滑） —— */
-  .quick-cmds {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 2px 0 2px;
-    margin: 0 -14px;
-    padding-left: 14px;
-    padding-right: 14px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .quick-cmds::-webkit-scrollbar { display: none; }
-  .quick-cmd {
-    flex-shrink: 0;
-    display: flex; align-items: center; gap: 6px;
-    height: 34px; padding: 0 13px;
-    background: rgba(255,255,255,0.06);
-    border: 0.5px solid rgba(255,255,255,0.1);
-    border-radius: 17px;
-    font-size: 12.5px; color: rgba(255,255,255,0.85);
-    white-space: nowrap; cursor: pointer;
-    transition: background 0.15s;
-  }
-  .quick-cmd:active { background: rgba(91,143,255,0.18); }
-  .quick-cmd svg { width: 14px; height: 14px; color: #8eb1ff; }
-
   /* —— 通用功能卡：复用 task-card 体系，但用于「调用 App 功能」的回执 —— */
   .fn-card {
     background: linear-gradient(180deg, #232730 0%, #1d2027 100%);
@@ -1278,18 +1393,6 @@
     font-size: 11px; padding: 3px 9px; border-radius: 12px;
     background: rgba(91,143,255,0.15); color: #8eb1ff;
   }
-
-  /* 机器人「配动作」的小标注：回复气泡下方表明它同时做了个动作 */
-  .bot-action {
-    display: inline-flex; align-items: center; gap: 5px;
-    margin-top: 5px; padding: 4px 9px;
-    background: rgba(91,143,255,0.1);
-    border: 0.5px solid rgba(91,143,255,0.2);
-    border-radius: 11px;
-    font-size: 11px; color: #8eb1ff;
-    width: fit-content;
-  }
-  .bot-action svg { width: 12px; height: 12px; }
 
   /* 主动推送卡：它在家「主动」告诉你的事 */
   .push-card {
@@ -2320,12 +2423,25 @@
     position: absolute;
     top: 16px; right: 16px;
     font-size: 11px;
-    color: #5b8fff;
-    background: rgba(91,143,255,0.12);
-    border: 0.5px solid rgba(91,143,255,0.3);
+    color: #4cd182;
+    background: rgba(76,209,130,0.12);
+    border: 0.5px solid rgba(76,209,130,0.3);
     padding: 3px 9px;
     border-radius: 6px;
   }
+  .rd-device-badge.available { color: #8eb1ff; background: rgba(91,143,255,0.12); border-color: rgba(91,143,255,0.3); }
+  .rd-device-badge.offline { color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
+  /* 非连接态：最后一次连接信息提示 */
+  .rd-history-note {
+    display: none;
+    align-items: center; gap: 7px;
+    font-size: 12px; color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px; padding: 9px 12px; margin-bottom: 14px;
+    line-height: 1.4;
+  }
+  .rd-history-note svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .rd-history-note.show { display: flex; }
 
   /* 详情菜单列表 */
   .rd-menu {
@@ -2358,6 +2474,12 @@
   .rd-menu-desc { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
   .rd-menu-arrow { color: rgba(255,255,255,0.3); flex-shrink: 0; display: flex; }
   .rd-menu-arrow svg { width: 18px; height: 18px; }
+  /* 受限菜单项（可连接/离线时不可操作）*/
+  .rd-menu-row.locked { opacity: 0.4; }
+  .rd-menu-row.locked .rd-menu-arrow svg { display: none; }
+  .rd-menu-lock { flex-shrink: 0; display: none; color: rgba(255,255,255,0.4); }
+  .rd-menu-row.locked .rd-menu-lock { display: flex; }
+  .rd-menu-lock svg { width: 15px; height: 15px; }
   .rd-menu-badge {
     background: #ff4d4d;
     color: #fff;
@@ -2384,6 +2506,38 @@
     transition: background 0.15s;
   }
   .rd-unbind-btn:active { background: rgba(255,77,77,0.16); }
+  /* 状态操作按钮：断开/去连接/重新搜索 */
+  .rd-conn-action-btn {
+    width: 100%;
+    height: 50px;
+    margin-top: 22px;
+    border-radius: 14px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  /* 已连接 → 断开（中性灰） */
+  .rd-conn-action-btn.disconnect {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.85);
+    border: 0.5px solid rgba(255,255,255,0.12);
+  }
+  .rd-conn-action-btn.disconnect:active { background: rgba(255,255,255,0.14); }
+  /* 可连接 → 去连接（蓝实心） */
+  .rd-conn-action-btn.connect {
+    background: #5b8fff;
+    color: #fff;
+  }
+  .rd-conn-action-btn.connect:active { opacity: 0.85; }
+  /* 离线 → 重新搜索（蓝描边） */
+  .rd-conn-action-btn.research {
+    background: rgba(91,143,255,0.1);
+    color: #8eb1ff;
+    border: 0.5px solid rgba(91,143,255,0.35);
+  }
+  .rd-conn-action-btn.research:active { background: rgba(91,143,255,0.18); }
 
   /* ===== 详情子 sheet 内的内容样式 ===== */
   /* 调试小图标（右上角，纯装饰，与视频一致） */
@@ -2415,6 +2569,7 @@
   }
   .rd-data-row:last-child { border-bottom: none; }
   .rd-data-key { font-size: 14px; color: rgba(255,255,255,0.6); }
+  .rd-data-note { display: block; font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
   .rd-data-val { font-size: 14px; color: #fff; font-weight: 500; text-align: right; }
   .rd-data-val.mono { font-family: 'SF Mono', ui-monospace, monospace; font-size: 13px; }
   .rd-data-val.ok { color: #4cd182; }
@@ -2575,6 +2730,41 @@
   }
   .conn-mode-arrow { width: 18px; height: 18px; color: rgba(255,255,255,0.3); flex-shrink: 0; }
 
+  /* 两种连接方式（说明 + 配网选择共用） */
+  .conn-ways { display: flex; flex-direction: column; gap: 10px; }
+  .conn-way {
+    display: flex; align-items: center; gap: 13px;
+    padding: 13px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 0.8px solid transparent;
+  }
+  .conn-way.current {
+    background: rgba(76,209,130,0.07);
+    border-color: rgba(76,209,130,0.22);
+  }
+  .conn-way.pick { cursor: pointer; transition: background 0.15s; }
+  .conn-way.pick:active { background: rgba(255,255,255,0.09); }
+  .conn-way-icon {
+    width: 40px; height: 40px; border-radius: 11px;
+    background: rgba(91,143,255,0.14);
+    display: flex; align-items: center; justify-content: center;
+    color: #5b8fff; flex-shrink: 0;
+  }
+  .conn-way.current .conn-way-icon { background: rgba(76,209,130,0.16); color: #4cd182; }
+  .conn-way-icon svg { width: 20px; height: 20px; }
+  .conn-way-main { flex: 1; min-width: 0; }
+  .conn-way-title { font-size: 15px; color: #fff; }
+  .conn-way-desc { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 3px; line-height: 1.4; }
+  .conn-way-cur { font-size: 12px; color: #4cd182; font-weight: 600; flex-shrink: 0; }
+  .conn-way-arrow { width: 18px; height: 18px; color: rgba(255,255,255,0.3); flex-shrink: 0; }
+  .conn-back {
+    display: flex; align-items: center; gap: 4px;
+    background: none; border: none; cursor: pointer;
+    color: #8eb1ff; font-size: 13px; padding: 0; margin-bottom: 14px;
+  }
+  .conn-back svg { width: 16px; height: 16px; }
+
   /* AP 配网引导 */
   .conn-flow-note {
     font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.6;
@@ -2719,6 +2909,17 @@
   .my-device-name { font-size: 15px; color: #fff; font-weight: 600; display: flex; align-items: center; gap: 8px; }
   .my-device-sn { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 3px; }
   .my-device-conn { font-size: 10.5px; color: #4cd182; background: rgba(76,209,130,0.12); padding: 2px 7px; border-radius: 5px; font-weight: 500; }
+  /* 三态：已连接(绿) / 可连接(蓝) / 离线(灰) */
+  .my-device-conn.available { color: #8eb1ff; background: rgba(91,143,255,0.14); }
+  .my-device-conn.offline { color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.08); }
+  .my-device-card.available { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
+  .my-device-card.offline { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); opacity: 0.75; }
+  .my-device-card.offline .my-device-icon { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
+  .my-device-card.available .my-device-icon { background: rgba(91,143,255,0.12); }
+  .my-device-conn-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 1px; }
+  .my-device-conn.connected .my-device-conn-dot { background: #4cd182; box-shadow: 0 0 0 2px rgba(76,209,130,0.25); }
+  .my-device-conn.available .my-device-conn-dot { background: #5b8fff; }
+  .my-device-conn.offline .my-device-conn-dot { background: rgba(255,255,255,0.4); }
   .my-device-arrow { color: rgba(255,255,255,0.3); flex-shrink: 0; display: flex; }
   .my-device-arrow svg { width: 18px; height: 18px; }
 
@@ -3719,6 +3920,59 @@
   }
   .remote-body::-webkit-scrollbar { width: 0; }
 
+  /* ===== 遥控页未连接引导态（需求4）===== */
+  .remote-guide {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 64px 28px 0;
+  }
+  /* 未连接：显示引导，隐藏所有实际遥控控件 */
+  .remote-page.disconnected .remote-guide { display: flex; }
+  .remote-page.disconnected .remote-preview,
+  .remote-page.disconnected .remote-actions,
+  .remote-page.disconnected .mode-pills,
+  .remote-page.disconnected .joysticks { display: none; }
+  .remote-guide-icon {
+    position: relative;
+    width: 88px; height: 88px;
+    border-radius: 24px;
+    background: rgba(255,255,255,0.05);
+    border: 0.5px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 24px;
+  }
+  .remote-guide-icon svg { width: 40px; height: 40px; }
+  .remote-guide-slash {
+    position: absolute;
+    width: 100px; height: 2px;
+    background: #ff5a5a;
+    border-radius: 2px;
+    transform: rotate(-45deg);
+    box-shadow: 0 0 0 2px rgba(10,11,13,0.9);
+  }
+  .remote-guide-title {
+    font-size: 19px; font-weight: 700; color: #fff;
+    margin-bottom: 10px;
+  }
+  .remote-guide-desc {
+    font-size: 13px; line-height: 1.7;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 28px;
+  }
+  .remote-guide-btn {
+    padding: 14px 32px;
+    border-radius: 100px;
+    border: none;
+    background: #5b8fff;
+    color: #fff;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+  }
+  .remote-guide-btn:active { transform: scale(0.97); opacity: 0.9; }
+
   /* 大标题 REMOTE */
   .remote-title {
     font-size: 28px;
@@ -3813,6 +4067,120 @@
   .action-btn.active svg,
   .action-btn.active .action-btn-label {
     color: #5b8fff;
+  }
+  /* + 添加动作按钮（虚线框） */
+  .action-btn.action-add {
+    border: 1px dashed rgba(255,255,255,0.22);
+    background: transparent;
+    color: rgba(255,255,255,0.55);
+  }
+  .action-btn.action-add svg { color: rgba(255,255,255,0.55); }
+
+  /* ===== 动作选择弹窗（需求7）===== */
+  .act-picker-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(2px);
+    z-index: 320;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .act-picker-mask.show { opacity: 1; pointer-events: auto; }
+  .act-picker {
+    position: fixed;
+    left: 50%; bottom: 0;
+    transform: translateX(-50%) translateY(100%);
+    width: 100%; max-width: 430px;
+    background: #1a1c20;
+    border-radius: 22px 22px 0 0;
+    z-index: 321;
+    padding: 8px 20px calc(24px + var(--safe-bottom));
+    transition: transform 0.28s cubic-bezier(.22,.61,.36,1);
+    max-height: 80dvh;
+    display: flex; flex-direction: column;
+  }
+  .act-picker.show { transform: translateX(-50%) translateY(0); }
+  .act-picker-handle {
+    width: 38px; height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,0.2);
+    margin: 8px auto 14px;
+    flex-shrink: 0;
+  }
+  .act-picker-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .act-picker-title { font-size: 17px; font-weight: 700; color: #fff; }
+  .act-picker-count { font-size: 12px; color: rgba(255,255,255,0.45); }
+  .act-picker-hint { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 16px; }
+  .act-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    overflow-y: auto;
+    padding: 2px;
+  }
+  .act-picker-grid::-webkit-scrollbar { width: 0; }
+  .act-pick-item {
+    aspect-ratio: 1 / 1;
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 8px; cursor: pointer;
+    color: rgba(255,255,255,0.85);
+    position: relative;
+    transition: all 0.15s;
+  }
+  .act-pick-item svg { width: 24px; height: 24px; stroke-width: 1.6; }
+  .act-pick-item span { font-size: 12px; line-height: 1; }
+  .act-pick-item.selected {
+    background: rgba(91,143,255,0.18);
+    border-color: #5b8fff;
+    color: #5b8fff;
+  }
+  .act-pick-item.selected svg { color: #5b8fff; }
+  .act-pick-check {
+    position: absolute; top: 5px; right: 5px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #5b8fff; color: #fff;
+    display: none; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .act-pick-item.selected .act-pick-check { display: flex; }
+  .act-picker-done {
+    margin-top: 16px;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    background: #5b8fff;
+    color: #fff; font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .act-picker-done:active { opacity: 0.9; }
+
+  /* ===== 横屏打开时：picker 改为居中卡片 + 跟随横屏旋转 90° ===== */
+  .act-picker.landscape {
+    left: 50%; top: 50%; bottom: auto;
+    width: min(86vh, 560px);   /* 旋转后“宽”对应屏幕高度方向 */
+    max-width: none;
+    max-height: 86vw;          /* 旋转后“高”对应屏幕宽度方向 */
+    border-radius: 20px;
+    transform-origin: center center;
+    transform: translate(-50%, -50%) rotate(-90deg) scale(0.94);
+    opacity: 0;
+    transition: transform 0.22s cubic-bezier(.22,.61,.36,1), opacity 0.2s;
+    padding: 18px 22px;
+  }
+  .act-picker.landscape.show {
+    transform: translate(-50%, -50%) rotate(-90deg) scale(1);
+    opacity: 1;
+  }
+  .act-picker.landscape .act-picker-handle { display: none; }
+  .act-picker.landscape .act-picker-grid {
+    grid-template-columns: repeat(6, 1fr);
   }
 
   /* 模式胶囊行 */
@@ -4029,6 +4397,12 @@
     color: #5b8fff;
   }
   .rl-action-btn.active svg, .rl-action-btn.active span { color: #5b8fff; }
+  .rl-action-btn.rl-action-add {
+    border: 1px dashed rgba(255,255,255,0.3);
+    background: rgba(0,0,0,0.3);
+    color: rgba(255,255,255,0.6);
+  }
+  .rl-action-btn.rl-action-add svg { color: rgba(255,255,255,0.6); }
 
   /* 双摇杆（竖屏） */
   .joysticks {
@@ -4039,6 +4413,8 @@
     padding: 8px 0;
     position: relative;
   }
+  .joysticks.single { justify-content: center; }
+  .joysticks.single .joystick { flex: 0 0 auto; width: 200px; max-width: 60%; }
   .joystick {
     flex: 1;
     aspect-ratio: 1 / 1;
@@ -4157,10 +4533,10 @@
     flex: 1;
   }
   .perform-title {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 800;
     color: #fff;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
     line-height: 1;
   }
   .perform-subtitle {
@@ -4339,11 +4715,12 @@
     background: rgba(76,209,130,0.08);
     color: #4cd182;
   }
-  /* 等待机器人上线标签（灰橙） */
-  .work-tag.waiting {
-    border-color: rgba(255,180,90,0.45);
-    background: rgba(255,180,90,0.08);
-    color: #ffb45a;
+  /* 未同步作品的友好提示小字 */
+  .work-sync-tip {
+    font-size: 11px;
+    color: rgba(255,255,255,0.38);
+    margin-top: 4px;
+    line-height: 1.4;
   }
   /* 作品卡右侧 同步/执行 按钮 */
   .work-action-btn {
@@ -4385,6 +4762,26 @@
     margin-top: 4px;
   }
   .work-meta span + span { margin-left: 12px; }
+  /* 全局：执行时播放音频 */
+  .works-music-global {
+    display: flex; align-items: center; gap: 8px;
+    justify-content: flex-end;
+    margin: 4px 0 12px; padding: 10px 12px;
+    background: rgba(255,255,255,0.04); border-radius: 11px;
+    cursor: pointer; user-select: none;
+    font-size: 13px; color: rgba(255,255,255,0.5);
+  }
+  .works-music-box {
+    width: 17px; height: 17px; border-radius: 5px;
+    border: 1.4px solid rgba(255,255,255,0.3);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #fff; transition: all 0.15s; flex-shrink: 0;
+  }
+  .works-music-box svg { width: 12px; height: 12px; opacity: 0; transition: opacity 0.15s; }
+  .works-music-global.on .works-music-box { background: #5b8fff; border-color: #5b8fff; }
+  .works-music-global.on .works-music-box svg { opacity: 1; }
+  .works-music-global.on { color: rgba(255,255,255,0.8); }
+  .works-music-note { width: 14px; height: 14px; flex-shrink: 0; }
   .work-download {
     width: 40px; height: 40px;
     border-radius: 50%;
@@ -5040,6 +5437,25 @@
   .mocap-task-status.learning { color: #5b8fff; }
   .mocap-task-status.pending { color: #4cd182; }
   .mocap-task-status.failed { color: #ff5959; }
+  /* 失败原因 + 重新上传 */
+  .mocap-task-fail {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 0.5px solid rgba(255,255,255,0.08);
+  }
+  .mocap-task-fail-reason {
+    display: flex; align-items: flex-start; gap: 7px;
+    font-size: 12.5px; color: #ff8080; line-height: 1.45;
+  }
+  .mocap-task-fail-reason svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
+  .mocap-task-retry {
+    margin-top: 10px; width: 100%;
+    padding: 9px; border-radius: 10px;
+    background: rgba(91,143,255,0.12); border: 0.5px solid rgba(91,143,255,0.3);
+    color: #8eb1ff; font-size: 13.5px; font-weight: 500;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .mocap-task-retry:active { background: rgba(91,143,255,0.2); }
   .mocap-task-card-actions {
     display: flex;
     gap: 8px;
@@ -5567,6 +5983,188 @@
     height: 100dvh;
     padding: var(--safe-top) 28px 0;
   }
+
+  /* ============================================ */
+  /* ===== 全局急停 FAB（需求2）===== */
+  /* 仅设备运动时出现；视觉最高优先级；长按防误触 */
+  /* ============================================ */
+  .estop-fab {
+    position: fixed;
+    right: calc(16px + env(safe-area-inset-right));
+    bottom: calc(120px + var(--safe-bottom));
+    width: 76px; height: 76px;
+    border: none;
+    background: transparent;
+    padding: 0;
+    z-index: 9999;               /* 压过所有页面/弹层 */
+    cursor: pointer;
+    display: none;               /* 默认隐藏，运动时由 JS 显示 */
+    align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+  }
+  .estop-fab.show { display: flex; animation: estop-pop 0.25s ease; }
+  /* 遥控页（竖屏 / 横屏 overlay）本身已有专用急停且在拇指可达区，
+     此处抑制全局浮动急停，避免重复 + 单手操控摇杆时够不到的问题 */
+  body:has(.phone.show-remote) .estop-fab,
+  body:has(#remoteLandscape.open) .estop-fab {
+    display: none !important;
+  }
+  @keyframes estop-pop {
+    from { transform: scale(0.6); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  /* 外圈脉冲，强提示存在感 */
+  .estop-fab-ring {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    background: rgba(255,59,48,0.35);
+    animation: estop-pulse 1.6s ease-out infinite;
+  }
+  @keyframes estop-pulse {
+    0%   { transform: scale(0.85); opacity: 0.7; }
+    70%  { transform: scale(1.35); opacity: 0; }
+    100% { transform: scale(1.35); opacity: 0; }
+  }
+  .estop-fab-core {
+    position: relative;
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 38%, #ff5a4d, #e0291c);
+    box-shadow: 0 6px 20px rgba(224,41,28,0.55), inset 0 -3px 8px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.35);
+    border: 2.5px solid rgba(255,255,255,0.9);
+    color: #fff;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1px;
+  }
+  .estop-fab-core svg { width: 20px; height: 20px; }
+  .estop-fab-label { font-size: 12px; font-weight: 800; letter-spacing: 1px; }
+  /* 长按进度环（按住时填充） */
+  .estop-fab.holding .estop-fab-core {
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.5), 0 6px 24px rgba(224,41,28,0.7);
+    transform: scale(0.94);
+  }
+  .estop-fab.holding .estop-fab-ring { animation: none; opacity: 0; }
+  .estop-fab-hint {
+    position: absolute;
+    bottom: -18px; left: 50%; transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 10px; font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    background: rgba(224,41,28,0.9);
+    padding: 2px 8px; border-radius: 8px;
+    pointer-events: none;
+  }
+
+  /* ============================================ */
+  /* ===== 启动确认弹窗（需求3）===== */
+  /* ============================================ */
+  .launch-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(3px);
+    z-index: 9000;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .launch-mask.show { opacity: 1; pointer-events: auto; }
+  .launch-modal {
+    position: fixed;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -48%) scale(0.96);
+    width: calc(100% - 56px); max-width: 360px;
+    background: #1b1d22;
+    border: 0.5px solid rgba(255,255,255,0.08);
+    border-radius: 22px;
+    z-index: 9001;
+    padding: 26px 22px 20px;
+    text-align: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.22s, transform 0.22s;
+  }
+  .launch-modal.show {
+    opacity: 1; pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .launch-icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: rgba(255,176,32,0.14);
+    color: #ffb020;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .launch-icon svg { width: 28px; height: 28px; }
+  .launch-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .launch-sub { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.55); margin-bottom: 18px; }
+  .launch-info {
+    background: rgba(255,255,255,0.04);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    text-align: left;
+  }
+  .launch-info-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 5px 0;
+    font-size: 13px;
+  }
+  .launch-info-k { color: rgba(255,255,255,0.4); flex-shrink: 0; width: 32px; }
+  .launch-info-v { color: rgba(255,255,255,0.9); flex: 1; }
+  .launch-check {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 4px;
+    cursor: pointer;
+    margin-bottom: 14px;
+    text-align: left;
+  }
+  .launch-check-box {
+    width: 22px; height: 22px; flex-shrink: 0;
+    border-radius: 7px;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    color: transparent;
+    transition: all 0.15s;
+  }
+  .launch-check-box svg { width: 14px; height: 14px; }
+  .launch-check.on .launch-check-box {
+    background: #5b8fff; border-color: #5b8fff; color: #fff;
+  }
+  .launch-check-text { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.4; }
+  /* 次要勾选：本次会话不再提醒（比安全确认弱一级） */
+  .launch-skip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 2px 4px 14px;
+    cursor: pointer;
+    margin-top: -4px;
+  }
+  .launch-skip-box {
+    width: 18px; height: 18px; flex-shrink: 0;
+    border-radius: 6px;
+    border: 1.5px solid rgba(255,255,255,0.22);
+    display: flex; align-items: center; justify-content: center;
+    color: transparent;
+    transition: all 0.15s;
+  }
+  .launch-skip-box svg { width: 11px; height: 11px; }
+  .launch-skip.on .launch-skip-box {
+    background: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.5); color: #1b1d22;
+  }
+  .launch-skip-text { font-size: 12px; color: rgba(255,255,255,0.45); }
+  .launch-btns { display: flex; gap: 12px; }
+  .launch-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+  }
+  .launch-btn.cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); }
+  .launch-btn.confirm { background: #5b8fff; color: #fff; transition: opacity 0.15s; }
+  .launch-btn.confirm.disabled { opacity: 0.4; pointer-events: none; }
+  .launch-btn:active { transform: scale(0.98); }
 </style>
 </head>
 <body>
@@ -5894,6 +6492,22 @@
     <div class="remote-body">
       <div class="remote-title">REMOTE</div>
 
+      <!-- 未连接引导态：盖住遥控内容，引导用户去连接 -->
+      <div class="remote-guide" id="remoteGuide">
+        <div class="remote-guide-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="3"/>
+            <circle cx="9" cy="9" r="1.2" fill="currentColor"/>
+            <circle cx="15" cy="9" r="1.2" fill="currentColor"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+          <div class="remote-guide-slash"></div>
+        </div>
+        <div class="remote-guide-title">尚未连接机器人</div>
+        <div class="remote-guide-desc">遥控需要先连接一台在线机器人。<br>连接后即可使用摇杆与快捷动作。</div>
+        <button class="remote-guide-btn" id="remoteGuideBtn">去连接机器人</button>
+      </div>
+
       <!-- 视频/状态预览 -->
       <div class="remote-preview">
         <div class="remote-preview-text">未连接机器人</div>
@@ -5908,93 +6522,22 @@
         <div class="remote-preview-handle"></div>
       </div>
 
-      <!-- 动作按钮 (2行x4列) -->
-      <div class="remote-actions">
-        <button class="action-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="4" x2="12" y2="16"/>
-            <polyline points="6 12 12 18 18 12"/>
-            <line x1="5" y1="20" x2="19" y2="20"/>
-          </svg>
-          <span class="action-btn-label">站→坐</span>
-        </button>
-        <button class="action-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="20" x2="12" y2="8"/>
-            <polyline points="6 12 12 6 18 12"/>
-            <line x1="5" y1="4" x2="19" y2="4"/>
-          </svg>
-          <span class="action-btn-label">坐→站</span>
-        </button>
-        <button class="action-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 4c0 5-3 7-3 11"/>
-            <path d="M15 4c0 5 3 7 3 11"/>
-            <path d="M5 20l3-2"/>
-            <path d="M19 20l-3-2"/>
-          </svg>
-          <span class="action-btn-label">踏步</span>
-        </button>
-        <button class="action-btn active">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="4" y1="18" x2="13" y2="18"/>
-            <line x1="16" y1="18" x2="20" y2="18"/>
-            <polyline points="14 14 18 10 20 12"/>
-          </svg>
-          <span class="action-btn-label">躺→站</span>
-        </button>
+      <!-- 快捷动作（数据驱动，可配置；最后一格为 + 添加）-->
+      <div class="remote-actions" id="remoteActions"></div>
 
-        <button class="action-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 11V6.5a1.5 1.5 0 0 0-3 0V11"/>
-            <path d="M15 11V4.5a1.5 1.5 0 0 0-3 0V11"/>
-            <path d="M12 11V5.5a1.5 1.5 0 0 0-3 0V13"/>
-            <path d="M9 13V8.5a1.5 1.5 0 0 0-3 0V18a6 6 0 0 0 12 0V11a1.5 1.5 0 0 0-3 0v3"/>
-          </svg>
-          <span class="action-btn-label">挥手</span>
-        </button>
-        <button class="action-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M11 17l-5-5 4-4 5 5"/>
-            <path d="M14 8l3-3 5 5-3 3"/>
-            <path d="M3 11l8 8c1 1 3 1 4 0l1-1c1-1 1-3 0-4"/>
-          </svg>
-          <span class="action-btn-label">握手</span>
-        </button>
-        <button class="action-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-          </svg>
-          <span class="action-btn-label">飞吻</span>
-        </button>
-        <button class="action-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="5" cy="12" r="1.5" fill="currentColor"/>
-            <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-            <circle cx="19" cy="12" r="1.5" fill="currentColor"/>
-          </svg>
-          <span class="action-btn-label">其他</span>
-        </button>
-      </div>
 
       <!-- 模式胶囊 -->
       <div class="mode-pills">
         <div class="mode-pill">零力矩</div>
         <div class="mode-pill">阻尼</div>
-        <div class="mode-pill">运控</div>
         <div class="mode-pill">站立</div>
+        <div class="mode-pill">运控</div>
         <div class="mode-pill danger">急停</div>
       </div>
 
       <!-- 双摇杆 -->
-      <div class="joysticks">
+      <div class="joysticks single">
         <div class="joystick" data-joystick="left">
-          <div class="joystick-stick"></div>
-        </div>
-        <div class="joystick-divider">
-          <span></span><span></span><span></span>
-        </div>
-        <div class="joystick" data-joystick="right">
           <div class="joystick-stick"></div>
         </div>
       </div>
@@ -6002,6 +6545,19 @@
     </div>
 
     <!-- 底部导航已统一为全局 #globalNav -->
+  </div>
+
+  <!-- ===== 动作选择弹窗（需求7）===== -->
+  <div class="act-picker-mask" id="actPickerMask"></div>
+  <div class="act-picker" id="actPicker">
+    <div class="act-picker-handle"></div>
+    <div class="act-picker-head">
+      <div class="act-picker-title">选择快捷动作</div>
+      <div class="act-picker-count" id="actPickerCount">已选 0 / 7</div>
+    </div>
+    <div class="act-picker-hint">最多选 7 个，会显示在遥控页快捷区</div>
+    <div class="act-picker-grid" id="actPickerGrid"></div>
+    <button class="act-picker-done" id="actPickerDone">完成</button>
   </div>
 
   <!-- ============================================ -->
@@ -6055,40 +6611,7 @@
     </div>
 
     <!-- 底部中间：一排 8 个动作按钮 -->
-    <div class="rl-actions">
-      <button class="rl-action-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="16"/><polyline points="6 12 12 18 18 12"/><line x1="5" y1="20" x2="19" y2="20"/></svg>
-        <span>站→坐</span>
-      </button>
-      <button class="rl-action-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="8"/><polyline points="6 12 12 6 18 12"/><line x1="5" y1="4" x2="19" y2="4"/></svg>
-        <span>坐→站</span>
-      </button>
-      <button class="rl-action-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4c0 5-3 7-3 11"/><path d="M15 4c0 5 3 7 3 11"/><path d="M5 20l3-2"/><path d="M19 20l-3-2"/></svg>
-        <span>踏步</span>
-      </button>
-      <button class="rl-action-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="18" x2="13" y2="18"/><line x1="16" y1="18" x2="20" y2="18"/><polyline points="14 14 18 10 20 12"/></svg>
-        <span>躺→站</span>
-      </button>
-      <button class="rl-action-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6.5a1.5 1.5 0 0 0-3 0V11"/><path d="M15 11V4.5a1.5 1.5 0 0 0-3 0V11"/><path d="M12 11V5.5a1.5 1.5 0 0 0-3 0V13"/><path d="M9 13V8.5a1.5 1.5 0 0 0-3 0V18a6 6 0 0 0 12 0V11a1.5 1.5 0 0 0-3 0v3"/></svg>
-        <span>挥手</span>
-      </button>
-      <button class="rl-action-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 4-4 5 5"/><path d="M14 8l3-3 5 5-3 3"/><path d="M3 11l8 8c1 1 3 1 4 0l1-1c1-1 1-3 0-4"/></svg>
-        <span>握手</span>
-      </button>
-      <button class="rl-action-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        <span>飞吻</span>
-      </button>
-      <button class="rl-action-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></svg>
-        <span>其他</span>
-      </button>
-    </div>
+    <div class="rl-actions" id="rlActions"></div>
   </div>
 
   <!-- 未连接 Toast -->
@@ -6130,8 +6653,8 @@
       <!-- 头部 -->
       <div class="perform-header">
         <div class="perform-title-block">
-          <div class="perform-title">PERFORM</div>
-          <div class="perform-subtitle">创作与表演管理</div>
+          <div class="perform-title">技能</div>
+          <div class="perform-subtitle">创作与管理机器人技能</div>
         </div>
         <button class="task-list-btn" id="openTaskListBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -6186,6 +6709,13 @@
         </div>
       </div>
 
+      <!-- 全局：执行时是否播放音频 -->
+      <label class="works-music-global on" id="worksMusicGlobal">
+        <svg class="works-music-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>执行时播放音频</span>
+        <span class="works-music-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+      </label>
+
       <!-- 用户作品列表（由 JS 渲染） -->
       <div class="works-list" id="worksListAll"></div>
 
@@ -6219,7 +6749,7 @@
         <path d="M7 6 L9 3 L15 3 L17 6"/>
         <line x1="3" y1="11" x2="21" y2="11"/>
       </svg>
-      <span>编排</span>
+      <span>技能</span>
     </div>
     <div class="nav-item" data-tab="遥控">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -6420,7 +6950,7 @@
       </div>
     </div>
 
-    <input class="preview-name-input" type="text" placeholder="请输入名称" id="previewNameInput"/>
+    <input class="preview-name-input" type="text" placeholder="视频模仿-00:00:00" id="previewNameInput"/>
 
     <button class="preview-start-btn" id="startLearnBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -6462,7 +6992,7 @@
       </svg>
     </div>
     <div class="upload-success-title">视频完成上传</div>
-    <div class="upload-success-desc">视频已加入任务列表开始学习。学习完成后会自动为你准备到机器人，准备好即可随时启动，无需手动保存或同步。你可前往任务列表查看进度，或继续添加新动作。</div>
+    <div class="upload-success-desc">视频已加入任务列表开始学习。学习完成后会自动为你同步到在线机器人。你可前往任务列表查看进度，或继续添加新动作。</div>
   </div>
   <div class="upload-success-buttons">
     <button class="btn-primary-large" id="goTaskListBtn">前往任务列表</button>
@@ -6754,28 +7284,14 @@
       </button>
     </div>
 
+    <!-- 断网提示条（B4）：仅在对话页顶部导航下方出现 -->
+    <div class="agent-net-banner" id="agentNetBanner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+      <span>网络连接已断开，消息将在恢复后重发</span>
+    </div>
+
     <!-- 消息流 -->
     <div class="agent-messages" id="agentMessages">
-
-      <!-- 快捷指令胶囊 -->
-      <div class="quick-cmds">
-        <div class="quick-cmd">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-          跳支舞
-        </div>
-        <div class="quick-cmd">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9v6M12 4v16M19 9v6"/></svg>
-          打个招呼
-        </div>
-        <div class="quick-cmd">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="11" r="3"/></svg>
-          看看家里
-        </div>
-        <div class="quick-cmd">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          学新动作
-        </div>
-      </div>
 
       <div class="msg-divider">今天 18:40</div>
 
@@ -6798,18 +7314,14 @@
         <div class="msg-avatar bot">ET</div>
         <div class="msg-body">
           <div class="msg-bubble">在客厅待命呢，等你回来！要我去门口迎接吗？</div>
-          <div class="bot-action">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>
-            原地转了个圈
-          </div>
           <div class="msg-meta">18:40</div>
         </div>
       </div>
 
-      <div class="msg-divider">18:52 · 你已到家</div>
+      <div class="msg-divider">18:52</div>
 
       <!-- 当面对话：到家后对着它说话，标注「当面」 -->
-      <div class="msg msg-user from-face">
+      <div class="msg msg-user from-face" id="staticVoiceMsg">
         <div class="msg-avatar user">我</div>
         <div class="msg-body">
           <div class="msg-bubble msg-voice">
@@ -6822,6 +7334,9 @@
               <span style="height:15px"></span><span style="height:22px"></span>
             </div>
             <span class="voice-duration">2"</span>
+            <button class="voice-to-text" title="转文字" style="background:none;border:none;padding:0 0 0 4px;cursor:pointer;color:rgba(255,255,255,0.75);display:flex;align-items:center;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5h16v2"/><path d="M9 19h6"/><path d="M12 5v14"/></svg>
+            </button>
           </div>
           <div class="msg-meta">
             <span class="msg-source-tag face">
@@ -6837,10 +7352,6 @@
         <div class="msg-avatar bot">ET</div>
         <div class="msg-body">
           <div class="msg-bubble">欢迎回家～今天辛苦啦！</div>
-          <div class="bot-action">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9v6M12 4v16M19 9v6"/></svg>
-            挥手 + 前进两步
-          </div>
           <div class="msg-meta">18:52</div>
         </div>
       </div>
@@ -6896,7 +7407,7 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   学习完成后可查看效果
                 </div>
-                <button class="task-btn">查看任务</button>
+                <button class="task-btn" data-open-tasklist>查看任务</button>
               </div>
             </div>
           </div>
@@ -6928,7 +7439,12 @@
                 </div>
               </div>
               <div class="fn-foot">
-                <button class="task-btn primary" style="flex:0;">查看效果</button>
+                <button class="task-btn" data-preview="动作模仿作品">查看效果</button>
+                <button class="task-btn primary" data-launch
+                  data-act-name="动作模仿作品" data-act-dur="约 8 秒">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                  启动
+                </button>
               </div>
             </div>
           </div>
@@ -7201,29 +7717,8 @@
 
     <div class="settings-group-label">我的设备</div>
 
-    <!-- 已连接设备列表（绑定新设备后会追加到这里）-->
-    <div id="myDeviceList">
-      <!-- 已连接设备卡：点击进入机器人详情页 -->
-      <div class="my-device-card" id="myDeviceCard" data-sn="R111AAAEAAAA3743">
-        <div class="my-device-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="5" y="2" width="14" height="20" rx="3"/>
-            <circle cx="9" cy="9" r="1.2" fill="currentColor"/>
-            <circle cx="15" cy="9" r="1.2" fill="currentColor"/>
-            <line x1="9" y1="15" x2="15" y2="15"/>
-          </svg>
-        </div>
-        <div class="my-device-main">
-          <div class="my-device-name">G-ET1-3743 <span class="my-device-conn">已连接</span></div>
-          <div class="my-device-sn">R111AAAEAAAA3743 · 90%</div>
-        </div>
-        <div class="my-device-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"/>
-          </svg>
-        </div>
-      </div>
-    </div>
+    <!-- 我的设备列表（由 JS 渲染）-->
+    <div id="myDeviceList"></div>
 
     <button class="bind-device-btn" id="bindDeviceBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -7313,9 +7808,15 @@
   </div>
 
   <div class="rd-body">
+    <!-- 非连接态：最后一次连接信息提示 -->
+    <div class="rd-history-note" id="rdHistoryNote">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span id="rdHistoryText">以下为最后一次连接时的信息</span>
+    </div>
+
     <!-- 设备卡 -->
     <div class="rd-device-card">
-      <div class="rd-device-badge">已连接</div>
+      <div class="rd-device-badge" id="rdBadge">已连接</div>
       <div class="rd-device-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <rect x="5" y="2" width="14" height="20" rx="3"/>
@@ -7325,11 +7826,11 @@
         </svg>
       </div>
       <div class="rd-device-main">
-        <div class="rd-device-name">G-ET1-3743</div>
-        <div class="rd-device-sn">R111AAAEAAAA3743</div>
+        <div class="rd-device-name" id="rdName">G-ET1-3743</div>
+        <div class="rd-device-sn" id="rdSn">R111AAAEAAAA3743</div>
         <div class="rd-device-batt">
           <svg width="16" height="11" viewBox="0 0 20 12" fill="none"><rect x="0.5" y="0.5" width="16" height="11" rx="2.5" stroke="currentColor"/><rect x="2" y="2" width="11" height="8" rx="1" fill="currentColor"/><rect x="17.5" y="3.5" width="2" height="5" rx="1" fill="currentColor"/></svg>
-          90%
+          <span id="rdBatt">90%</span>
         </div>
       </div>
     </div>
@@ -7343,21 +7844,21 @@
         <div class="rd-menu-main"><div class="rd-menu-title">基础信息</div><div class="rd-menu-desc">SN、型号、版本</div></div>
         <div class="rd-menu-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       </div>
-      <div class="rd-menu-row" data-rd-sheet="rdRemote">
+      <div class="rd-menu-row" data-rd-sheet="rdRemote" data-rd-locked>
         <div class="rd-menu-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="12" x2="6" y2="12"/><line x1="10" y1="12" x2="10" y2="12"/><circle cx="16" cy="11" r="1" fill="currentColor"/><circle cx="19" cy="13" r="1" fill="currentColor"/></svg>
         </div>
         <div class="rd-menu-main"><div class="rd-menu-title">绑定遥控器</div><div class="rd-menu-desc">ID: RC-9364</div></div>
         <div class="rd-menu-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       </div>
-      <div class="rd-menu-row" data-rd-sheet="rdConn">
+      <div class="rd-menu-row" data-rd-sheet="rdConn" data-rd-locked>
         <div class="rd-menu-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
         </div>
-        <div class="rd-menu-main"><div class="rd-menu-title">连接模式</div><div class="rd-menu-desc">Wi-Fi 模式 · 已连接</div></div>
+        <div class="rd-menu-main"><div class="rd-menu-title">连接模式</div><div class="rd-menu-desc" id="rdConnModeDesc">Wi-Fi 模式 · 已连接</div></div>
         <div class="rd-menu-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       </div>
-      <div class="rd-menu-row" data-rd-sheet="rdOta">
+      <div class="rd-menu-row" data-rd-sheet="rdOta" data-rd-locked>
         <div class="rd-menu-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         </div>
@@ -7395,6 +7896,7 @@
       </div>
     </div>
 
+    <button class="rd-conn-action-btn" id="rdConnActionBtn">断开连接</button>
     <button class="rd-unbind-btn" id="rdUnbindBtn">解除绑定</button>
   </div>
 </div>
@@ -7410,9 +7912,9 @@
     <div class="rd-data-card">
       <div class="rd-data-row"><div class="rd-data-key">序列号 (SN)</div><div class="rd-data-val mono">R111AAAEAAAA3743</div></div>
       <div class="rd-data-row"><div class="rd-data-key">型号</div><div class="rd-data-val">GALBOT ET1</div></div>
-      <div class="rd-data-row"><div class="rd-data-key">硬件版本</div><div class="rd-data-val">HW v1.2</div></div>
-      <div class="rd-data-row"><div class="rd-data-key">固件版本</div><div class="rd-data-val">FW v3.4.1</div></div>
-      <div class="rd-data-row"><div class="rd-data-key">软件版本</div><div class="rd-data-val">v1.0.0</div></div>
+      <div class="rd-data-row"><div class="rd-data-key">硬件版本<span class="rd-data-note">机器人主板型号</span></div><div class="rd-data-val">HW v1.2</div></div>
+      <div class="rd-data-row"><div class="rd-data-key">固件版本<span class="rd-data-note">机器人底层控制程序</span></div><div class="rd-data-val">FW v3.4.1</div></div>
+      <div class="rd-data-row"><div class="rd-data-key">软件版本<span class="rd-data-note">机器人系统应用版本</span></div><div class="rd-data-val">v1.0.0</div></div>
       <div class="rd-data-row"><div class="rd-data-key">IP 地址</div><div class="rd-data-val mono">192.168.1.37</div></div>
       <div class="rd-data-row"><div class="rd-data-key">遥控器 ID</div><div class="rd-data-val mono">RC-9364</div></div>
       <div class="rd-data-row"><div class="rd-data-key">当前模式</div><div class="rd-data-val ok">Idle</div></div>
@@ -7425,22 +7927,46 @@
   <div class="sheet-handle"></div>
   <div class="sheet-header"><div class="sheet-title">绑定遥控器</div></div>
   <div class="sheet-body">
-    <div class="rd-status-card">
-      <div class="rd-status-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="12" x2="6" y2="12"/><circle cx="16" cy="11" r="1" fill="currentColor"/><circle cx="19" cy="13" r="1" fill="currentColor"/></svg>
+
+    <!-- 已绑定视图 -->
+    <div id="rcBound">
+      <div class="rd-status-card">
+        <div class="rd-status-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="12" x2="6" y2="12"/><circle cx="16" cy="11" r="1" fill="currentColor"/><circle cx="19" cy="13" r="1" fill="currentColor"/></svg>
+        </div>
+        <div class="rd-status-main">
+          <div class="rd-status-title">遥控器已绑定</div>
+          <div class="rd-status-sub">ID: <span id="rcBoundId">RC-9364</span></div>
+        </div>
+        <div class="rd-status-tag"><span class="dot"></span>已连接</div>
       </div>
-      <div class="rd-status-main">
-        <div class="rd-status-title">遥控器已绑定</div>
-        <div class="rd-status-sub">ID: RC-9364</div>
+      <div class="rd-data-card">
+        <div class="rd-data-row"><div class="rd-data-key">型号</div><div class="rd-data-val">RC-01 Pro</div></div>
+        <div class="rd-data-row"><div class="rd-data-key">固件</div><div class="rd-data-val">v2.1.0</div></div>
+        <div class="rd-data-row"><div class="rd-data-key">电量</div><div class="rd-data-val">87%</div></div>
       </div>
-      <div class="rd-status-tag"><span class="dot"></span>已连接</div>
+      <button class="rd-unbind-btn" id="rcUnbindBtn" style="margin-top:16px;">解除绑定</button>
     </div>
-    <div class="rd-data-card">
-      <div class="rd-data-row"><div class="rd-data-key">型号</div><div class="rd-data-val">RC-01 Pro</div></div>
-      <div class="rd-data-row"><div class="rd-data-key">固件</div><div class="rd-data-val">v2.1.0</div></div>
-      <div class="rd-data-row"><div class="rd-data-key">电量</div><div class="rd-data-val">87%</div></div>
+
+    <!-- 未绑定视图 -->
+    <div id="rcUnbound" style="display:none;">
+      <div class="rd-status-card" style="opacity:0.8;">
+        <div class="rd-status-icon" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="12" x2="6" y2="12"/><circle cx="16" cy="11" r="1" fill="currentColor"/><circle cx="19" cy="13" r="1" fill="currentColor"/></svg>
+        </div>
+        <div class="rd-status-main">
+          <div class="rd-status-title">未绑定遥控器</div>
+          <div class="rd-status-sub">输入遥控器 ID 进行绑定</div>
+        </div>
+      </div>
+      <div class="rd-input-wrap" style="margin-top:16px;">
+        <div class="rd-input-label">遥控器 ID</div>
+        <input class="rd-input-field" type="text" placeholder="如 RC-9364" id="rcIdInput" />
+      </div>
+      <div class="rd-input-hint">遥控器 ID 印在机身背面或包装上。</div>
+      <button class="rd-sheet-btn" id="rcBindBtn">绑定</button>
     </div>
-    <button class="rd-sheet-btn ghost" id="rdRepairBtn">重新配对</button>
+
   </div>
 </div>
 
@@ -7457,93 +7983,102 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
         </div>
         <div class="conn-cur-main">
-          <div class="conn-cur-mode">Wi-Fi 模式 · 已连接</div>
-          <div class="conn-cur-net">galbot-employee</div>
+          <div class="conn-cur-mode" id="connCurMode">Wi-Fi 模式 · 已连接</div>
+          <div class="conn-cur-net" id="connCurNet">galbot-employee</div>
         </div>
         <div class="conn-cur-dot"></div>
       </div>
       <div class="conn-cur-stats">
         <div class="conn-cur-stat"><span>信号</span><b>92%</b></div>
         <div class="conn-cur-stat"><span>延迟</span><b>12ms</b></div>
-        <div class="conn-cur-stat"><span>在线</span><b>6h 18m</b></div>
       </div>
-      <button class="conn-cur-change" id="connChangeWifi">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        更换 Wi-Fi 网络
-      </button>
     </div>
 
-    <!-- 切换连接模式 -->
-    <div class="conn-section-label">切换连接模式</div>
-    <div class="conn-switch-hint">切换连接方式需要重新配网，按引导操作即可。</div>
-
-    <!-- Wi-Fi（当前） -->
-    <div class="conn-mode-item current">
-      <div class="conn-mode-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+    <!-- 两种连接方式说明（只读引导） -->
+    <div class="conn-section-label" style="margin-top:20px;">两种连接方式</div>
+    <div class="conn-ways">
+      <div class="conn-way" id="connWayWifi">
+        <div class="conn-way-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+        </div>
+        <div class="conn-way-main">
+          <div class="conn-way-title">Wi-Fi 模式</div>
+          <div class="conn-way-desc">机器人和手机连同一 Wi-Fi，家里 / 办公室日常使用</div>
+        </div>
+        <div class="conn-way-cur" style="display:none;">当前</div>
       </div>
-      <div class="conn-mode-main">
-        <div class="conn-mode-title">Wi-Fi 模式</div>
-        <div class="conn-mode-desc">机器人与手机连同一 Wi-Fi，日常使用推荐</div>
+      <div class="conn-way" id="connWayAp">
+        <div class="conn-way-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+        </div>
+        <div class="conn-way-main">
+          <div class="conn-way-title">AP 模式（热点直连）</div>
+          <div class="conn-way-desc">手机直连机器人热点，户外或没有 Wi-Fi 时使用</div>
+        </div>
+        <div class="conn-way-cur" style="display:none;">当前</div>
       </div>
-      <div class="conn-mode-using">使用中</div>
     </div>
 
-    <!-- AP（可切换 → 触发配网） -->
-    <div class="conn-mode-item" id="connSwitchAp">
-      <div class="conn-mode-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
-      </div>
-      <div class="conn-mode-main">
-        <div class="conn-mode-title">AP 模式（热点直连）</div>
-        <div class="conn-mode-desc">手机直连机器人热点，无 Wi-Fi 时可用</div>
-      </div>
-      <svg class="conn-mode-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>
+    <!-- 重新配网 -->
+    <button class="rd-sheet-btn" id="connReconfigBtn" style="margin-top:16px;">重新配网</button>
+    <div class="conn-switch-hint" style="margin-top:10px; margin-bottom:0;">切换连接方式请点「重新配网」按引导操作。配网过程中机器人会短暂断开，完成后将自动重连。</div>
 
   </div>
 </div>
 
-<!-- Sheet: 切到 AP 模式的配网引导 -->
-<div class="sheet" id="rdConnAp" style="z-index:271;">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header"><div class="sheet-title">切换到 AP 模式</div></div>
-  <div class="sheet-body">
-    <div class="conn-flow-note">
-      切换到 AP 模式后，机器人会断开当前 Wi-Fi 并开启自身热点，请按以下步骤操作：
-    </div>
-    <div class="conn-step"><span class="conn-step-num">1</span><div class="conn-step-txt">点击下方「开启热点」，机器人将广播热点</div></div>
-    <div class="conn-step"><span class="conn-step-num">2</span><div class="conn-step-txt">前往手机系统设置，连接机器人热点</div></div>
-    <div class="conn-step"><span class="conn-step-num">3</span><div class="conn-step-txt">返回 App，即可在热点直连下使用</div></div>
-
-    <div class="rd-data-card" style="margin-top:16px;">
-      <div class="rd-data-row"><div class="rd-data-key">热点名称</div><div class="rd-data-val">G-ET1-9885</div></div>
-      <div class="rd-data-row"><div class="rd-data-key">热点密码</div><div class="rd-data-val">galbot12345</div></div>
-    </div>
-    <button class="rd-sheet-btn" id="rdApStartBtn" style="margin-top:16px;">开启热点</button>
-  </div>
-</div>
-
-<!-- Sheet: 更换 Wi-Fi 网络的配网 -->
+<!-- Sheet: 重新配网（选方式 → 分流） -->
 <div class="sheet" id="rdConnWifi" style="z-index:271;">
   <div class="sheet-handle"></div>
-  <div class="sheet-header"><div class="sheet-title">更换 Wi-Fi 网络</div></div>
+  <div class="sheet-header"><div class="sheet-title" id="reconfTitle">重新配网</div></div>
   <div class="sheet-body">
-    <div class="conn-flow-note">
-      为机器人填写新的 Wi-Fi。配网过程中机器人会短暂断开，完成后将自动连上新网络。
+
+    <!-- 第1步：选择连接方式 -->
+    <div id="reconfStep1">
+      <div class="conn-flow-note">选择要用哪种方式连接机器人：</div>
+      <div class="conn-way pick" id="pickWifi" style="margin-bottom:10px;">
+        <div class="conn-way-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+        </div>
+        <div class="conn-way-main">
+          <div class="conn-way-title">Wi-Fi 模式</div>
+          <div class="conn-way-desc">已有 Wi-Fi，让机器人连上它</div>
+        </div>
+        <svg class="conn-way-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="conn-way pick" id="pickAp">
+        <div class="conn-way-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+        </div>
+        <div class="conn-way-main">
+          <div class="conn-way-title">AP 模式（热点直连）</div>
+          <div class="conn-way-desc">没有 Wi-Fi，手机直连机器人热点</div>
+        </div>
+        <svg class="conn-way-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
     </div>
-    <div class="rd-input-wrap" style="margin-top:8px;">
-      <div class="rd-input-label">Wi-Fi 名称 (SSID)</div>
-      <input class="rd-input-field" type="text" placeholder="输入 Wi-Fi 名称" id="rdNewSsid" />
-    </div>
-    <div class="rd-input-wrap">
-      <div class="rd-input-label">Wi-Fi 密码</div>
-      <input class="rd-input-field" type="password" placeholder="输入密码" id="rdNewWifiPw" />
-      <button class="rd-input-eye" data-rd-eye>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+
+    <!-- 第2步A：Wi-Fi 配网表单 -->
+    <div id="reconfWifi" style="display:none;">
+      <button class="conn-back" id="reconfBackW">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        选择其他方式
       </button>
+      <div class="conn-flow-note">为机器人填写要连接的 Wi-Fi。配网过程中机器人会短暂断开，完成后将自动连上网络。</div>
+      <div class="rd-input-wrap" style="margin-top:8px;">
+        <div class="rd-input-label">Wi-Fi 名称 (SSID)</div>
+        <input class="rd-input-field" type="text" placeholder="输入 Wi-Fi 名称" id="rdNewSsid" />
+      </div>
+      <div class="rd-input-wrap">
+        <div class="rd-input-label">Wi-Fi 密码</div>
+        <input class="rd-input-field" type="password" placeholder="输入密码" id="rdNewWifiPw" />
+        <button class="rd-input-eye" data-rd-eye>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <button class="rd-sheet-btn" id="rdWifiStartBtn" style="margin-top:8px;">开始配网</button>
     </div>
-    <button class="rd-sheet-btn" id="rdWifiStartBtn" style="margin-top:8px;">开始配网</button>
+
+    <!-- 第2步B：AP 热点引导 -->
   </div>
 </div>
 
@@ -7675,6 +8210,20 @@
     <div class="confirm-buttons">
       <button class="confirm-btn cancel" id="rdUnbindCancel">取消</button>
       <button class="confirm-btn danger" id="rdUnbindOk">解除绑定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 遥控器解绑确认 -->
+<div class="confirm-modal" id="rcUnbindModal">
+  <div class="confirm-box">
+    <div class="confirm-title">解除遥控器绑定</div>
+    <div class="confirm-desc">
+      解除后将无法用该遥控器操控机器人，<br/>需重新输入 ID 绑定。确认解绑吗？
+    </div>
+    <div class="confirm-buttons">
+      <button class="confirm-btn cancel" id="rcUnbindCancel">取消</button>
+      <button class="confirm-btn danger" id="rcUnbindOk">解除绑定</button>
     </div>
   </div>
 </div>
@@ -8151,6 +8700,57 @@
   <span>当前已是最新版本</span>
 </div>
 
+<!-- ============================================ -->
+<!-- ===== 全局急停（需求2）：仅设备运动时出现 ===== -->
+<!-- 视觉最高优先级 / 全局常驻 / 长按防误触 ===== -->
+<!-- ============================================ -->
+<button class="estop-fab" id="estopFab" aria-label="紧急停止">
+  <span class="estop-fab-ring"></span>
+  <span class="estop-fab-core">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+    <span class="estop-fab-label">急停</span>
+  </span>
+  <span class="estop-fab-hint" id="estopFabHint">长按急停</span>
+</button>
+
+<!-- ============================================ -->
+<!-- ===== 启动确认弹窗（需求3）：执行有物理后果，需确认 ===== -->
+<!-- ============================================ -->
+<div class="launch-mask" id="launchMask"></div>
+<div class="launch-modal" id="launchModal" role="dialog" aria-modal="true">
+  <div class="launch-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  </div>
+  <div class="launch-title">即将启动机器人</div>
+  <div class="launch-sub">这会让机器人当场执行动作，请确认周围安全。</div>
+  <div class="launch-info">
+    <div class="launch-info-row"><span class="launch-info-k">动作</span><span class="launch-info-v" id="launchName">—</span></div>
+    <div class="launch-info-row"><span class="launch-info-k">时长</span><span class="launch-info-v" id="launchDur">—</span></div>
+    <div class="launch-info-row"><span class="launch-info-k">建议</span><span class="launch-info-v">机器人前后左右预留 ≥1.5 米空间</span></div>
+  </div>
+  <label class="launch-check" id="launchCheck">
+    <span class="launch-check-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+    <span class="launch-check-text">我已确认机器人周围安全、无人靠近</span>
+  </label>
+  <label class="launch-skip" id="launchSkip">
+    <span class="launch-skip-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+    <span class="launch-skip-text">本次使用期间不再提醒</span>
+  </label>
+  <div class="launch-btns">
+    <button class="launch-btn cancel" id="launchCancel">取消</button>
+    <button class="launch-btn confirm disabled" id="launchConfirm">启动</button>
+  </div>
+</div>
+
+<!-- ===== 消息长按菜单：复制（C）===== -->
+<div class="msg-ctx-mask" id="msgCtxMask"></div>
+<div class="msg-ctx-menu" id="msgCtxMenu">
+  <div class="msg-ctx-item" id="msgCtxCopy">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    复制
+  </div>
+</div>
+
 <script>
   /* ============================================================
    * GALBOT ET1 App —— 交互脚本
@@ -8181,6 +8781,185 @@
    *   3. 要弹提示就调 UI.toast('文案')，不用再自己写 setTimeout。
    *   4. 自己的事件监听写在对应模块区块里，不要去动核心系统。
    * ============================================================ */
+
+  /* ============================================================
+   * [M] 集中 Mock 数据：所有页面写死的演示数据统一放这里
+   * ------------------------------------------------------------
+   * 原来这些数组散落在各模块内部（devices/scanPool/fakePhotos/
+   * fakeFiles/works/tasks/services/albumMedia/moves/replies...），
+   * 改数据要全文件找。现在统一收口到 MockData，各模块从这里取。
+   * 注意：只搬运、不改值，行为与原来完全一致。
+   * ============================================================ */
+  const MockData = {
+    // —— 设备（首页连接 / 设置-我的设备 / 详情页 三态数据源）——
+    devices: [
+      { name: 'G-ET1-3743', sn: 'R111AAAEAAAA3743', batt: 90, status: 'connected', connMode: 'wifi', net: 'galbot-employee', lastSeen: '刚刚' },
+      { name: 'G-ET1-5012', sn: 'R111AAAEAAAA5012', batt: 64, status: 'available', connMode: 'wifi', net: 'galbot-employee', lastSeen: '今天 14:20' },
+      { name: 'G-ET1-2208', sn: 'R111AAAEAAAA2208', batt: 0,  status: 'offline',   connMode: 'ap',   net: 'G-ET1-2208', lastSeen: '昨天 19:05' },
+    ],
+    // —— 状态/模式文案（设备相关）——
+    deviceModeLabel:   { wifi: 'Wi-Fi 模式', ap: 'AP 模式（热点直连）' },
+    deviceStatusLabel: { connected: '已连接', available: '可连接', offline: '离线' },
+    // —— 搜寻设备：可被搜到的设备尾号池 ——
+    scanPool: ['7421', '3056', '8890', '5134', '6207', '9885'],
+    // —— Agent 对话页：模拟系统相册缩略图配色（含视频时长）——
+    fakePhotos: [
+      { c1:'#7c8cff', c2:'#4a5bd4' }, { c1:'#ff9a76', c2:'#d4604a' },
+      { c1:'#76d3ff', c2:'#3a8fd4', video:'0:08' }, { c1:'#a0e8a0', c2:'#4ab84a' },
+      { c1:'#ffd166', c2:'#e0a020' }, { c1:'#c98cff', c2:'#8a4ad4' },
+      { c1:'#ff8cc8', c2:'#d44a8f', video:'0:15' }, { c1:'#8cffe0', c2:'#4ad4b0' },
+      { c1:'#b0b8c8', c2:'#707888' }, { c1:'#ffb088', c2:'#d47850' },
+      { c1:'#88b0ff', c2:'#5078d4' }, { c1:'#d4d488', c2:'#a0a050' },
+      { c1:'#ff99aa', c2:'#d45070' }, { c1:'#99ddff', c2:'#5099d4' },
+      { c1:'#bb99ff', c2:'#7050d4' }, { c1:'#99ffbb', c2:'#50d470' }
+    ],
+    // —— Agent 对话页：知识库示例文件 ——
+    fakeFiles: [
+      { name: '上海门店运营手册.pdf', ext: 'PDF', color: '#e2574c', meta: '2.4 MB · 昨天' },
+      { name: '城市攻略·成都美食.docx', ext: 'DOC', color: '#4a86e8', meta: '1.1 MB · 3天前' },
+      { name: '产品价格表_2026.xlsx', ext: 'XLS', color: '#4cd182', meta: '680 KB · 上周' },
+      { name: '会员权益说明.pdf', ext: 'PDF', color: '#e2574c', meta: '920 KB · 上周' },
+      { name: '常见问题FAQ.txt', ext: 'TXT', color: '#8e8e93', meta: '24 KB · 6月10日' },
+    ],
+    // —— 遥控页：语音指令 → 动作映射 ——
+    remoteMoves: [
+      { re: /(向前|往前|前进|走两步|走几步)/, say: '好的，我往前走两步～', act: '前进两步' },
+      { re: /(后退|往后|退)/,                 say: '收到，往后退～',       act: '后退两步' },
+      { re: /(左|往左)/,                       say: '好，向左挪一下～',     act: '向左移动' },
+      { re: /(右|往右)/,                       say: '好，向右挪一下～',     act: '向右移动' },
+      { re: /(转圈|转个圈|转一圈|旋转)/,       say: '看我转一个～ 🌀',      act: '原地转圈' },
+      { re: /(挥手|打招呼|招呼|你好|嗨|hi)/i,  say: '嗨～你好呀！',         act: '挥手致意' },
+      { re: /(点头|点点头)/,                   say: '嗯嗯，好的！',         act: '点头' },
+      { re: /(鞠躬|敬礼)/,                     say: '请多关照～',           act: '鞠躬' },
+      { re: /(摇头)/,                          say: '唔，不要～',           act: '摇头' },
+    ],
+    // —— 遥控页：兜底闲聊回复 ——
+    remoteReplies: [
+      '我在听呢，你说～',
+      '好的，我记下啦 😊',
+      '嗯嗯，还有什么想跟我说的吗？',
+      '收到～',
+    ],
+    // —— 遥控页：快捷动作全集（id 唯一；icon 为 SVG 内部路径）——
+    // selectedActions 决定遥控页默认展示哪些（最多 7 个，留 1 位给 +）
+    quickActions: [
+      { id: 'wave',     name: '挥手', icon: '<path d="M18 11V6.5a1.5 1.5 0 0 0-3 0V11"/><path d="M15 11V4.5a1.5 1.5 0 0 0-3 0V11"/><path d="M12 11V5.5a1.5 1.5 0 0 0-3 0V13"/><path d="M9 13V8.5a1.5 1.5 0 0 0-3 0V18a6 6 0 0 0 12 0V11a1.5 1.5 0 0 0-3 0v3"/>' },
+      { id: 'heart',    name: '比心', icon: '<path d="M12 21s-7-4.5-9.5-9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 9.5 5c-2.5 4.5-9.5 9-9.5 9z"/>' },
+      { id: 'handshake',name: '握手', icon: '<path d="M11 17l-5-5 4-4 5 5"/><path d="M14 8l3-3 5 5-3 3"/><path d="M3 11l8 8c1 1 3 1 4 0l1-1c1-1 1-3 0-4"/>' },
+      { id: 'cheer',    name: '加油', icon: '<path d="M7 11V6a2 2 0 0 1 4 0v5"/><path d="M11 11V4.5a1.5 1.5 0 0 1 3 0V11"/><path d="M14 11V6.5a1.5 1.5 0 0 1 3 0V13a6 6 0 0 1-12 0v-2l-2-2a1.4 1.4 0 0 1 2-2l2 2"/>' },
+      { id: 'kiss',     name: '飞吻', icon: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' },
+      { id: 'bow',      name: '鞠躬', icon: '<path d="M6 4v6a6 6 0 0 0 12 0V4"/><line x1="4" y1="20" x2="20" y2="20"/><path d="M9 20c0-2 1.5-3 3-3s3 1 3 3"/>' },
+      { id: 'nod',      name: '点头', icon: '<circle cx="12" cy="7" r="3"/><path d="M12 10v5"/><polyline points="9 13 12 16 15 13"/>' },
+      { id: 'clap',     name: '鼓掌', icon: '<path d="M8 13l-2 2"/><path d="M16 13l2 2"/><path d="M9 11l-3-3a1.5 1.5 0 0 1 2-2l3 3"/><path d="M15 11l3-3a1.5 1.5 0 0 0-2-2l-3 3"/><path d="M9 9l3 3 3-3"/>' },
+      { id: 'sit',      name: '站→坐', icon: '<line x1="12" y1="4" x2="12" y2="16"/><polyline points="6 12 12 18 18 12"/><line x1="5" y1="20" x2="19" y2="20"/>' },
+      { id: 'stand',    name: '坐→站', icon: '<line x1="12" y1="20" x2="12" y2="8"/><polyline points="6 12 12 6 18 12"/><line x1="5" y1="4" x2="19" y2="4"/>' },
+      { id: 'step',     name: '踏步', icon: '<path d="M9 4c0 5-3 7-3 11"/><path d="M15 4c0 5 3 7 3 11"/><path d="M5 20l3-2"/><path d="M19 20l-3-2"/>' },
+      { id: 'turn',     name: '转圈', icon: '<path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 8 16 8"/>' },
+    ],
+    // 默认选中的快捷动作（最多 7 个）
+    quickActionSelected: ['wave', 'heart', 'handshake', 'cheer'],
+    // —— 机器人详情页：后台服务清单 ——
+    services: [
+      'ai_sport', 'audio_player_service', 'bashrunner', 'basic_service', 'battery_guard',
+      'chat_g0', 'dex3_service_l', 'dex3_service_r', 'g1_arm_example', 'lidar_driver',
+      'log_system', 'master_service', 'motion_switcher', 'net_switcher', 'ota_box',
+      'ota_pipe', 'robot_state', 'robot_type_service', 'slam_service', 'state_estimator',
+      'unitree_slam', 'video_hub', 'vui_service', 'webrtc_bridge', 'webrtc_signal_server'
+    ],
+    // —— 编排页：作品库（我的作品）——
+    performWorks: [
+      { id: 'w1', name: '动作模仿-20:19:29', duration: '0:06', date: '2026-06-03', syncState: 'unsynced', musicOn: true },
+      { id: 'w2', name: 'test1',             duration: '0:02', date: '2026-05-22', syncState: 'synced',  musicOn: true },
+      { id: 'w3', name: '裁判恰恰',           duration: '0:19', date: '2026-05-22', syncState: 'synced', musicOn: true },
+      { id: 'w4', name: '动作模仿-11:13:51', duration: '0:08', date: '2026-05-20', syncState: 'synced', musicOn: true },
+    ],
+    // —— 编排页：官方作品（预置示范）——
+    performOfficialWorks: [
+      { id: 'o1', name: '风吹一夏',     duration: '0:24', date: '官方', syncState: 'synced',   musicOn: true },
+      { id: 'o2', name: '太极',         duration: '0:48', date: '官方', syncState: 'synced',   musicOn: true },
+      { id: 'o3', name: 'Billie Jean',  duration: '0:36', date: '官方', syncState: 'unsynced', musicOn: true },
+      { id: 'o4', name: 'Uptown Funk',  duration: '0:30', date: '官方', syncState: 'unsynced', musicOn: true },
+    ],
+    // —— 编排页：学习任务（learning | failed）——
+    performTasks: [
+      { id: 't1', name: 'jj',               time: '刚刚',      status: 'learning', progress: 12 },
+      { id: 't3', name: '动作模仿-20:45:33', time: '昨日 20:45', status: 'failed',   progress: 0, reason: '动作幅度过大，存在安全风险，已停止生成' },
+    ],
+    // —— 编排页：动作模仿 - 模拟相册视频 ——
+    albumMedia: [
+      { grad: ['#3a4a6b', '#1a2030'], dur: '0:12' },
+      { grad: ['#6b3a52', '#2a1a24'], dur: '0:08' },
+      { grad: ['#3a6b5a', '#1a2a24'], dur: '0:24' },
+      { grad: ['#6b5a3a', '#2a241a'], dur: '0:15' },
+      { grad: ['#4a3a6b', '#201a2a'], dur: '0:06' },
+      { grad: ['#3a5a6b', '#1a242a'], dur: '0:33' },
+      { grad: ['#6b3a3a', '#2a1a1a'], dur: '0:19' },
+      { grad: ['#5a6b3a', '#242a1a'], dur: '0:11' },
+      { grad: ['#3a4a6b', '#1a1f2e'], dur: '0:09' },
+      { grad: ['#6b4a3a', '#2a201a'], dur: '0:27' },
+      { grad: ['#4a6b3a', '#1f2a1a'], dur: '0:14' },
+      { grad: ['#3a3a6b', '#1a1a2a'], dur: '0:05' },
+    ],
+  };
+
+  /* ============================================================
+   * [S] 设备状态中枢 Store（发布订阅）
+   * ------------------------------------------------------------
+   * 单一数据源 + 自动同步：以前改设备状态后要手动在 7 个地方调
+   * HomeSyncConnState()，漏一个就 UI 不同步。现在所有变更走
+   * Store，内部自动 notify() 通知订阅者重渲染。
+   *
+   * 用法：
+   *   Store.get()                 → 当前设备数组
+   *   Store.isConnected()         → 是否有已连接设备
+   *   Store.subscribe(fn)         → 注册订阅者（状态变更后自动回调）
+   *   Store.connect(sn)           → 连接某台（互斥：其余已连接降为可连接）
+   *   Store.disconnect(sn)        → 断开某台
+   *   Store.addOrConnect(dev)     → 绑定/连接新设备
+   *
+   * 兼容：旧的 window.DeviceStore / window.HomeSyncConnState 仍保留，
+   *       作为薄包装转发到 Store，散落各处的旧调用无需改动。
+   * ============================================================ */
+  const Store = (function () {
+    const devices = MockData.devices;
+    const subscribers = [];
+
+    function notify() { subscribers.forEach(fn => { try { fn(devices); } catch (e) { console.error(e); } }); }
+    function subscribe(fn) { if (typeof fn === 'function' && !subscribers.includes(fn)) subscribers.push(fn); }
+
+    function get() { return devices; }
+    function isConnected() { return devices.some(d => d.status === 'connected'); }
+    function find(sn) { return devices.find(d => d.sn === sn); }
+
+    // 连接互斥：把某台设为已连接，其余已连接的降为可连接
+    function connect(sn) {
+      devices.forEach(d => {
+        if (d.sn === sn) d.status = 'connected';
+        else if (d.status === 'connected') d.status = 'available';
+      });
+      notify();
+    }
+    // 主动断开：已连接 → 可连接（不自动连别的）
+    function disconnect(sn) {
+      const d = find(sn);
+      if (d && d.status === 'connected') d.status = 'available';
+      notify();
+    }
+    // 绑定/连接新设备（已存在则合并字段并连接）
+    function addOrConnect(dev) {
+      const exist = find(dev.sn);
+      if (exist) {
+        Object.assign(exist, dev);
+        connect(dev.sn);
+      } else {
+        devices.forEach(d => { if (d.status === 'connected') d.status = 'available'; });
+        devices.push({ ...dev, status: 'connected', lastSeen: '刚刚' });
+        notify();
+      }
+    }
+
+    return { get, isConnected, find, subscribe, connect, disconnect, addOrConnect };
+  })();
 
   /* ============================================================
    * [0] 核心系统：统一消息提示 Toast
@@ -8298,7 +9077,7 @@
     // Tab 文案 → 对应的 phone 容器 class（无 class 表示首页默认态）
     const TAB_CLASS = {
       '首页': null,
-      '编排': 'show-perform',
+      '技能': 'show-perform',
       '遥控': 'show-remote',
     };
     const ALL_TAB_CLASSES = ['show-perform', 'show-remote'];
@@ -8328,6 +9107,167 @@
     return { init, switchTab };
   })();
   Nav.init();
+
+  /* ============================================================
+   * [E] 全局急停（需求2，安全生死线）
+   * ------------------------------------------------------------
+   * 设计原则：
+   *  · 只要设备「在动」就常驻显示，视觉最高优先级（红 + 脉冲）
+   *  · 全局浮层，z-index 压过一切页面/弹层
+   *  · 防误触：必须长按 ~0.7s 才真正下发急停（短按只提示）
+   *
+   * 谁让设备动了，就调 Motion.start(reason)；动作结束调 Motion.stop()。
+   * 触发点：
+   *  · Agent 对话执行动作
+   *  · 编排「启动」作品
+   *  · 遥控摇杆 / 快捷动作 / 运控模式
+   * ============================================================ */
+  const Motion = (function () {
+    const fab = document.getElementById('estopFab');
+    const hint = document.getElementById('estopFabHint');
+    const HOLD_MS = 700;          // 长按阈值（防误触）
+    let movingCount = 0;          // 同时可能有多处触发，用计数避免提前隐藏
+    let holdTimer = null;
+
+    function refresh() {
+      if (movingCount > 0) fab.classList.add('show');
+      else { fab.classList.remove('show'); cancelHold(); }
+    }
+    // 开始运动：reason 仅用于语义；可多次调用（计数 +1）
+    function start() { movingCount++; refresh(); }
+    // 结束运动：计数 -1，归零则隐藏急停
+    function stop()  { movingCount = Math.max(0, movingCount - 1); refresh(); }
+    // 强制全部停止（急停命中后）
+    function reset() { movingCount = 0; refresh(); }
+    function isMoving() { return movingCount > 0; }
+
+    // ---- 长按触发急停 ----
+    function fire() {
+      reset();
+      fab.classList.remove('holding');
+      UI.toast('已急停 · 机器人已停止所有动作', { variant: 'center', duration: 2200 });
+    }
+    function startHold() {
+      if (!fab.classList.contains('show')) return;
+      fab.classList.add('holding');
+      if (hint) hint.textContent = '保持按住…';
+      holdTimer = setTimeout(fire, HOLD_MS);
+    }
+    function cancelHold() {
+      if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+      fab.classList.remove('holding');
+      if (hint) hint.textContent = '长按急停';
+    }
+
+    fab.addEventListener('mousedown', startHold);
+    fab.addEventListener('touchstart', (e) => { e.preventDefault(); startHold(); }, { passive: false });
+    document.addEventListener('mouseup', cancelHold);
+    document.addEventListener('touchend', cancelHold);
+    fab.addEventListener('mouseleave', cancelHold);
+    // 短按（未达长按）给提示，避免用户以为点一下就停了
+    fab.addEventListener('click', () => {
+      if (holdTimer === null && !fab.classList.contains('holding')) {
+        // click 在 mouseup 后触发，holdTimer 已被清；用提示引导长按
+        UI.toast('请长按急停按钮以确认停止', { variant: 'center', duration: 1600 });
+      }
+    });
+
+    return { start, stop, reset, isMoving };
+  })();
+  window.Motion = Motion;
+
+  /* ============================================================
+   * [L] 启动确认（需求3）：真机执行前的二次确认
+   * ------------------------------------------------------------
+   * 「启动」会让机器人当场动起来，有物理后果。统一走这个弹窗：
+   *  · 明确告知执行什么动作 / 时长 / 预留空间建议
+   *  · 必须勾选「我已确认周围安全」才能点「启动」
+   *  · 确认后执行回调，并由调用方触发 Motion（执行中急停可达）
+   *  · 体验优化：可勾「本次使用期间不再提醒」，之后同会话内的启动
+   *    直接放行、跳过弹窗（刷新后恢复，安全底线仍在首次守住）
+   *
+   * 用法：LaunchConfirm.open({ name, dur, onConfirm })
+   * ============================================================ */
+  const LaunchConfirm = (function () {
+    const mask = document.getElementById('launchMask');
+    const modal = document.getElementById('launchModal');
+    const check = document.getElementById('launchCheck');
+    const skip = document.getElementById('launchSkip');
+    const confirmBtn = document.getElementById('launchConfirm');
+    const cancelBtn = document.getElementById('launchCancel');
+    const nameEl = document.getElementById('launchName');
+    const durEl = document.getElementById('launchDur');
+    let onConfirm = null;
+    let skipConfirm = false; // 本次会话是否跳过后续确认
+
+    function setChecked(on) {
+      check.classList.toggle('on', on);
+      confirmBtn.classList.toggle('disabled', !on);
+    }
+    function open(opts = {}) {
+      const cb = typeof opts.onConfirm === 'function' ? opts.onConfirm : null;
+      // 本次会话已选择不再提醒 → 直接执行，跳过弹窗
+      if (skipConfirm) { if (cb) cb(); return; }
+      onConfirm = cb;
+      nameEl.textContent = opts.name || '动作';
+      durEl.textContent = opts.dur || '—';
+      setChecked(false);                 // 每次打开都要求重新勾选安全确认
+      skip.classList.remove('on');       // 重置「不再提醒」
+      mask.classList.add('show');
+      modal.classList.add('show');
+    }
+    function close() {
+      mask.classList.remove('show');
+      modal.classList.remove('show');
+      onConfirm = null;
+    }
+    check.addEventListener('click', () => setChecked(!check.classList.contains('on')));
+    skip.addEventListener('click', () => skip.classList.toggle('on'));
+    cancelBtn.addEventListener('click', close);
+    mask.addEventListener('click', close);
+    confirmBtn.addEventListener('click', () => {
+      if (confirmBtn.classList.contains('disabled')) return;
+      if (skip.classList.contains('on')) skipConfirm = true; // 记住本次会话不再提醒
+      const cb = onConfirm;
+      close();
+      if (cb) cb();
+    });
+
+    return { open };
+  })();
+  window.LaunchConfirm = LaunchConfirm;
+
+  /* 对话页等静态卡里的「启动」按钮（data-launch）：统一走确认弹窗 */
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-launch]');
+    if (!btn) return;
+    LaunchConfirm.open({
+      name: btn.dataset.actName || '动作',
+      dur: btn.dataset.actDur || '—',
+      onConfirm: () => {
+        UI.toast('已启动 · 机器人开始执行', { variant: 'center', duration: 1800 });
+        Motion.start();
+        // 演示：执行一段时间后自动结束（真机由动作完成回调控制）
+        setTimeout(() => Motion.stop(), 4000);
+      },
+    });
+  });
+
+  /* 对话页卡片：「查看任务」→ 跳任务列表；「查看效果」→ 打开预览 */
+  document.addEventListener('click', (e) => {
+    const taskBtn = e.target.closest('[data-open-tasklist]');
+    if (taskBtn) {
+      e.stopPropagation();
+      if (window.PerformOpenTaskList) window.PerformOpenTaskList();
+      return;
+    }
+    const previewBtn = e.target.closest('[data-preview]');
+    if (previewBtn) {
+      e.stopPropagation();
+      if (window.PerformPreview) window.PerformPreview(previewBtn.dataset.preview);
+      return;
+    }
+  });
 
   /* ============================================================
    * [3] 首页 Home：Agent 快速入口（点击进对话页 / 麦克风长按语音）
@@ -8420,17 +9360,22 @@
       setTimeout(() => { messagesEl.scrollTop = messagesEl.scrollHeight; }, 600);
     }
 
-    // 连接成功后：隐藏「连接机器人」，显示对话胶囊，顶部状态改「已连接」
+    // 连接成功后：隐藏「连接机器人」，显示对话胶囊，顶部状态显示电量+连接模式
     function setConnectedUI() {
       const connectBtn = document.getElementById('connectBtn');
       if (connectBtn) connectBtn.style.display = 'none';
       if (dialogBar) dialogBar.style.display = 'flex';
-      // 顶部状态条改为已连接
+      // 顶部状态条：显示已连接设备的真实电量 + 连接模式
       const chip = document.querySelector('.header .status-chip');
       if (chip) {
-        chip.innerHTML = '<div class="chip-battery-icon"></div><span>100%</span>'
-          + '<span class="chip-divider">|</span><span>已连接</span>'
-          + '<span class="chip-divider">|</span><span>在线</span>';
+        const dev = Store.get().find(d => d.status === 'connected');
+        const batt = dev ? dev.batt + '%' : '100%';
+        const modeText = dev
+          ? (dev.connMode === 'ap' ? 'AP 直连' : 'Wi-Fi')
+          : '已连接';
+        chip.style.display = '';
+        chip.innerHTML = '<div class="chip-battery-icon"></div><span>' + batt + '</span>'
+          + '<span class="chip-divider">|</span><span>' + modeText + '</span>';
       }
       // 遥控页同步为已连接
       const rp = document.querySelector('.remote-preview-text');
@@ -8439,32 +9384,35 @@
       if (rlbg) rlbg.textContent = '第一视角 · 已连接';
     }
 
-    // 断开 / 解绑后：恢复「连接机器人」，隐藏对话胶囊，状态改「未连接」
+    // 断开 / 解绑后：恢复「连接机器人」，隐藏对话胶囊，隐藏状态胶囊
     function setDisconnectedUI() {
       const connectBtn = document.getElementById('connectBtn');
       if (connectBtn) connectBtn.style.display = '';
       if (dialogBar) dialogBar.style.display = 'none';
+      // 未连接：不显示状态胶囊（不展示假的 --% / 离线）
       const chip = document.querySelector('.header .status-chip');
-      if (chip) {
-        chip.innerHTML = '<div class="chip-battery-icon"></div><span>--%</span>'
-          + '<span class="chip-divider">|</span><span>未连接</span>'
-          + '<span class="chip-divider">|</span><span>离线</span>';
-      }
+      if (chip) chip.style.display = 'none';
       const rp = document.querySelector('.remote-preview-text');
       if (rp) rp.textContent = '未连接机器人';
       const rlbg = document.querySelector('.rl-bg-text');
       if (rlbg) rlbg.textContent = '第一视角 · 未连接机器人';
     }
 
-    // 暴露给添加机器人 / 解绑流程调用
+    // 暴露给添加机器人 / 解绑流程调用（保留兼容接口）
     window.HomeSetConnected = setConnectedUI;
     window.HomeSetDisconnected = setDisconnectedUI;
 
-    // 初始状态：若「我的设备」里已存在已绑定设备，则首页默认显示为已连接
-    // （修复：设置页已连机器人，首页却仍显示「连接机器人」而非对话框）
-    if (document.querySelector('#myDeviceList .my-device-card')) {
-      setConnectedUI();
+    // 根据 Store 当前连接态刷新首页/遥控页 UI
+    function syncConnState() {
+      if (Store.isConnected()) setConnectedUI();
+      else setDisconnectedUI();
     }
+    window.HomeSyncConnState = syncConnState;
+
+    // 订阅 Store：设备状态一变，首页连接态 UI 自动跟随
+    Store.subscribe(syncConnState);
+    // 首屏按当前状态初始化一次
+    syncConnState();
   })();
 
   /* ============================================================
@@ -8536,16 +9484,7 @@
     const ppAddBtn = document.getElementById('ppAddBtn');
 
     // 生成假照片（渐变色块占位），第 3、7 张标记为视频
-    const fakePhotos = [
-      { c1:'#7c8cff', c2:'#4a5bd4' }, { c1:'#ff9a76', c2:'#d4604a' },
-      { c1:'#76d3ff', c2:'#3a8fd4', video:'0:08' }, { c1:'#a0e8a0', c2:'#4ab84a' },
-      { c1:'#ffd166', c2:'#e0a020' }, { c1:'#c98cff', c2:'#8a4ad4' },
-      { c1:'#ff8cc8', c2:'#d44a8f', video:'0:15' }, { c1:'#8cffe0', c2:'#4ad4b0' },
-      { c1:'#b0b8c8', c2:'#707888' }, { c1:'#ffb088', c2:'#d47850' },
-      { c1:'#88b0ff', c2:'#5078d4' }, { c1:'#d4d488', c2:'#a0a050' },
-      { c1:'#ff99aa', c2:'#d45070' }, { c1:'#99ddff', c2:'#5099d4' },
-      { c1:'#bb99ff', c2:'#7050d4' }, { c1:'#99ffbb', c2:'#50d470' }
-    ];
+    const fakePhotos = MockData.fakePhotos;
     function gradientDataURI(c1, c2) {
       const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${c1}'/><stop offset='1' stop-color='${c2}'/></linearGradient></defs><rect width='120' height='120' fill='url(%23g)'/></svg>`;
       return 'data:image/svg+xml;utf8,' + svg.replace(/#/g, '%23').replace(/</g,'%3C').replace(/>/g,'%3E').replace(/"/g,"'");
@@ -8632,17 +9571,93 @@
       if (!pickerSelected.length) return;
       const chosen = pickerSelected.slice().sort((a,b)=>a-b);
       closePicker();
-      // 选中的照片作为消息进对话流
+      maybeInsertTimeDivider();
+      const hasVideo = chosen.some(i => fakePhotos[i].video);
+      let remaining = chosen.length;
+      let anySuccess = false;
+      // 选中的照片/视频作为消息进对话流，逐个上传
       chosen.forEach(i => {
         const p = fakePhotos[i];
-        messagesEl.appendChild(makeMediaMsg(gradientDataURI(p.c1, p.c2), !!p.video));
+        const el = makeMediaMsg(gradientDataURI(p.c1, p.c2), !!p.video);
+        messagesEl.appendChild(el);
+        uploadMedia(el, () => {
+          anySuccess = true;
+          remaining--;
+          // 全部处理完且至少一个成功 → 机器人回复一次
+          if (remaining === 0 && anySuccess) {
+            setTimeout(() => {
+              messagesEl.appendChild(makeBotMsg(hasVideo ? '收到视频～要我学这个动作吗？' : '图片收到啦！'));
+              scrollToBottom();
+            }, 800);
+          }
+        }, () => { remaining--; });
       });
       scrollToBottom();
-      const hasVideo = chosen.some(i => fakePhotos[i].video);
-      setTimeout(() => {
-        messagesEl.appendChild(makeBotMsg(hasVideo ? '收到视频～要我学这个动作吗？' : '图片收到啦！'));
-        scrollToBottom();
-      }, 1000);
+    });
+
+    // 媒体上传进度（B3）：先跑进度环，再走发送成功/失败
+    function uploadMedia(msgEl, onSuccess, onFail) {
+      const bubble = msgEl.querySelector('.msg-bubble');
+      const status = msgEl.querySelector('.msg-status');
+      if (status) status.classList.add('sending');
+      // 进度环覆盖层
+      const R = 16, C = 2 * Math.PI * R;
+      const overlay = document.createElement('div');
+      overlay.className = 'msg-upload-ring';
+      overlay.innerHTML = `
+        <svg viewBox="0 0 40 40"><circle class="ring-bg" cx="20" cy="20" r="${R}" fill="none" stroke-width="3"/><circle class="ring-fg" cx="20" cy="20" r="${R}" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg>
+        <span class="msg-upload-pct">0%</span>`;
+      bubble.classList.add('msg-media-uploading');
+      bubble.appendChild(overlay);
+      const fg = overlay.querySelector('.ring-fg');
+      const pctEl = overlay.querySelector('.msg-upload-pct');
+
+      let pct = 0;
+      const willFail = isOffline || Math.random() < 0.12;
+      const cap = willFail ? (30 + Math.random() * 40) : 100; // 失败的卡在中途
+      const timer = setInterval(() => {
+        pct += 4 + Math.random() * 9;
+        if (pct >= cap) pct = cap;
+        fg.style.strokeDashoffset = String(C * (1 - pct / 100));
+        pctEl.textContent = Math.round(pct) + '%';
+        if (pct >= cap) {
+          clearInterval(timer);
+          setTimeout(() => {
+            bubble.classList.remove('msg-media-uploading');
+            overlay.remove();
+            if (status) status.classList.remove('sending');
+            if (willFail) {
+              if (status) {
+                status.classList.add('failed');
+                const tip = document.createElement('span');
+                tip.className = 'msg-fail-tip';
+                tip.textContent = isOffline ? '未发送' : '上传失败';
+                status.parentElement.insertBefore(tip, status);
+              }
+              // 媒体重发：重新上传
+              msgEl._onSuccess = onSuccess;
+              if (onFail) onFail();
+            } else {
+              if (status) status.classList.add('sent');
+              if (onSuccess) onSuccess();
+            }
+          }, 250);
+        }
+      }, 180);
+    }
+
+    // 媒体失败点击重发 → 重新上传
+    messagesEl.addEventListener('click', (e) => {
+      const failed = e.target.closest('.msg-status.failed');
+      if (!failed) return;
+      const msgEl = failed.closest('.msg');
+      const bubble = msgEl && msgEl.querySelector('.msg-bubble');
+      if (msgEl && bubble && (bubble.querySelector('img') || bubble.querySelector('video'))) {
+        const tip = msgEl.querySelector('.msg-fail-tip');
+        if (tip) tip.remove();
+        failed.classList.remove('failed');
+        uploadMedia(msgEl, msgEl._onSuccess || (()=>{}));
+      }
     });
 
     function makeMediaMsg(url, isVideo) {
@@ -8677,13 +9692,7 @@
     const filePickerMask = document.getElementById('filePickerMask');
     const fpList = document.getElementById('fpList');
     const fpAddBtn = document.getElementById('fpAddBtn');
-    const fakeFiles = [
-      { name: '上海门店运营手册.pdf', ext: 'PDF', color: '#e2574c', meta: '2.4 MB · 昨天' },
-      { name: '城市攻略·成都美食.docx', ext: 'DOC', color: '#4a86e8', meta: '1.1 MB · 3天前' },
-      { name: '产品价格表_2026.xlsx', ext: 'XLS', color: '#4cd182', meta: '680 KB · 上周' },
-      { name: '会员权益说明.pdf', ext: 'PDF', color: '#e2574c', meta: '920 KB · 上周' },
-      { name: '常见问题FAQ.txt', ext: 'TXT', color: '#8e8e93', meta: '24 KB · 6月10日' },
-    ];
+    const fakeFiles = MockData.fakeFiles;
     let fileSelected = [];
 
     function buildFileList() {
@@ -8830,6 +9839,205 @@
       setTimeout(() => { messagesEl.scrollTop = messagesEl.scrollHeight; }, 30);
     }
 
+    /* ============================================================
+     * 聊天增强基础设施（A2 / B / C / G / H）
+     * ============================================================ */
+
+    // —— 断网模拟（B4）：offline 时所有发送进入失败/排队 ——
+    let isOffline = false;
+    const netBanner = document.getElementById('agentNetBanner');
+    const pendingResend = []; // 断网期间失败、待网络恢复重发的元素
+    function setOffline(off) {
+      isOffline = off;
+      netBanner.classList.toggle('show', off);
+      if (!off) {
+        // 恢复网络 → 自动重发排队的消息
+        const queue = pendingResend.splice(0);
+        queue.forEach(el => resend(el));
+      }
+    }
+    // 供调试/演示：长按标题切换断网（见下方绑定）
+
+    // —— 时间分组（G）：与上一条间隔 > 5 分钟才插入时间分隔 ——
+    let lastMsgTime = Date.now();
+    function maybeInsertTimeDivider() {
+      const now = Date.now();
+      if (now - lastMsgTime > 5 * 60 * 1000) {
+        const d = document.createElement('div');
+        d.className = 'msg-divider';
+        d.textContent = getNowTime();
+        messagesEl.appendChild(d);
+      }
+      lastMsgTime = now;
+    }
+
+    // —— 发送生命周期（B1/B2）——
+    // 给一个用户消息元素跑 发送中 → 成功 / 失败(可重发)
+    // onSuccess：发送成功后的回调（如触发机器人回复）
+    function runSendLifecycle(msgEl, onSuccess) {
+      const status = msgEl.querySelector('.msg-status');
+      if (!status) { if (onSuccess) onSuccess(); return; }
+      msgEl._onSuccess = onSuccess; // 存起来供重发用
+      status.classList.remove('sent', 'failed');
+      status.classList.add('sending');
+      // 移除可能存在的失败提示
+      const oldTip = msgEl.querySelector('.msg-fail-tip');
+      if (oldTip) oldTip.remove();
+
+      const willFail = isOffline || Math.random() < 0.12; // 断网必失败，否则 12% 概率失败
+      setTimeout(() => {
+        status.classList.remove('sending');
+        if (willFail) {
+          status.classList.add('failed');
+          // 失败提示文字
+          const tip = document.createElement('span');
+          tip.className = 'msg-fail-tip';
+          tip.textContent = isOffline ? '未发送' : '发送失败';
+          status.parentElement.insertBefore(tip, status);
+          if (isOffline && !pendingResend.includes(msgEl)) pendingResend.push(msgEl);
+        } else {
+          status.classList.add('sent');
+          if (onSuccess) onSuccess();
+        }
+      }, isOffline ? 500 : 700 + Math.random() * 500);
+    }
+    // 点失败标记 → 重发
+    function resend(msgEl) {
+      runSendLifecycle(msgEl, msgEl._onSuccess);
+    }
+    // 事件委托：点失败状态重发（纯文字/语音；媒体由 uploadMedia 的 handler 处理）
+    messagesEl.addEventListener('click', (e) => {
+      const failed = e.target.closest('.msg-status.failed');
+      if (!failed) return;
+      const msgEl = failed.closest('.msg');
+      if (!msgEl) return;
+      const bubble = msgEl.querySelector('.msg-bubble');
+      if (bubble && (bubble.querySelector('img') || bubble.querySelector('video'))) return; // 媒体跳过
+      const tip = msgEl.querySelector('.msg-fail-tip');
+      if (tip) tip.remove();
+      failed.classList.remove('failed');
+      resend(msgEl);
+    });
+
+    // —— 长按复制（C）——
+    const ctxMask = document.getElementById('msgCtxMask');
+    const ctxMenu = document.getElementById('msgCtxMenu');
+    const ctxCopy = document.getElementById('msgCtxCopy');
+    let ctxText = '';
+    let pressTimer = null;
+    function openCtxMenu(x, y, text) {
+      ctxText = text;
+      ctxMenu.style.left = '0px'; ctxMenu.style.top = '0px';
+      ctxMask.classList.add('show');
+      ctxMenu.classList.add('show');
+      // 定位：在按压点上方居中，限制在视口内
+      const rect = ctxMenu.getBoundingClientRect();
+      let left = x - rect.width / 2;
+      left = Math.max(10, Math.min(left, window.innerWidth - rect.width - 10));
+      let top = y - rect.height - 10;
+      if (top < 10) top = y + 16;
+      ctxMenu.style.left = left + 'px';
+      ctxMenu.style.top = top + 'px';
+    }
+    function closeCtxMenu() {
+      ctxMask.classList.remove('show');
+      ctxMenu.classList.remove('show');
+    }
+    ctxMask.addEventListener('click', closeCtxMenu);
+    ctxCopy.addEventListener('click', () => {
+      const t = ctxText;
+      const done = () => { closeCtxMenu(); UI.toast('已复制', { variant: 'center', duration: 1200 }); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(t).then(done).catch(done);
+      } else { done(); }
+    });
+    // 给文字气泡绑长按（全局委托：用户/机器人文字均可复制）
+    let lpTimer = null, lpSX = 0, lpSY = 0;
+    function lpTargetBubble(target) {
+      const bubble = target.closest && target.closest('.msg-bubble');
+      if (!bubble) return null;
+      if (bubble.classList.contains('msg-voice')) return null;
+      if (bubble.querySelector('img,video')) return null;
+      if (!bubble.textContent.trim()) return null;
+      return bubble;
+    }
+    function lpStart(x, y, target) {
+      const bubble = lpTargetBubble(target);
+      if (!bubble) return;
+      lpSX = x; lpSY = y;
+      lpTimer = setTimeout(() => openCtxMenu(x, y, bubble.textContent.trim()), 500);
+    }
+    function lpCancel() { if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } }
+    messagesEl.addEventListener('touchstart', (e) => { const t = e.touches[0]; lpStart(t.clientX, t.clientY, e.target); }, { passive: true });
+    messagesEl.addEventListener('touchmove', (e) => { const t = e.touches[0]; if (Math.abs(t.clientX - lpSX) > 10 || Math.abs(t.clientY - lpSY) > 10) lpCancel(); }, { passive: true });
+    messagesEl.addEventListener('touchend', lpCancel);
+    messagesEl.addEventListener('mousedown', (e) => lpStart(e.clientX, e.clientY, e.target));
+    messagesEl.addEventListener('mouseup', lpCancel);
+    messagesEl.addEventListener('contextmenu', (e) => {
+      const bubble = lpTargetBubble(e.target);
+      if (bubble) { e.preventDefault(); openCtxMenu(e.clientX, e.clientY, bubble.textContent.trim()); }
+    });
+    function bindLongPress() { /* 已改为全局委托，保留空函数兼容旧调用 */ }
+
+    // —— 语音转文字（A2）+ 播放进度（H）——
+    // 给语音气泡绑定：点击播放（波形进度），右侧「转文字」展开
+    const VOICE_TRANSCRIPTS = [
+      '我快到家啦，路上有点堵，大概十分钟到',
+      '帮我看看客厅的灯关了没',
+      '今天天气真不错，适合出去走走',
+      '提醒我晚上八点给妈妈打电话',
+      '把空调调到 26 度谢谢',
+    ];
+    function bindVoice(el, durationSec, transcript) {
+      const voice = el.querySelector('.msg-voice');
+      if (!voice) return;
+      const bars = Array.from(voice.querySelectorAll('.voice-wave span'));
+      let playing = false, playTimer = null, progress = 0;
+      const text = transcript || VOICE_TRANSCRIPTS[Math.floor(Math.random() * VOICE_TRANSCRIPTS.length)];
+
+      // 点波形区域 → 播放/暂停（H）
+      voice.addEventListener('click', (e) => {
+        if (e.target.closest('.voice-to-text')) return; // 点转文字不触发播放
+        if (playing) { stopPlay(); return; }
+        playing = true; voice.classList.add('playing'); progress = 0;
+        const step = 1 / (durationSec * 10);
+        playTimer = setInterval(() => {
+          progress += step;
+          const lit = Math.round(progress * bars.length);
+          bars.forEach((b, i) => b.classList.toggle('played', i < lit));
+          if (progress >= 1) stopPlay();
+        }, 100);
+      });
+      function stopPlay() {
+        playing = false; voice.classList.remove('playing');
+        if (playTimer) clearInterval(playTimer);
+        bars.forEach(b => b.classList.remove('played'));
+      }
+
+      // 「转文字」按钮（A2）
+      const toText = el.querySelector('.voice-to-text');
+      if (toText) {
+        let expanded = false, loaded = false;
+        toText.addEventListener('click', () => {
+          let tip = el.querySelector('.voice-transcript');
+          if (expanded) { if (tip) tip.remove(); expanded = false; return; }
+          expanded = true;
+          tip = document.createElement('div');
+          tip.className = 'voice-transcript loading';
+          tip.textContent = '转写中…';
+          voice.parentElement.insertBefore(tip, voice.nextSibling);
+          scrollToBottom();
+          if (loaded) { showText(tip); }
+          else setTimeout(() => { loaded = true; showText(tip); }, 800);
+        });
+        function showText(tip) {
+          tip.classList.remove('loading');
+          tip.innerHTML = escapeHTML(text) + '<span class="voice-transcript-tag">语音转文字</span>';
+          scrollToBottom();
+        }
+      }
+    }
+
     function makeUserMsg(text) {
       const div = document.createElement('div');
       div.className = 'msg msg-user';
@@ -8875,16 +10083,13 @@
     }
     // 气泡 + 动作标注（即时动作：走两步/转圈/挥手等）
     function makeBotMsgWithAction(text, actionLabel) {
+      // 动作标注已移除：身体动作指令只回纯文字气泡
       const div = document.createElement('div');
       div.className = 'msg msg-bot';
       div.innerHTML = `
         <div class="msg-avatar bot">ET</div>
         <div class="msg-body">
           <div class="msg-bubble">${escapeHTML(text)}</div>
-          <div class="bot-action">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>
-            ${escapeHTML(actionLabel)}
-          </div>
           <div class="msg-meta">${getNowTime()}</div>
         </div>`;
       return div;
@@ -8920,10 +10125,15 @@
       const stopBtn = div.querySelector('.perform-stop');
       const statusEl = div.querySelector('.fn-status');
       let paused = false;
+      // 机器人开始表演 → 全局急停常驻（执行中可达）
+      Motion.start();
+      let motionEnded = false;
+      function endMotion() { if (!motionEnded) { motionEnded = true; Motion.stop(); } }
       pauseBtn.addEventListener('click', () => {
         paused = !paused;
         pauseBtn.textContent = paused ? '▶ 继续' : '⏸ 暂停';
         statusEl.childNodes[statusEl.childNodes.length - 1].textContent = paused ? ' 已暂停' : ' 正在表演…';
+        // 暂停时仍处于"可能动"状态，保留急停；继续不变
       });
       stopBtn.addEventListener('click', () => {
         card.classList.add('done');
@@ -8931,6 +10141,7 @@
         chip.textContent = '已结束';
         chip.classList.add('done');
         card.querySelector('.fn-foot').innerHTML = '<div class="fn-status ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 表演已结束</div>';
+        endMotion();
       });
       return div;
     }
@@ -8958,50 +10169,42 @@
       }
 
       // 4) 即时身体动作 → 气泡 + 动作标注
-      const moves = [
-        { re: /(向前|往前|前进|走两步|走几步)/, say: '好的，我往前走两步～', act: '前进两步' },
-        { re: /(后退|往后|退)/,                 say: '收到，往后退～',       act: '后退两步' },
-        { re: /(左|往左)/,                       say: '好，向左挪一下～',     act: '向左移动' },
-        { re: /(右|往右)/,                       say: '好，向右挪一下～',     act: '向右移动' },
-        { re: /(转圈|转个圈|转一圈|旋转)/,       say: '看我转一个～ 🌀',      act: '原地转圈' },
-        { re: /(挥手|打招呼|招呼|你好|嗨|hi)/i,  say: '嗨～你好呀！',         act: '挥手致意' },
-        { re: /(点头|点点头)/,                   say: '嗯嗯，好的！',         act: '点头' },
-        { re: /(鞠躬|敬礼)/,                     say: '请多关照～',           act: '鞠躬' },
-        { re: /(摇头)/,                          say: '唔，不要～',           act: '摇头' },
-      ];
+      const moves = MockData.remoteMoves;
       for (const m of moves) {
         if (m.re.test(t)) return makeBotMsgWithAction(m.say, m.act);
       }
 
       // 5) 其余 → 纯对话气泡
-      const replies = [
-        '我在听呢，你说～',
-        '好的，我记下啦 😊',
-        '嗯嗯，还有什么想跟我说的吗？',
-        '收到～',
-      ];
+      const replies = MockData.remoteReplies;
       return makeBotMsg(replies[Math.floor(Math.random() * replies.length)]);
     }
 
     function sendMessage() {
       const text = agentInput.value.trim();
       if (!text) return;
-      messagesEl.appendChild(makeUserMsg(text));
+      maybeInsertTimeDivider();
+      const msgEl = makeUserMsg(text);
+      messagesEl.appendChild(msgEl);
+      bindLongPress(msgEl);
       agentInput.value = '';
       agentInput.style.height = 'auto';
       sendBtn.disabled = true;
       scrollToBottom();
 
-      const typing = makeTypingIndicator();
-      setTimeout(() => { messagesEl.appendChild(typing); scrollToBottom(); }, 400);
-      setTimeout(() => {
-        typing.remove();
-        messagesEl.appendChild(getBotReply(text));
-        scrollToBottom();
-      }, 1600);
+      // 发送中 → 成功后才出现机器人回复（失败则不回复，可点感叹号重发）
+      runSendLifecycle(msgEl, () => {
+        const typing = makeTypingIndicator();
+        setTimeout(() => { messagesEl.appendChild(typing); scrollToBottom(); }, 300);
+        setTimeout(() => {
+          typing.remove();
+          messagesEl.appendChild(getBotReply(text));
+          scrollToBottom();
+        }, 1400);
+      });
     }
 
     function addVoiceMessage() {
+      maybeInsertTimeDivider();
       const div = document.createElement('div');
       div.className = 'msg msg-user';
       const duration = Math.floor(Math.random() * 5) + 2;
@@ -9017,6 +10220,9 @@
             <svg class="voice-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             <div class="voice-wave">${waveBars}</div>
             <span class="voice-duration">${duration}"</span>
+            <button class="voice-to-text" title="转文字" style="background:none;border:none;padding:0 0 0 4px;cursor:pointer;color:rgba(255,255,255,0.75);display:flex;align-items:center;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5h16v2"/><path d="M9 19h6"/><path d="M12 5v14"/></svg>
+            </button>
           </div>
           <div class="msg-meta">
             ${getNowTime()} · 语音
@@ -9028,11 +10234,19 @@
           </div>
         </div>`;
       messagesEl.appendChild(div);
+      bindVoice(div, duration);
       scrollToBottom();
-      setTimeout(() => { messagesEl.appendChild(makeBotMsg('收到语音，正在处理...')); scrollToBottom(); }, 1200);
+      // 发送成功后机器人才处理
+      runSendLifecycle(div, () => {
+        setTimeout(() => { messagesEl.appendChild(makeBotMsg('收到语音，正在处理...')); scrollToBottom(); }, 800);
+      });
     }
 
     sendBtn.addEventListener('click', sendMessage);
+
+    // 给预置的静态语音消息也接上「转文字 + 播放进度」
+    const staticVoice = document.getElementById('staticVoiceMsg');
+    if (staticVoice) bindVoice(staticVoice, 2, '哈喽，我回来啦，你在干嘛呀');
 
     // typing 动画 keyframes（动态注入）
     const styleSheet = document.createElement('style');
@@ -9043,7 +10257,7 @@
       }`;
     document.head.appendChild(styleSheet);
 
-    return { sendMessage, addVoiceMessage };
+    return { sendMessage, addVoiceMessage, setOffline, isOffline: () => isOffline };
   })();
 
   /* ============================================================
@@ -9051,7 +10265,27 @@
    * ============================================================ */
   (function ConfigModule() {
     // 从对话页右上角「…」打开配置
-    document.getElementById('agentMenuBtn').addEventListener('click', () => UI.openPage('configPage'));
+    // Agent 右上角「⋮」：配置功能开发中（与轨道编排一致的占位提示）
+    // 注：配置页 HTML/JS 保留，开发完成后改回 UI.openPage('configPage') 即可
+    document.getElementById('agentMenuBtn').addEventListener('click', () => UI.toast('对话配置开发中', { variant: 'center', duration: 1500 }));
+
+    // 演示用：长按标题「小G」切换断网模拟，用于体验消息失败/重发/恢复
+    (function bindOfflineDemo() {
+      const title = document.querySelector('.agent-title');
+      if (!title) return;
+      let t = null;
+      const start = () => { t = setTimeout(() => {
+        const next = !Agent.isOffline();
+        Agent.setOffline(next);
+        UI.toast(next ? '已模拟断网（演示）' : '网络已恢复', { variant: 'center', duration: 1500 });
+      }, 600); };
+      const cancel = () => { if (t) { clearTimeout(t); t = null; } };
+      title.addEventListener('touchstart', start, { passive: true });
+      title.addEventListener('touchend', cancel);
+      title.addEventListener('mousedown', start);
+      title.addEventListener('mouseup', cancel);
+      title.addEventListener('mouseleave', cancel);
+    })();
     // 配置主页：返回 / 完成
     document.getElementById('configBack').addEventListener('click', () => UI.closePage('configPage'));
     document.getElementById('configDone').addEventListener('click', () => UI.closePage('configPage'));
@@ -9121,7 +10355,14 @@
     // 连接机器人 / 绑定新设备 → 打开「添加新机器人」流程（从搜寻步骤开始）
     document.getElementById('connectBtn').addEventListener('click', (e) => {
       e.preventDefault();
-      startScanFlow();
+      // 已绑定过设备（只是都断开了）→ 跳设置页「我的设备」让用户重连；
+      // 一台都没绑定 → 才走搜寻新设备流程。
+      const hasBound = Store.get().length > 0;
+      if (hasBound) {
+        UI.openPage('settingsPage');
+      } else {
+        startScanFlow();
+      }
     });
     document.getElementById('bindDeviceBtn').addEventListener('click', startScanFlow);
     document.getElementById('scanCancelBtn').addEventListener('click', UI.closeTopSheet);
@@ -9135,6 +10376,22 @@
     function showScanStep(id) {
       steps.forEach(s => document.getElementById(s).classList.toggle('active', s === id));
     }
+    // 候选待发现设备（绑定后从池中排除已存在的）
+    const scanPool = MockData.scanPool;
+    function pickUnboundDevice() {
+      const bound = (window.DeviceStore && window.DeviceStore.get) ? window.DeviceStore.get().map(d => d.sn) : [];
+      const free = scanPool.find(s4 => !bound.includes('R111AAAEAAAA' + s4)) || scanPool[0];
+      return { name: 'G-ET1-' + free, sn: 'R111AAAEAAAA' + free };
+    }
+    function fillScanResult() {
+      const dev = pickUnboundDevice();
+      const card = document.querySelector('#scanDeviceList .scan-device');
+      if (!card) return;
+      card.dataset.devName = dev.name;
+      card.dataset.devSn = dev.sn;
+      card.querySelector('.scan-device-name').textContent = dev.name;
+      card.querySelector('.scan-device-sn').textContent = dev.sn;
+    }
     function startScanFlow() {
       showScanStep('scanStepSearch');
       UI.openSheet('scan');
@@ -9142,10 +10399,12 @@
       clearTimeout(scanTimer);
       scanTimer = setTimeout(() => {
         if (document.getElementById('sheetScan').classList.contains('open')) {
+          fillScanResult();
           showScanStep('scanStepResult');
         }
       }, 2200);
     }
+    window.startScanFlow = startScanFlow;
     // 取消搜寻时清掉定时器（避免关闭后还跳到结果页）
     document.getElementById('scanCancelBtn').addEventListener('click', () => clearTimeout(scanTimer));
 
@@ -9162,19 +10421,32 @@
     document.querySelectorAll('#scanStepConn [data-conn-method]').forEach(opt => {
       opt.addEventListener('click', () => {
         if (opt.dataset.connMethod === 'wifi') {
+          window.__lastBindMode = 'wifi';
           showScanStep('scanStepWifi');
         } else {
-          // 进入 AP 配置：用设备名生成热点信息
-          const sn4 = (scanSelected?.sn || 'XXXX9885').slice(-4);
-          document.getElementById('apSsid').textContent = 'GALBOT-AP-' + sn4;
-          document.getElementById('apPw').textContent = 'galbot' + sn4;
-          apSettingsDone = false;
-          document.getElementById('apConnectBtn').disabled = false;
-          document.getElementById('apHint').textContent = '请前往系统设置连接上述热点，连接成功后返回点击「连接」。';
-          showScanStep('scanStepAp');
+          window.__lastBindMode = 'ap';
+          enterApStep();
         }
       });
     });
+
+    // 进入原 AP 直连页（生成热点信息、重置状态）
+    function enterApStep() {
+      const sn4 = (scanSelected?.sn || 'XXXX9885').slice(-4);
+      document.getElementById('apSsid').textContent = 'GALBOT-AP-' + sn4;
+      document.getElementById('apPw').textContent = 'galbot' + sn4;
+      apSettingsDone = false;
+      document.getElementById('apConnectBtn').disabled = false;
+      document.getElementById('apHint').textContent = '请前往系统设置连接上述热点，连接成功后返回点击「连接」。';
+      showScanStep('scanStepAp');
+    }
+    // 暴露：重新配网选 AP 时复用原 AP 页（针对已绑定的当前设备）
+    window.openApReconfig = function (device) {
+      scanSelected = { name: device.name, sn: device.sn };
+      window.__lastBindMode = 'ap';
+      enterApStep();
+      UI.openSheet('scan');
+    };
 
     // 步骤内返回
     document.querySelectorAll('[data-scan-back]').forEach(btn => {
@@ -9255,35 +10527,16 @@
     // 完成：把设备加入「我的设备」，关闭 sheet
     document.getElementById('scanDoneBtn').addEventListener('click', () => {
       const dev = scanSelected || { name: 'G-ET1-9885', sn: 'R111AAAEAAAA9885' };
-      const list = document.getElementById('myDeviceList');
-      if (list && !list.querySelector(`[data-sn="${dev.sn}"]`)) {
-        const card = document.createElement('div');
-        card.className = 'my-device-card';
-        card.dataset.sn = dev.sn;
-        card.innerHTML = `
-          <div class="my-device-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="2" width="14" height="20" rx="3"/>
-              <circle cx="9" cy="9" r="1.2" fill="currentColor"/>
-              <circle cx="15" cy="9" r="1.2" fill="currentColor"/>
-              <line x1="9" y1="15" x2="15" y2="15"/>
-            </svg>
-          </div>
-          <div class="my-device-main">
-            <div class="my-device-name">${dev.name} <span class="my-device-conn">已连接</span></div>
-            <div class="my-device-sn">${dev.sn} · 100%</div>
-          </div>
-          <div class="my-device-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>`;
-        list.appendChild(card);
-        card.addEventListener('click', () => {
-          document.getElementById('robotDetailPage').dataset.sn = card.dataset.sn || '';
-          UI.openPage('robotDetailPage');
-        });
-      }
-      // 首页切换为已连接：隐藏「连接机器人」，显示对话胶囊
-      if (window.HomeSetConnected) window.HomeSetConnected();
+      // 新绑定的设备：用「上次配网方式」决定连接模式（默认 Wi-Fi，AP 流程会置为 ap）
+      const mode = window.__lastBindMode || 'wifi';
+      window.DeviceStore && window.DeviceStore.addOrConnect({
+        name: dev.name, sn: dev.sn, batt: 100,
+        connMode: mode,
+        net: mode === 'ap' ? dev.name : 'galbot-employee',
+      });
+      window.__lastBindMode = null;
+      // 首页同步连接状态
+      if (window.HomeSyncConnState) window.HomeSyncConnState();
       UI.closeTopSheet();
     });
   })();
@@ -9297,11 +10550,137 @@
     const detailPage = document.getElementById('robotDetailPage');
     const rdMask = document.getElementById('rdSheetMask');
 
-    // 设备卡 → 打开详情页（记录当前设备 SN，供解绑时定位移除）
-    document.getElementById('myDeviceCard').addEventListener('click', () => {
-      detailPage.dataset.sn = document.getElementById('myDeviceCard').dataset.sn || '';
+    /* ===== 设备状态管理（数据源统一到 Store / MockData）===== */
+    const MODE_LABEL = MockData.deviceModeLabel;
+    const STATUS_LABEL = MockData.deviceStatusLabel;
+    const devices = Store.get(); // 与 Store 共享同一份数组引用
+    const listEl = document.getElementById('myDeviceList');
+
+    function deviceCardHTML(d) {
+      const dotCls = d.status; // connected/available/offline
+      return `
+        <div class="my-device-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="3"/>
+            <circle cx="9" cy="9" r="1.2" fill="currentColor"/>
+            <circle cx="15" cy="9" r="1.2" fill="currentColor"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+        </div>
+        <div class="my-device-main">
+          <div class="my-device-name">${d.name}
+            <span class="my-device-conn ${dotCls}"><span class="my-device-conn-dot"></span>${STATUS_LABEL[d.status]}</span>
+          </div>
+          <div class="my-device-sn">${d.sn}${d.status === 'offline' ? ' · 上次在线 ' + d.lastSeen : ' · ' + d.batt + '%'}</div>
+        </div>
+        <div class="my-device-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>`;
+    }
+
+    function renderDevices() {
+      listEl.innerHTML = '';
+      devices.forEach(d => {
+        const card = document.createElement('div');
+        card.className = 'my-device-card' + (d.status === 'available' ? ' available' : d.status === 'offline' ? ' offline' : '');
+        card.dataset.sn = d.sn;
+        card.innerHTML = deviceCardHTML(d);
+        card.addEventListener('click', () => openDetail(d.sn));
+        listEl.appendChild(card);
+      });
+    }
+
+    // 状态变更统一走 Store（变更后由订阅机制自动重渲染）
+    function connectDevice(sn)    { Store.connect(sn); }
+    function disconnectDevice(sn) { Store.disconnect(sn); }
+    function addOrConnect(dev)    { Store.addOrConnect(dev); }
+
+    // 订阅 Store：任何设备状态变更都会自动重渲染列表
+    Store.subscribe(renderDevices);
+
+    // 兼容旧接口：散落各处的 window.DeviceStore 调用无需改动
+    window.DeviceStore = { addOrConnect, connectDevice, get: Store.get };
+
+    // ----- 打开详情页：把设备数据填进去 -----
+    function openDetail(sn) {
+      const d = devices.find(x => x.sn === sn);
+      if (!d) return;
+      detailPage.dataset.sn = sn;
+
+      // 名称 / SN / 电量
+      document.getElementById('rdName').textContent = d.name;
+      document.getElementById('rdSn').textContent = d.sn;
+      document.getElementById('rdBatt').textContent = d.status === 'offline' ? '—' : d.batt + '%';
+
+      // 状态徽章（三态）
+      const badge = document.getElementById('rdBadge');
+      badge.textContent = STATUS_LABEL[d.status];
+      badge.className = 'rd-device-badge' + (d.status === 'available' ? ' available' : d.status === 'offline' ? ' offline' : '');
+
+      // 连接模式描述
+      const connDesc = d.status === 'connected'
+        ? MODE_LABEL[d.connMode] + ' · 已连接'
+        : MODE_LABEL[d.connMode];
+      document.getElementById('rdConnModeDesc').textContent = connDesc;
+
+      // 连接模式 sheet 内的当前卡
+      document.getElementById('connCurMode').textContent = d.status === 'connected'
+        ? MODE_LABEL[d.connMode] + ' · 已连接'
+        : MODE_LABEL[d.connMode] + ' · ' + STATUS_LABEL[d.status];
+      document.getElementById('connCurNet').textContent = d.net;
+
+      // 两种连接方式：高亮当前模式
+      const wayWifi = document.getElementById('connWayWifi');
+      const wayAp = document.getElementById('connWayAp');
+      const isWifi = d.connMode === 'wifi';
+      wayWifi.classList.toggle('current', isWifi);
+      wayAp.classList.toggle('current', !isWifi);
+      wayWifi.querySelector('.conn-way-cur').style.display = isWifi ? '' : 'none';
+      wayAp.querySelector('.conn-way-cur').style.display = isWifi ? 'none' : '';
+
+      // 非连接态：显示「最后一次连接信息」提示
+      const note = document.getElementById('rdHistoryNote');
+      if (d.status === 'connected') {
+        note.classList.remove('show');
+      } else {
+        note.classList.add('show');
+        document.getElementById('rdHistoryText').textContent =
+          d.status === 'available'
+            ? '以下为最后一次连接时的信息，连接后可查看与操作'
+            : '该设备已离线（上次在线 ' + d.lastSeen + '），连接后可查看与操作';
+      }
+
+      // 状态操作按钮：已连接→断开 / 可连接→去连接 / 离线→重新搜索
+      const actBtn = document.getElementById('rdConnActionBtn');
+      if (d.status === 'connected') {
+        actBtn.textContent = '断开连接';
+        actBtn.className = 'rd-conn-action-btn disconnect';
+      } else if (d.status === 'available') {
+        actBtn.textContent = '连接此设备';
+        actBtn.className = 'rd-conn-action-btn connect';
+      } else {
+        actBtn.textContent = '重新搜索设备';
+        actBtn.className = 'rd-conn-action-btn research';
+      }
+
+      // 非连接态：所有详情菜单置灰只读（仅已连接可操作）
+      const locked = d.status !== 'connected';
+      document.querySelectorAll('#robotDetailPage .rd-menu-row').forEach(row => {
+        row.classList.toggle('locked', locked);
+        if (!row.querySelector('.rd-menu-lock')) {
+          const lock = document.createElement('div');
+          lock.className = 'rd-menu-lock';
+          lock.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+          const arrow = row.querySelector('.rd-menu-arrow');
+          row.insertBefore(lock, arrow);
+        }
+      });
+
       UI.openPage('robotDetailPage');
-    });
+    }
+
+    renderDevices();
+    if (window.HomeSyncConnState) window.HomeSyncConnState();
     document.getElementById('robotDetailBack').addEventListener('click', () => UI.closePage('robotDetailPage'));
 
     // ----- 详情子 sheet 系统（独立于设置页 sheet）-----
@@ -9318,38 +10697,125 @@
         document.getElementById(openSheetId).classList.remove('open');
         openSheetId = null;
       }
+      // 同时收起配网子 sheet（它独立用 open class 打开）
+      const cw = document.getElementById('rdConnWifi');
+      if (cw) cw.classList.remove('open');
       rdMask.classList.remove('show');
     }
     rdMask.addEventListener('click', closeRdSheet);
 
     // 详情菜单行 → 打开对应 sheet
     document.querySelectorAll('[data-rd-sheet]').forEach(row => {
-      row.addEventListener('click', () => openRdSheet(row.dataset.rdSheet));
+      row.addEventListener('click', () => {
+        if (row.classList.contains('locked')) {
+          UI.toast('连接此设备后可查看', { variant: 'center', duration: 1600 });
+          return;
+        }
+        openRdSheet(row.dataset.rdSheet);
+      });
     });
 
-    // 连接模式：点「AP 模式」→ 打开配网引导（不是直接切换，切换=重新配网）
-    const connSwitchAp = document.getElementById('connSwitchAp');
-    if (connSwitchAp) {
-      connSwitchAp.addEventListener('click', () => {
-        UI.openSheet ? UI.openSheet('rdConnAp') : document.getElementById('rdConnAp').classList.add('open');
+    // 连接模式：「重新配网」→ 打开 Wi-Fi 配网 sheet
+    // 重新配网：打开时回到第1步（选方式）
+    const reconfStep1 = document.getElementById('reconfStep1');
+    const reconfWifi  = document.getElementById('reconfWifi');
+    const reconfTitle = document.getElementById('reconfTitle');
+    function reconfReset() {
+      reconfStep1.style.display = '';
+      reconfWifi.style.display = 'none';
+      reconfTitle.textContent = '重新配网';
+    }
+    const connReconfigBtn = document.getElementById('connReconfigBtn');
+    if (connReconfigBtn) {
+      connReconfigBtn.addEventListener('click', () => {
+        reconfReset();
+        // rdConnWifi 是详情子 sheet（z-index 271），直接显示并保证蒙层在
+        document.getElementById('rdConnWifi').classList.add('open');
+        document.getElementById('rdSheetMask').classList.add('show');
       });
     }
-    const apStartBtn = document.getElementById('rdApStartBtn');
-    if (apStartBtn) {
-      apStartBtn.addEventListener('click', () => UI.toast('正在开启机器人热点…', { variant: 'center', duration: 1800 }));
-    }
-    // 更换 Wi-Fi → 打开配网
-    const connChangeWifi = document.getElementById('connChangeWifi');
-    if (connChangeWifi) {
-      connChangeWifi.addEventListener('click', () => {
-        UI.openSheet ? UI.openSheet('rdConnWifi') : document.getElementById('rdConnWifi').classList.add('open');
+    // 选 Wi-Fi
+    document.getElementById('pickWifi').addEventListener('click', () => {
+      reconfStep1.style.display = 'none';
+      reconfWifi.style.display = '';
+      reconfTitle.textContent = 'Wi-Fi 配网';
+    });
+    // 选 AP → 复用原绑定流程的 AP 直连页
+    document.getElementById('pickAp').addEventListener('click', () => {
+      const sn = detailPage.dataset.sn;
+      const d = devices.find(x => x.sn === sn);
+      if (!d) return;
+      // 关掉配网 + 连接模式 sheet
+      document.getElementById('rdConnWifi').classList.remove('open');
+      document.getElementById('rdConn').classList.remove('open');
+      document.getElementById('rdSheetMask').classList.remove('show');
+      // 跳进原 AP 页（针对当前设备）
+      if (window.openApReconfig) window.openApReconfig({ name: d.name, sn: d.sn });
+    });
+    // 返回选方式
+    document.getElementById('reconfBackW').addEventListener('click', reconfReset);
+
+    function closeConnSheets() {
+      ['rdConnWifi', 'rdConn'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('open');
       });
+      const m = document.getElementById('rdSheetMask');
+      if (m) m.classList.remove('show');
+      const gm = document.getElementById('sheetMask');
+      if (gm) gm.classList.remove('show');
     }
     const wifiStartBtn = document.getElementById('rdWifiStartBtn');
     if (wifiStartBtn) {
-      wifiStartBtn.addEventListener('click', () => UI.toast('正在配网，机器人将短暂断开…', { variant: 'center', duration: 2000 }));
+      wifiStartBtn.addEventListener('click', () => {
+        const ssid = document.getElementById('rdNewSsid').value.trim();
+        if (!ssid) { UI.toast('请输入 Wi-Fi 名称', { variant: 'center', duration: 1500 }); return; }
+        UI.toast('正在配网，机器人将短暂断开…', { variant: 'center', duration: 2000 });
+        const sn = detailPage.dataset.sn;
+        const d = devices.find(x => x.sn === sn);
+        closeConnSheets();
+        if (d) {
+          setTimeout(() => {
+            d.connMode = 'wifi'; d.net = ssid; d.status = 'connected';
+            connectDevice(sn);
+            if (window.HomeSyncConnState) window.HomeSyncConnState();
+            openDetail(sn);
+            UI.toast('已切换为 Wi-Fi 模式', { variant: 'center', duration: 1500 });
+          }, 2100);
+        }
+      });
     }
-    document.getElementById('rdRepairBtn').addEventListener('click', () => UI.toast('正在重新配对遥控器...', { variant: 'center', duration: 1800 }));
+    // 遥控器：解绑 → 未绑定视图；输入 ID 绑定 → 回到已绑定视图
+    const rcBound = document.getElementById('rcBound');
+    const rcUnbound = document.getElementById('rcUnbound');
+    const rcBoundId = document.getElementById('rcBoundId');
+    const rcMenuDesc = document.querySelector('[data-rd-sheet="rdRemote"] .rd-menu-desc');
+    function rcShowBound(id) {
+      rcBoundId.textContent = id;
+      if (rcMenuDesc) rcMenuDesc.textContent = 'ID: ' + id;
+      rcBound.style.display = '';
+      rcUnbound.style.display = 'none';
+    }
+    function rcShowUnbound() {
+      if (rcMenuDesc) rcMenuDesc.textContent = '未绑定';
+      rcBound.style.display = 'none';
+      rcUnbound.style.display = '';
+      document.getElementById('rcIdInput').value = '';
+    }
+    const rcUnbindModal = document.getElementById('rcUnbindModal');
+    document.getElementById('rcUnbindBtn').addEventListener('click', () => rcUnbindModal.classList.add('show'));
+    document.getElementById('rcUnbindCancel').addEventListener('click', () => rcUnbindModal.classList.remove('show'));
+    document.getElementById('rcUnbindOk').addEventListener('click', () => {
+      rcUnbindModal.classList.remove('show');
+      rcShowUnbound();
+      UI.toast('已解除遥控器绑定', { variant: 'center', duration: 1500 });
+    });
+    document.getElementById('rcBindBtn').addEventListener('click', () => {
+      const id = document.getElementById('rcIdInput').value.trim();
+      if (!id) { UI.toast('请输入遥控器 ID', { variant: 'center', duration: 1500 }); return; }
+      rcShowBound(id);
+      UI.toast('遥控器绑定成功', { variant: 'center', duration: 1500 });
+    });
     document.getElementById('rdCheckOtaBtn').addEventListener('click', () => UI.toast('当前已是最新版本', { variant: 'center', duration: 1800 }));
 
     // 报警信息 全部 / 仅报警 过滤
@@ -9365,16 +10831,37 @@
     });
 
     // 服务状态列表（与首页服务进程示例一致的服务名）
-    const services = [
-      'ai_sport', 'audio_player_service', 'bashrunner', 'basic_service', 'battery_guard',
-      'chat_g0', 'dex3_service_l', 'dex3_service_r', 'g1_arm_example', 'lidar_driver',
-      'log_system', 'master_service', 'motion_switcher', 'net_switcher', 'ota_box',
-      'ota_pipe', 'robot_state', 'robot_type_service', 'slam_service', 'state_estimator',
-      'unitree_slam', 'video_hub', 'vui_service', 'webrtc_bridge', 'webrtc_signal_server'
-    ];
+    const services = MockData.services;
     document.getElementById('rdServiceList').innerHTML = services.map(s => `
       <div class="rd-svc-row"><span class="rd-svc-name">${s}</span><span class="rd-svc-dot"></span></div>
     `).join('');
+
+    // 状态操作按钮：断开 / 去连接 / 重新搜索
+    document.getElementById('rdConnActionBtn').addEventListener('click', () => {
+      const sn = detailPage.dataset.sn;
+      const d = devices.find(x => x.sn === sn);
+      if (!d) return;
+      if (d.status === 'connected') {
+        // 断开 → 可连接
+        disconnectDevice(sn);
+        if (window.HomeSyncConnState) window.HomeSyncConnState();
+        openDetail(sn);
+        UI.toast('已断开连接', { variant: 'center', duration: 1500 });
+      } else if (d.status === 'available') {
+        // 去连接 → 连上它（互斥）
+        UI.toast('正在连接…', { variant: 'center', duration: 1200 });
+        setTimeout(() => {
+          connectDevice(sn);
+          if (window.HomeSyncConnState) window.HomeSyncConnState();
+          openDetail(sn);
+          UI.toast('已连接到「' + d.name + '」', { variant: 'center', duration: 1500 });
+        }, 1300);
+      } else {
+        // 离线 → 重新搜索：关详情页，跳搜索配网流程
+        UI.closePage('robotDetailPage');
+        setTimeout(() => { if (window.startScanFlow) window.startScanFlow(); }, 320);
+      }
+    });
 
     // 解除绑定（二次确认）
     const unbindModal = document.getElementById('rdUnbindModal');
@@ -9383,16 +10870,18 @@
     document.getElementById('rdUnbindOk').addEventListener('click', () => {
       unbindModal.classList.remove('show');
       UI.closePage('robotDetailPage');
-      // 从「我的设备」移除当前设备卡
-      const sn = document.getElementById('robotDetailPage')?.dataset.sn;
-      const list = document.getElementById('myDeviceList');
-      if (list) {
-        const card = sn ? list.querySelector(`[data-sn="${sn}"]`) : list.querySelector('.my-device-card');
-        if (card) card.remove();
-        // 若已无任何绑定设备，首页 / 遥控页恢复为未连接
-        if (!list.querySelector('.my-device-card') && window.HomeSetDisconnected) {
-          window.HomeSetDisconnected();
+      const sn = detailPage.dataset.sn;
+      const idx = devices.findIndex(d => d.sn === sn);
+      if (idx > -1) {
+        const wasConnected = devices[idx].status === 'connected';
+        devices.splice(idx, 1);
+        // 解绑的是当前连接设备 → 若还有别的在线设备，自动连接一台
+        if (wasConnected) {
+          const next = devices.find(d => d.status !== 'offline');
+          if (next) connectDevice(next.sn);
         }
+        renderDevices();
+        if (window.HomeSyncConnState) window.HomeSyncConnState();
       }
       UI.toast('已解除绑定', { variant: 'center', duration: 1800 });
     });
@@ -9403,25 +10892,170 @@
    * 未连接态下所有操作均走 UI.toast 提示。
    * ============================================================ */
   (function RemoteModule() {
-    // 快捷动作按钮：高亮 + 未连接提示
-    document.querySelectorAll('.action-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        UI.toast();
+    const remotePage = document.getElementById('remotePage');
+
+    /* ===== 需求4：未连接 → 整页引导态 ===== */
+    function syncRemoteConn() {
+      if (!remotePage) return;
+      remotePage.classList.toggle('disconnected', !Store.isConnected());
+    }
+    Store.subscribe(syncRemoteConn);
+    syncRemoteConn();
+
+    // 引导按钮：有已绑定设备 → 去设置页重连；否则搜寻新设备
+    const remoteGuideBtn = document.getElementById('remoteGuideBtn');
+    if (remoteGuideBtn) {
+      remoteGuideBtn.addEventListener('click', () => {
+        if (Store.get().length > 0) {
+          Nav.switchTab('首页');
+          UI.openPage('settingsPage');
+        } else {
+          Nav.switchTab('首页');
+          document.getElementById('connectBtn')?.click();
+        }
       });
+    }
+
+    // ===== 需求7：可配置快捷动作 =====
+    const MAX_QUICK = 7; // 最多 7 个，留 1 格给 +
+    const allActions = MockData.quickActions;
+    let selectedIds = [...MockData.quickActionSelected];
+    const actionsEl = document.getElementById('remoteActions');
+    const rlActionsEl = document.getElementById('rlActions');
+    const actById = (id) => allActions.find(a => a.id === id);
+
+    // 渲染遥控页快捷动作区（竖屏 + 横屏共用同一份 selectedIds，保持一致）
+    function renderQuickActions() {
+      // —— 竖屏 ——
+      if (actionsEl) {
+        const cards = selectedIds.map(id => {
+          const a = actById(id);
+          if (!a) return '';
+          return `<button class="action-btn" data-act="${a.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">${a.icon}</svg>
+            <span class="action-btn-label">${a.name}</span>
+          </button>`;
+        }).join('');
+        const addBtn = selectedIds.length < MAX_QUICK
+          ? `<button class="action-btn action-add" id="quickAddBtn">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+               <span class="action-btn-label">添加</span>
+             </button>`
+          : '';
+        actionsEl.innerHTML = cards + addBtn;
+        actionsEl.querySelectorAll('.action-btn[data-act]').forEach(btn => {
+          btn.addEventListener('click', () => fireQuickAction(btn.dataset.act));
+        });
+        const addEl = document.getElementById('quickAddBtn');
+        if (addEl) addEl.addEventListener('click', openActPicker);
+      }
+
+      // —— 横屏（沿用 .rl-action-btn 样式）——
+      if (rlActionsEl) {
+        const cards = selectedIds.map(id => {
+          const a = actById(id);
+          if (!a) return '';
+          return `<button class="rl-action-btn" data-act="${a.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">${a.icon}</svg>
+            <span>${a.name}</span>
+          </button>`;
+        }).join('');
+        const addBtn = selectedIds.length < MAX_QUICK
+          ? `<button class="rl-action-btn rl-action-add" id="rlQuickAddBtn">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+               <span>添加</span>
+             </button>`
+          : '';
+        rlActionsEl.innerHTML = cards + addBtn;
+        rlActionsEl.querySelectorAll('.rl-action-btn[data-act]').forEach(btn => {
+          btn.addEventListener('click', () => fireQuickAction(btn.dataset.act));
+        });
+        const rlAddEl = document.getElementById('rlQuickAddBtn');
+        if (rlAddEl) rlAddEl.addEventListener('click', openActPicker);
+      }
+    }
+    // 触发一个快捷动作（竖横屏共用）
+    function fireQuickAction(id) {
+      if (!Store.isConnected()) { UI.toast(); return; }
+      const a = actById(id);
+      UI.toast('已发送「' + (a ? a.name : '动作') + '」', { duration: 1500 });
+      // 注：遥控页有自己的急停（模式行/横屏右上角），不触发全局浮动急停
+    }
+
+    // ----- 动作选择弹窗 -----
+    const actPicker = document.getElementById('actPicker');
+    const actPickerMask = document.getElementById('actPickerMask');
+    const actPickerGrid = document.getElementById('actPickerGrid');
+    const actPickerCount = document.getElementById('actPickerCount');
+    let draftIds = []; // 弹窗内的临时选择，点完成才生效
+
+    function renderPickerGrid() {
+      actPickerGrid.innerHTML = allActions.map(a => {
+        const on = draftIds.includes(a.id);
+        return `<div class="act-pick-item ${on ? 'selected' : ''}" data-pick="${a.id}">
+          <div class="act-pick-check">✓</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">${a.icon}</svg>
+          <span>${a.name}</span>
+        </div>`;
+      }).join('');
+      actPickerCount.textContent = `已选 ${draftIds.length} / ${MAX_QUICK}`;
+      actPickerGrid.querySelectorAll('.act-pick-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const id = item.dataset.pick;
+          const idx = draftIds.indexOf(id);
+          if (idx > -1) {
+            draftIds.splice(idx, 1); // 取消选择
+          } else {
+            if (draftIds.length >= MAX_QUICK) {
+              UI.toast('最多选 ' + MAX_QUICK + ' 个动作', { variant: 'center', duration: 1500 });
+              return;
+            }
+            draftIds.push(id);
+          }
+          renderPickerGrid();
+        });
+      });
+    }
+    function openActPicker() {
+      draftIds = [...selectedIds];
+      renderPickerGrid();
+      // 横屏 overlay 打开时 → picker 用横屏居中布局
+      const isLandscape = document.getElementById('remoteLandscape').classList.contains('open');
+      actPicker.classList.toggle('landscape', isLandscape);
+      actPickerMask.classList.add('show');
+      actPicker.classList.add('show');
+    }
+    function closeActPicker() {
+      actPickerMask.classList.remove('show');
+      actPicker.classList.remove('show');
+    }
+    actPickerMask.addEventListener('click', closeActPicker);
+    document.getElementById('actPickerDone').addEventListener('click', () => {
+      if (draftIds.length === 0) {
+        UI.toast('请至少保留 1 个动作', { variant: 'center', duration: 1500 });
+        return;
+      }
+      selectedIds = [...draftIds];
+      renderQuickActions();
+      closeActPicker();
     });
 
-    // 模式胶囊（含急停 .danger）
+    renderQuickActions();
+
+    // 模式胶囊（含页内专用急停 .danger）
     document.querySelectorAll('.mode-pill').forEach(pill => {
       pill.addEventListener('click', () => {
+        const label = pill.textContent.trim();
         if (pill.classList.contains('danger')) {
+          // 遥控页专用急停：拇指可达区，直接生效
+          Motion.reset(); // 顺带清掉其它场景可能残留的运动计数
           UI.toast('已发送急停指令', { duration: 2200 });
           return;
         }
         document.querySelectorAll('.mode-pill:not(.danger)').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
-        UI.toast();
+        if (!Store.isConnected()) { UI.toast(); return; }
+        UI.toast('已切换到「' + label + '」', { duration: 1500 });
       });
     });
 
@@ -9439,7 +11073,7 @@
         centerY = rect.top + rect.height / 2;
         radius = rect.width / 2 - 18;
         move(clientX, clientY);
-        UI.toast();
+        if (!Store.isConnected()) UI.toast(); // 未连接：提示（遥控页有专用急停，不触发全局浮动急停）
       }
       function move(clientX, clientY) {
         if (!active) return;
@@ -9468,15 +11102,6 @@
       joystick.addEventListener('touchcancel', end);
     });
 
-    // 横屏动作按钮（.rl-action-btn）：高亮 + 未连接提示
-    document.querySelectorAll('.rl-action-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.rl-action-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        UI.toast();
-      });
-    });
-
     // 全屏按钮（#11）：进入横屏遥控 overlay
     document.querySelector('.remote-preview-fullscreen').addEventListener('click', () => {
       UI.openPage('remoteLandscape');
@@ -9495,20 +11120,21 @@
    * ============================================================ */
   (function PerformModule() {
     // -------------------- 内存数据 --------------------
-    // 用户作品：syncState = synced(已同步) | syncing(准备中,自动下发) | waiting(等待机器人上线)
-    let works = [
-      { id: 'w1', name: '动作模仿-20:19:29', duration: '0:06', date: '2026-06-03', syncState: 'waiting' },
-      { id: 'w2', name: 'test1',             duration: '0:02', date: '2026-05-22', syncState: 'synced'  },
-      { id: 'w3', name: '裁判恰恰',           duration: '0:19', date: '2026-05-22', syncState: 'synced' },
-      { id: 'w4', name: '动作模仿-11:13:51', duration: '0:08', date: '2026-05-20', syncState: 'synced' },
-    ];
+    // 用户作品：syncState = synced(已同步真机) | unsynced(未同步，机器人上线后自动同步)
+    // musicOn：执行时是否同时播放音乐（默认开）
+    let works = MockData.performWorks.map(w => ({ ...w }));
+    // 官方作品（预置示范）
+    let officialWorks = MockData.performOfficialWorks.map(w => ({ ...w }));
     // 学习任务：status = learning | failed（方案A：学习完成自动进作品，无“待保存”）
-    let tasks = [
-      { id: 't1', name: 'jj',               time: '刚刚',      status: 'learning', progress: 12 },
-      { id: 't3', name: '动作模仿-20:45:33', time: '昨日 20:45', status: 'failed',   progress: 0 },
-    ];
+    let tasks = MockData.performTasks.map(t => ({ ...t }));
     let seq = 100; // 自增 id
     const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    // 动作模仿预览的默认命名：视频模仿-HH:MM:SS
+    function defaultMocapName() {
+      const n = new Date();
+      const p = x => String(x).padStart(2, '0');
+      return '视频模仿-' + p(n.getHours()) + ':' + p(n.getMinutes()) + ':' + p(n.getSeconds());
+    }
 
     // -------------------- DOM --------------------
     const worksListAll   = document.getElementById('worksListAll');
@@ -9532,49 +11158,84 @@
     const playIconSVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
 
     // 作品状态标签文案
-    const SYNC_LABEL = { synced: '已准备好', syncing: '准备中…', waiting: '等待机器人上线' };
+    const SYNC_LABEL = { synced: '已同步', unsynced: '未同步' };
+    const musicIconSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+    const checkIconSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
-    // ==================== 渲染：用户作品 ====================
-    function renderWorks() {
-      userWorksCount.textContent = works.length;
-      worksListAll.innerHTML = works.map(w => `
+    // 通用作品卡片 HTML（用户/官方共用）
+    function workCardHTML(w) {
+      const synced = w.syncState === 'synced';
+      return `
         <div class="work-card" data-work-id="${w.id}">
           <div class="work-thumb">${thumbSVG}</div>
           <div class="work-info">
             <div class="work-name">${esc(w.name)}</div>
-            <div class="work-tag ${w.syncState === 'synced' ? 'synced' : w.syncState === 'waiting' ? 'waiting' : ''}">${SYNC_LABEL[w.syncState]}</div>
+            <div class="work-tag ${synced ? 'synced' : ''}">${SYNC_LABEL[w.syncState] || '未同步'}</div>
+            ${synced ? '' : '<div class="work-sync-tip">还没传给机器人，等它上线就自动同步～</div>'}
             <div class="work-meta">
-              <span>视频时长 ${w.duration}</span>
+              <span>动作时长 ${w.duration}</span>
               <span>${w.date}</span>
             </div>
           </div>
-          ${w.syncState === 'syncing'
-            ? `<button class="work-action-btn syncing" data-action="execute" disabled>${syncIconSVG}准备中</button>`
-            : `<button class="work-action-btn execute" data-action="execute">${playIconSVG}执行</button>`}
-        </div>`).join('');
+          <button class="work-action-btn execute" data-action="execute">${playIconSVG}执行</button>
+        </div>`;
+    }
+
+    // ==================== 渲染：用户作品 ====================
+    function renderWorks() {
+      userWorksCount.textContent = works.length;
+      worksListAll.innerHTML = works.map(workCardHTML).join('');
+    }
+    // ==================== 渲染：官方作品 ====================
+    const worksListOfficial = document.getElementById('worksListOfficial');
+    function renderOfficial() {
+      worksListOfficial.innerHTML = officialWorks.map(workCardHTML).join('');
     }
 
     // 作品卡：点击卡片进播放页；点执行按钮按状态处理（方案A：同步已自动，执行时只判断状态）
-    worksListAll.addEventListener('click', (e) => {
+    function handleWorkClick(e, dataArr, rerender) {
       const card = e.target.closest('.work-card');
       if (!card) return;
-      const work = works.find(w => w.id === card.dataset.workId);
+      const work = dataArr.find(w => w.id === card.dataset.workId);
       if (!work) return;
 
       const actionBtn = e.target.closest('.work-action-btn');
       if (actionBtn) {
         e.stopPropagation();
-        if (work.syncState === 'syncing') {
-          UI.toast('正在准备，请稍候…', { variant: 'perform', duration: 1500 });
-        } else if (work.syncState === 'waiting') {
-          UI.toast('请先唤醒 / 开机机器人', { variant: 'perform', duration: 1800 });
-        } else {
-          UI.toast('已下发执行指令', { variant: 'perform', duration: 1500 });
-        }
+        const musicOn = document.getElementById('worksMusicGlobal').classList.contains('on');
+        const musicTip = musicOn ? '（含音频）' : '（静音）';
+        // 执行有物理后果 → 先二次确认（含安全勾选）
+        LaunchConfirm.open({
+          name: work.name,
+          dur: '约 ' + (work.duration || '—'),
+          onConfirm: () => {
+            if (work.syncState === 'synced') {
+              UI.toast('已下发执行指令' + musicTip, { variant: 'perform', duration: 1500 });
+              Motion.start();
+              setTimeout(() => Motion.stop(), 4000);
+            } else {
+              UI.toast('正在同步到机器人…', { variant: 'perform', duration: 1500 });
+              setTimeout(() => {
+                work.syncState = 'synced';
+                rerender();
+                UI.toast('已同步，开始执行' + musicTip, { variant: 'perform', duration: 1500 });
+                Motion.start();
+                setTimeout(() => Motion.stop(), 4000);
+              }, 1600);
+            }
+          },
+        });
         return;
       }
       // 点卡片其他区域 → 预览播放
-      openPlayer(work.name);
+      openPlayer(work.name, dataArr === officialWorks);
+    }
+    worksListAll.addEventListener('click', (e) => handleWorkClick(e, works, renderWorks));
+    document.getElementById('worksListOfficial').addEventListener('click', (e) => handleWorkClick(e, officialWorks, renderOfficial));
+    // 全局音频开关切换
+    document.getElementById('worksMusicGlobal').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.currentTarget.classList.toggle('on');
     });
 
     // ==================== 渲染：我的任务 ====================
@@ -9595,6 +11256,15 @@
             <div class="mocap-task-progress-bar"><div class="mocap-task-progress-fill" style="width:${t.progress}%;"></div></div>
             <div class="mocap-task-progress-text">${t.progress}%</div>
           </div>`;
+        // 失败态：原因 + 重新上传入口
+        const failBlock = (t.status === 'failed') ? `
+          <div class="mocap-task-fail">
+            <div class="mocap-task-fail-reason">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>${esc(t.reason || '生成失败，请重试')}</span>
+            </div>
+            <button class="mocap-task-retry" data-task-act="retry">重新上传</button>
+          </div>` : '';
         return `
           <div class="mocap-task-card" data-task-id="${t.id}">
             <div class="mocap-task-card-top">
@@ -9610,6 +11280,7 @@
               ${actions}
             </div>
             ${progress}
+            ${failBlock}
           </div>`;
       }).join('');
     }
@@ -9625,7 +11296,14 @@
       const actBtn = e.target.closest('[data-task-act]');
       if (actBtn) {
         e.stopPropagation();
-        // 仅删除（方案A：无手动保存）
+        if (actBtn.dataset.taskAct === 'retry') {
+          // 重新上传 → 关掉任务列表，跳到新建动作模仿页
+          e.stopPropagation();
+          UI.closePage('subpageTaskList');
+          setTimeout(() => UI.openPage('subpageMocap'), 300);
+          return;
+        }
+        // 删除（方案A：无手动保存）
         pendingDeleteTaskId = task.id;
         document.getElementById('taskDeleteModal').classList.add('show');
         return;
@@ -9661,20 +11339,7 @@
 
     // 上传视频 → 打开模拟系统相册（不调用真实系统相册）
     // 假相册素材：渐变缩略图 + 视频时长角标
-    const albumMedia = [
-      { grad: ['#3a4a6b', '#1a2030'], dur: '0:12' },
-      { grad: ['#6b3a52', '#2a1a24'], dur: '0:08' },
-      { grad: ['#3a6b5a', '#1a2a24'], dur: '0:24' },
-      { grad: ['#6b5a3a', '#2a241a'], dur: '0:15' },
-      { grad: ['#4a3a6b', '#201a2a'], dur: '0:06' },
-      { grad: ['#3a5a6b', '#1a242a'], dur: '0:33' },
-      { grad: ['#6b3a3a', '#2a1a1a'], dur: '0:19' },
-      { grad: ['#5a6b3a', '#242a1a'], dur: '0:11' },
-      { grad: ['#3a4a6b', '#1a1f2e'], dur: '0:09' },
-      { grad: ['#6b4a3a', '#2a201a'], dur: '0:27' },
-      { grad: ['#4a6b3a', '#1f2a1a'], dur: '0:14' },
-      { grad: ['#3a3a6b', '#1a1a2a'], dur: '0:05' },
-    ];
+    const albumMedia = MockData.albumMedia;
     const albumGrid = document.getElementById('albumGrid');
     function renderAlbum() {
       albumGrid.innerHTML = albumMedia.map((m, i) => `
@@ -9711,7 +11376,7 @@
       pendingSource = 'upload';
       setTimeout(() => {
         UI.closePage('subpageAlbum');
-        document.getElementById('previewNameInput').value = '';
+        document.getElementById('previewNameInput').value = defaultMocapName();
         setTimeout(() => UI.openPage('subpagePreview'), 300);
       }, 260);
     });
@@ -9734,7 +11399,7 @@
         recStatus.classList.remove('recording');
         recStatus.querySelector('span:last-child').textContent = '待录制';
         pendingSource = 'record';
-        document.getElementById('previewNameInput').value = '';
+        document.getElementById('previewNameInput').value = defaultMocapName();
         UI.closePage('subpageRecord');
         setTimeout(() => UI.openPage('subpagePreview'), 350);
       }
@@ -9755,9 +11420,9 @@
       autoAdvance(taskId, name);
     });
 
-    // 方案A 自动流转：学习中 → (完成) 自动进作品 syncing → (下发) 自动 synced
+    // 方案A 自动流转：学习中 → (完成) 自动进作品(未同步) → (机器人在线自动下发) synced
     function autoAdvance(taskId, name) {
-      // 1) 学习完成：移出任务列表，作为新作品进入「用户作品」，状态 准备中
+      // 1) 学习完成：移出任务列表，作为新作品进入「用户作品」，初始未同步
       setTimeout(() => {
         const idx = tasks.findIndex(t => t.id === taskId);
         if (idx === -1) return;            // 任务可能已被用户删除
@@ -9767,17 +11432,17 @@
           id: workId, name,
           duration: '0:05',
           date: new Date().toISOString().slice(0, 10),
-          syncState: 'syncing',            // 自动下发中
+          syncState: 'unsynced',           // 等机器人上线自动同步
         });
         renderTasks();
         renderWorks();
-        // 2) 自动下发完成 → 已准备好（演示默认机器人在线）
+        // 2) 机器人在线 → 自动同步成功（演示默认在线）
         setTimeout(() => {
           const w = works.find(x => x.id === workId);
           if (!w) return;
           w.syncState = 'synced';
           renderWorks();
-          UI.toast('「' + name + '」已准备好，可随时启动', { variant: 'perform', duration: 2000 });
+          UI.toast('「' + name + '」已学会并同步到机器人～', { variant: 'perform', duration: 2000 });
         }, 2500);
       }, 4000);
     }
@@ -9826,12 +11491,16 @@
 
     let playerOldName = ''; // 进入播放页时记录的原作品名（用于编辑后回写数据）
 
-    function openPlayer(name) {
+    function openPlayer(name, isOfficial) {
       playerOldName = name;
       playerTitle.textContent = name;
       // 退出编辑态（防止上次遗留）
       playerTitle.setAttribute('contenteditable', 'false');
       playerTitleEdit.classList.remove('editing');
+      // 官方作品：不可改名、无原视频画中画
+      playerTitleEdit.style.display = isOfficial ? 'none' : '';
+      const refVideo = document.querySelector('#subpagePlayer .player-ref-video');
+      if (refVideo) refVideo.style.display = isOfficial ? 'none' : '';
       // 重置播放态
       playerSec = 0;
       playerPlaying = false;
@@ -9910,7 +11579,12 @@
 
     // -------------------- 初始渲染 --------------------
     renderWorks();
+    renderOfficial();
     renderTasks();
+
+    // 暴露给对话页卡片按钮调用（查看任务 / 查看效果预览）
+    window.PerformOpenTaskList = () => UI.openPage('subpageTaskList');
+    window.PerformPreview = (name) => openPlayer(name || '动作预览', false);
   })();
 
   /* ============================================================
