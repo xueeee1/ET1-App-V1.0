@@ -3373,35 +3373,233 @@
     transition: background 0.15s;
   }
   .check-update-btn:active { background: rgba(255,255,255,0.12); }
+  /* 按钮主色态（有新版/待安装时）*/
+  .check-update-btn.primary,
+  .rd-sheet-btn.primary {
+    background: #5b8fff;
+    border-color: transparent;
+    color: #fff;
+  }
+  .check-update-btn.primary:active,
+  .rd-sheet-btn.primary:active { background: #4a7ce8; }
+  .check-update-btn.disabled,
+  .rd-sheet-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+  /* 版本徽标状态变体 */
+  .version-badge.new {
+    background: rgba(91,143,255,0.16);
+    color: #5b8fff;
+  }
+  .version-badge.checking {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.6);
+  }
+  .version-badge.failed {
+    background: rgba(255,77,77,0.15);
+    color: #ff6b6b;
+  }
+
+  /* 新版本详情卡片 */
+  .update-detail-card {
+    background: rgba(91,143,255,0.06);
+    border: 0.5px solid rgba(91,143,255,0.18);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .update-detail-ver {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .udv-old { color: rgba(255,255,255,0.45); }
+  .udv-arrow { width: 15px; height: 15px; color: rgba(255,255,255,0.4); }
+  .udv-new { color: #5b8fff; font-weight: 600; }
+  .udv-size { color: rgba(255,255,255,0.4); font-size: 12px; }
+  .update-detail-log {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.55;
+  }
+
+  /* 下载/安装进度条 */
+  .update-progress-wrap {
+    background: rgba(255,255,255,0.05);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .update-progress-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 10px;
+  }
+  .update-progress-track {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .update-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #5b8fff;
+    border-radius: 100px;
+    transition: width 0.3s ease;
+  }
+  .update-progress-note {
+    font-size: 11.5px;
+    color: #ffb84d;
+    margin-top: 10px;
+  }
+
+  /* OTA 升级期间：全局锁定遮罩，屏蔽一切其他操作 */
+  .ota-lock {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(10px);
+    z-index: 999;              /* 高于所有页面/sheet/弹窗 */
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0 32px;
+  }
+  .ota-lock.show { display: flex; }
+  .ota-lock-box {
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
+  }
+  .ota-lock-spinner {
+    width: 44px; height: 44px;
+    margin: 0 auto 18px;
+    border: 3px solid rgba(91,143,255,0.2);
+    border-top-color: #5b8fff;
+    border-radius: 50%;
+    animation: ota-spin 0.9s linear infinite;
+  }
+  @keyframes ota-spin { to { transform: rotate(360deg); } }
+  .ota-lock-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .ota-lock-desc {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .ota-lock-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .ota-lock-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .ota-lock-fill {
+    height: 100%;
+    width: 0%;
+    background: #5b8fff;
+    border-radius: 100px;
+    transition: width 0.3s ease;
+  }
+  .ota-lock-pct {
+    font-size: 13px;
+    color: rgba(255,255,255,0.8);
+    min-width: 38px;
+    text-align: right;
+  }
 
   /* Toast - 当前已是最新版本 */
+  /* ============================================================
+   * Toast 重设计
+   * 旧版问题：每条都挂 GALBOT logo（像广告）、成功/失败长一个样、
+   *          浮在屏幕正中挡内容、浅灰底和深色 App 违和、只有淡入淡出。
+   * 新版：按类型分色（error/success/warning/info），深色玻璃拟态，
+   *      顶部滑入，左侧色条 + 图标，长文案自动换行。
+   * ============================================================ */
   .galbot-toast {
     position: fixed;
     left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    background: #f5f5f5;
-    color: #1a1a1a;
-    font-size: 14px;
-    padding: 8px 18px 8px 8px;
-    border-radius: 100px;
+    top: calc(var(--safe-top, 44px) + 12px);
+    transform: translate(-50%, -14px) scale(0.96);
+    min-width: 200px;
+    max-width: min(340px, calc(100% - 40px));
+    background: rgba(28, 30, 36, 0.92);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    color: rgba(255,255,255,0.95);
+    font-size: 13.5px;
+    line-height: 1.45;
+    font-weight: 500;
+    padding: 12px 16px 12px 14px;
+    border-radius: 13px;
+    border: 0.5px solid rgba(255,255,255,0.1);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
     z-index: 500;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
-    font-weight: 500;
+    overflow: hidden;
+    transition: opacity 0.24s cubic-bezier(.22,.61,.36,1),
+                transform 0.28s cubic-bezier(.22,.61,.36,1);
   }
   .galbot-toast.show {
     opacity: 1;
+    transform: translate(-50%, 0) scale(1);
   }
-  .galbot-toast-logo {
-    display: flex; align-items: center; justify-content: center;
+  /* 左侧类型色条：细、内缩、带圆角，作为低调的类型标识 */
+  .galbot-toast::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 2.5px;
+    border-radius: 0 2px 2px 0;
+    background: var(--toast-accent, #5b8fff);
+  }
+  /* 图标 */
+  .galbot-toast-icon {
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
+    margin-top: 0.5px;
+    color: var(--toast-accent, #5b8fff);
   }
+  .galbot-toast-icon svg {
+    width: 100%; height: 100%;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  #galbotToastText {
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
+  }
+  /* 类型配色：卡片底色保持中性深灰，只让图标 + 左侧细色条带颜色。
+     不给整卡染色——密码输错这种小事不该把界面变成警报牌。 */
+  .galbot-toast.t-error   { --toast-accent: #ff6b6b; }
+  .galbot-toast.t-success { --toast-accent: #3ddc84; }
+  .galbot-toast.t-warning { --toast-accent: #ffb020; }
+  .galbot-toast.t-info    { --toast-accent: #5b8fff; }
 
   /* 帮助与服务 - 底部协议 */
   .help-legal {
@@ -3794,6 +3992,17 @@
   .ap-copy-btn:active { background: rgba(91,143,255,0.25); }
   .ap-copy-btn svg { width: 15px; height: 15px; }
   .ap-hint { font-size: 12.5px; color: rgba(255,255,255,0.45); line-height: 1.6; margin: 0 2px 16px; }
+  /* AP 补充说明：解释"无互联网连接"是正常的，避免用户以为配网失败而断开 */
+  .ap-note {
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: rgba(255,176,32,0.08);
+    border-left: 2px solid rgba(255,176,32,0.5);
+    border-radius: 0 6px 6px 0;
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: rgba(255,196,90,0.85);
+  }
   .ap-btn-row { display: flex; gap: 10px; }
   .ap-btn-row .scan-connect-btn { margin-top: 0; }
 
@@ -4020,13 +4229,61 @@
     border-radius: 100px;
   }
 
-  /* 动作按钮 4 列 grid */
-  .remote-actions {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+  /* 快捷动作分页容器：左侧动作网格 + 右侧竖向翻页滑杆 */
+  .remote-actions-wrap {
+    display: flex;
+    align-items: stretch;
     gap: 10px;
     margin-bottom: 12px;
   }
+  .remote-actions-viewport {
+    flex: 1;
+    overflow: hidden;   /* 分页：超出高度的内容被裁掉，靠翻页看到 */
+    min-width: 0;
+  }
+  /* 每页 4 列 × 3 行 = 12 个，多页时靠 translateY 切换 */
+  .remote-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 10px;
+    transition: transform 0.28s cubic-bezier(.22,.61,.36,1);
+    will-change: transform;
+  }
+
+  /* 右侧竖向翻页滑杆 */
+  .remote-actions-slider {
+    width: 22px;
+    flex-shrink: 0;
+    display: none;              /* 单页时隐藏，JS 控制 */
+    align-items: center;
+    justify-content: center;
+    touch-action: none;         /* 拖动时不触发页面滚动 */
+  }
+  .remote-actions-slider.show { display: flex; }
+  .ras-track {
+    position: relative;
+    width: 6px;
+    height: 100%;
+    background: rgba(255,255,255,0.08);
+    border-radius: 100px;
+    cursor: pointer;
+  }
+  .ras-thumb {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 16px;
+    /* 高度与位置由 JS 按页数计算 */
+    background: #5b8fff;
+    border-radius: 100px;
+    box-shadow: 0 0 0 4px rgba(91,143,255,0.14);
+    cursor: grab;
+    transition: top 0.2s cubic-bezier(.22,.61,.36,1);
+  }
+  .ras-thumb:active { cursor: grabbing; }
+  .ras-thumb.dragging { transition: none; }
   .action-btn {
     aspect-ratio: 1 / 1;
     background: rgba(255,255,255,0.04);
@@ -4357,7 +4614,7 @@
   .remote-landscape .rl-joy-left { left: 22px; right: auto; }
   .remote-landscape .rl-joy-right { right: 22px; left: auto; }
 
-  /* 底部中间：一排 8 个动作按钮 */
+  /* 底部中间：一排动作按钮，动作多时横向滚动（左右摇杆之间的空间内）*/
   .rl-actions {
     position: absolute;
     bottom: 30px;
@@ -4366,7 +4623,12 @@
     display: flex;
     gap: 10px;
     z-index: 4;
+    max-width: calc(100vw - 220px);  /* 给左右摇杆留出空间 */
+    overflow-x: auto;
+    padding: 4px;
+    scrollbar-width: none;
   }
+  .rl-actions::-webkit-scrollbar { display: none; }
   .rl-action-btn {
     width: 52px; height: 52px;
     border-radius: 13px;
@@ -6168,6 +6430,369 @@
   .launch-btn.confirm { background: #5b8fff; color: #fff; transition: opacity 0.15s; }
   .launch-btn.confirm.disabled { opacity: 0.4; pointer-events: none; }
   .launch-btn:active { transform: scale(0.98); }
+/* ============================================================
+ * 全局离线横幅（网络断开时出现在手机框顶部）
+ * ============================================================ */
+.net-offline-bar {
+  position: absolute;
+  top: calc(var(--safe-top, 44px));
+  left: 0; right: 0;
+  z-index: 480;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 14px;
+  background: rgba(255,77,77,0.92);
+  color: #fff;
+  font-size: 12.5px;
+  backdrop-filter: blur(6px);
+}
+.net-offline-bar.show { display: flex; }
+.net-offline-bar svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ============================================================
+ * 状态调试面板（悬浮 / 可拖动 / 半透明；非产品 UI）
+ * ============================================================ */
+.simpanel {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  width: 220px;
+  background: rgba(20, 22, 26, 0.86);
+  backdrop-filter: blur(16px);
+  border: 0.5px solid rgba(255,255,255,0.14);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  z-index: 9999;              /* 永远在最上层，含 OTA 锁定遮罩之上 */
+  color: #fff;
+  font-size: 12px;
+  user-select: none;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.simpanel:hover { opacity: 1; }
+.simpanel.dragging { opacity: 1; transition: none; }
+
+.simpanel-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border-bottom: 0.5px solid rgba(255,255,255,0.1);
+  cursor: grab;
+}
+.simpanel-head:active { cursor: grabbing; }
+.simpanel-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #4cd182;
+  flex-shrink: 0;
+}
+.simpanel-title {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: rgba(255,255,255,0.9);
+}
+.simpanel-min {
+  width: 20px; height: 20px;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.simpanel-min:hover { background: rgba(255,255,255,0.18); }
+
+.simpanel-body {
+  padding: 10px 12px 12px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.simpanel.collapsed .simpanel-body { display: none; }
+
+.sim-sec { margin-bottom: 11px; }
+.sim-label {
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 5px;
+  letter-spacing: 0.3px;
+}
+.sim-label b { color: #5b8fff; font-weight: 600; }
+
+/* 分段按钮组 */
+.sim-seg {
+  display: flex;
+  gap: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 7px;
+  padding: 2px;
+}
+.sim-seg button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  font-size: 11px;
+  padding: 5px 2px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.sim-seg button:hover { color: rgba(255,255,255,0.85); }
+.sim-seg button.active {
+  background: #5b8fff;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* 场景预设按钮 */
+.sim-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.sim-presets button {
+  border: 0.5px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.75);
+  font-size: 10.5px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.sim-presets button:hover {
+  background: rgba(91,143,255,0.25);
+  border-color: rgba(91,143,255,0.5);
+  color: #fff;
+}
+.sim-presets button.active {
+  background: rgba(91,143,255,0.9);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* 电量滑杆 */
+.sim-range {
+  width: 100%;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255,255,255,0.15);
+  border-radius: 100px;
+  outline: none;
+  cursor: pointer;
+}
+.sim-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: #5b8fff;
+  cursor: pointer;
+}
+.sim-range::-moz-range-thumb {
+  width: 13px; height: 13px;
+  border: none;
+  border-radius: 50%;
+  background: #5b8fff;
+  cursor: pointer;
+}
+
+.sim-reset {
+  width: 100%;
+  border: 0.5px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.6);
+  font-size: 11px;
+  padding: 6px;
+  border-radius: 7px;
+  cursor: pointer;
+  margin-top: 3px;
+}
+.sim-reset:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+/* 分组标题 */
+.sim-group {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: rgba(91,143,255,0.9);
+  text-transform: uppercase;
+  margin: 14px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 0.5px solid rgba(255,255,255,0.08);
+}
+.sim-group:first-child { margin-top: 0; }
+
+/* 异常类条件：非默认值时高亮成橙色，提示"该异常持续生效中" */
+.sim-seg button.active.err {
+  background: #ff8c42;
+  color: #fff;
+}
+.sim-sec.armed .sim-label { color: #ff8c42; }
+.sim-sec.armed .sim-label::after {
+  content: ' ● 生效中';
+  font-size: 9px;
+  color: #ff8c42;
+}
+
+/* 下拉选择（取值多的条件用下拉，省空间） */
+.sim-select {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 0.5px solid rgba(255,255,255,0.1);
+  border-radius: 7px;
+  color: rgba(255,255,255,0.85);
+  font-size: 11px;
+  padding: 6px 8px;
+  outline: none;
+  cursor: pointer;
+}
+.sim-select:focus { border-color: rgba(91,143,255,0.5); }
+.sim-select option { background: #1c1f24; color: #fff; }
+.sim-select.armed {
+  border-color: rgba(255,140,66,0.6);
+  color: #ff8c42;
+}
+
+/* 窄屏（真手机）：面板缩小并靠右下，避免挡住内容 */
+@media (max-width: 480px) {
+  .simpanel {
+    width: 172px;
+    top: auto;
+    bottom: 90px;
+    right: 8px;
+    font-size: 11px;
+    opacity: 0.5;
+  }
+  .simpanel-body { max-height: 44vh; }
+}
+/* ============================================================
+ * 长按语音 · 上滑取消
+ * 录音中显示波形；上滑越过阈值 → 波形换成删除图标、整体转红，
+ * 松手即取消发送。首页与智能体页共用同一套视觉语言。
+ * ============================================================ */
+.hv-panel {
+  position: fixed;
+  left: 50%;
+  bottom: 50%;
+  transform: translate(-50%, 50%) scale(0.94);
+  background: rgba(20, 22, 28, 0.95);
+  border: 0.5px solid rgba(91, 143, 255, 0.4);
+  border-radius: 20px;
+  padding: 22px 34px;
+  text-align: center;
+  z-index: 500;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease,
+              transform 0.22s cubic-bezier(.22,.61,.36,1),
+              border-color 0.2s ease,
+              background 0.2s ease;
+}
+.hv-panel.show {
+  opacity: 1;
+  transform: translate(-50%, 50%) scale(1);
+}
+/* 取消态：整体转红 + 轻微上移，呼应"往上滑"的手势方向 */
+.hv-panel.canceling {
+  border-color: rgba(255, 107, 107, 0.55);
+  background: rgba(30, 20, 22, 0.95);
+  transform: translate(-50%, calc(50% - 6px)) scale(1);
+}
+
+.hv-body {
+  height: 40px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+/* 波形（录音中） */
+.hv-wave {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.hv-wave span {
+  width: 3px;
+  background: #5b8fff;
+  border-radius: 2px;
+  animation: voice-pulse 1s ease-in-out infinite;
+}
+/* 删除图标（取消态） */
+.hv-cancel-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff6b6b;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.16s ease, transform 0.2s cubic-bezier(.34,1.56,.64,1);
+  pointer-events: none;
+}
+.hv-cancel-icon svg { width: 26px; height: 26px; }
+/* 切换：取消态时波形淡出、图标弹入 */
+.hv-panel.canceling .hv-wave {
+  opacity: 0;
+  transform: scale(0.8);
+}
+.hv-panel.canceling .hv-cancel-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hv-hint {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: color 0.2s ease;
+}
+.hv-hint .hv-up { color: rgba(255, 255, 255, 0.5); }
+.hv-hint b { color: #ff6b6b; font-weight: 600; }
+.hv-panel.canceling .hv-hint { color: rgba(255, 255, 255, 0.9); }
+
+/* 倒计时（最后 10 秒）：数字用琥珀色，提示"时间不多了"但不至于像报错 */
+.hv-count {
+  color: #ffb020;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;   /* 等宽数字，跳秒时不抖动 */
+}
+.hv-panel.counting .hv-wave span,
+.voice-recording.counting .voice-rec-wave span {
+  background: #ffb020;
+}
+/* 取消态优先级高于倒计时：滑进取消区时波形仍转红 */
+.hv-panel.canceling .hv-wave span,
+.voice-recording.canceling .voice-rec-wave span {
+  background: #ff6b6b;
+}
+
+/* 触发按钮在取消态下也转红，让手指下方也有反馈 */
+.dialog-mic-main.canceling,
+.push-to-talk.canceling {
+  background: rgba(255, 107, 107, 0.18) !important;
+  border-color: rgba(255, 107, 107, 0.5) !important;
+  color: #ff8c8c !important;
+}
+
+/* 智能体页录音浮层的取消态（复用同一视觉） */
+.voice-rec-hint b { color: #ff6b6b; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -6526,8 +7151,18 @@
         <div class="remote-preview-handle"></div>
       </div>
 
-      <!-- 快捷动作（数据驱动，可配置；最后一格为 + 添加）-->
-      <div class="remote-actions" id="remoteActions"></div>
+      <!-- 快捷动作（数据驱动，可配置；分页展示，右侧竖向滑杆翻页）-->
+      <div class="remote-actions-wrap" id="remoteActionsWrap">
+        <div class="remote-actions-viewport" id="remoteActionsViewport">
+          <div class="remote-actions" id="remoteActions"></div>
+        </div>
+        <!-- 右侧竖向翻页滑杆（页数>1 时显示）-->
+        <div class="remote-actions-slider" id="remoteActionsSlider">
+          <div class="ras-track" id="rasTrack">
+            <div class="ras-thumb" id="rasThumb"></div>
+          </div>
+        </div>
+      </div>
 
 
       <!-- 模式胶囊 -->
@@ -6556,10 +7191,10 @@
   <div class="act-picker" id="actPicker">
     <div class="act-picker-handle"></div>
     <div class="act-picker-head">
-      <div class="act-picker-title">选择快捷动作</div>
-      <div class="act-picker-count" id="actPickerCount">已选 0 / 7</div>
+      <div class="act-picker-title">动作库</div>
+      <div class="act-picker-count" id="actPickerCount">已选 0 个</div>
     </div>
-    <div class="act-picker-hint">最多选 7 个，会显示在遥控页快捷区</div>
+    <div class="act-picker-hint">勾选动作即可加入遥控页快捷区，数量不限</div>
     <div class="act-picker-grid" id="actPickerGrid"></div>
     <button class="act-picker-done" id="actPickerDone">完成</button>
   </div>
@@ -8097,10 +8732,28 @@
   <div class="sheet-header"><div class="sheet-title">设备 OTA</div></div>
   <div class="sheet-body">
     <div class="rd-data-card">
-      <div class="rd-data-row"><div class="rd-data-key">当前版本</div><div class="rd-data-val">v3.4.1</div></div>
-      <div class="rd-data-row"><div class="rd-data-key">最新版本</div><div class="rd-data-val ok">v3.4.1</div></div>
-      <div class="rd-data-row"><div class="rd-data-key">状态</div><div class="rd-data-val">已是最新版本</div></div>
+      <div class="rd-data-row"><div class="rd-data-key">当前版本</div><div class="rd-data-val" id="otaCurVer">v3.4.1</div></div>
+      <div class="rd-data-row"><div class="rd-data-key">最新版本</div><div class="rd-data-val ok" id="otaLatestVer">v3.4.1</div></div>
+      <div class="rd-data-row"><div class="rd-data-key">状态</div><div class="rd-data-val" id="otaStatusText">已是最新版本</div></div>
     </div>
+
+    <!-- 新版本详情（有新版时显示）-->
+    <div class="update-detail-card" id="otaUpdateDetail" style="display:none;">
+      <div class="update-detail-log" id="otaUdvLog">
+        本次固件更新：提升运动控制精度、优化电池管理、修复偶发通信中断问题。
+      </div>
+    </div>
+
+    <!-- 进度条 -->
+    <div class="update-progress-wrap" id="otaUpdateProgress" style="display:none;">
+      <div class="update-progress-head">
+        <span id="otaProgLabel">正在下载…</span>
+        <span id="otaProgPct">0%</span>
+      </div>
+      <div class="update-progress-track"><div class="update-progress-fill" id="otaProgFill"></div></div>
+      <div class="update-progress-note" id="otaProgNote" style="display:none;">升级中，请勿操作机器人并保持网络稳定</div>
+    </div>
+
     <button class="rd-sheet-btn ghost" id="rdCheckOtaBtn">检查更新</button>
   </div>
 </div>
@@ -8237,8 +8890,108 @@
   </div>
 </div>
 
+<!-- 退出登录二次确认 -->
+<div class="confirm-modal" id="logoutModal" style="z-index:400;">
+  <div class="confirm-box">
+    <div class="confirm-title">退出登录</div>
+    <div class="confirm-desc">
+      退出后需重新登录才能控制机器人。确认退出吗？
+    </div>
+    <div class="confirm-buttons">
+      <button class="confirm-btn cancel" id="logoutCancel">取消</button>
+      <button class="confirm-btn danger" id="logoutConfirm">退出登录</button>
+    </div>
+  </div>
+</div>
+
+<!-- 设备 OTA 安装安全确认 -->
+<div class="confirm-modal" id="otaInstallModal" style="z-index:400;">
+  <div class="confirm-box">
+    <div class="confirm-title">开始安装固件</div>
+    <div class="confirm-desc">
+      请确保机器人<b style="color:#ffb84d;">电量高于 50%</b>、<b style="color:#ffb84d;">网络环境稳定</b>。<br/>升级过程中请勿操作机器人，期间 App 将暂停其他功能，约需数分钟。
+    </div>
+    <div class="confirm-buttons">
+      <button class="confirm-btn cancel" id="otaInstallCancel">稍后</button>
+      <button class="confirm-btn ok" id="otaInstallConfirm">立即安装</button>
+    </div>
+  </div>
+</div>
+
+<!-- OTA 升级期间：全局锁定遮罩（禁止操作其他功能） -->
+<div class="ota-lock" id="otaLock">
+  <div class="ota-lock-box">
+    <div class="ota-lock-spinner"></div>
+    <div class="ota-lock-title">固件升级中</div>
+    <div class="ota-lock-desc">升级过程中请勿操作机器人，<br/>请保持网络稳定，请勿关闭 App。</div>
+    <div class="ota-lock-progress">
+      <div class="ota-lock-track"><div class="ota-lock-fill" id="otaLockFill"></div></div>
+      <div class="ota-lock-pct" id="otaLockPct">0%</div>
+    </div>
+  </div>
+</div>
+
+<!-- 发现新版本提示（自动更新开启时） -->
+<div class="confirm-modal" id="newVersionModal" style="z-index:400;">
+  <div class="confirm-box">
+    <div class="confirm-title">发现新版本</div>
+    <div class="confirm-desc" id="newVersionDesc">
+      检测到新版本，是否现在更新？
+    </div>
+    <div class="confirm-buttons">
+      <button class="confirm-btn cancel" id="newVersionLater">稍后</button>
+      <button class="confirm-btn ok" id="newVersionNow">立即更新</button>
+    </div>
+  </div>
+</div>
+
 <!-- 通用 sheet 蒙层 -->
 <div class="sheet-mask" id="sheetMask"></div>
+
+<!-- ============================================ -->
+<!-- ===== 全局离线横幅（网络断开时出现） ===== -->
+<!-- ============================================ -->
+<div class="net-offline-bar" id="netOfflineBar">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="1" y1="1" x2="23" y2="23"/>
+    <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+    <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+    <path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
+    <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+    <line x1="12" y1="20" x2="12.01" y2="20"/>
+  </svg>
+  <span>网络不可用，请检查网络连接</span>
+</div>
+
+<!-- 强制更新（不可关闭） -->
+<div class="confirm-modal" id="forceUpdateModal" style="z-index:998;">
+  <div class="confirm-box">
+    <div class="confirm-title">需要更新</div>
+    <div class="confirm-desc">
+      当前版本已停止支持，请更新到 <b style="color:#5b8fff;" id="forceUpdateVer">v1.1.0</b> 后继续使用。
+    </div>
+    <div class="confirm-buttons">
+      <button class="confirm-btn ok" id="forceUpdateBtn" style="flex:1;">立即更新</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- ===== 状态调试面板（悬浮、可拖动、非产品 UI） ===== -->
+<!-- ============================================ -->
+<div class="simpanel" id="simPanel">
+  <div class="simpanel-head" id="simPanelHead">
+    <span class="simpanel-dot"></span>
+    <span class="simpanel-title">状态调试</span>
+    <button class="simpanel-min" id="simPanelMin" title="折叠/展开">–</button>
+  </div>
+  <div class="simpanel-body" id="simPanelBody">
+    <!-- 内容由 Sim 模块按 SCHEMA 自动渲染 -->
+    <div id="simFields"></div>
+    <button class="sim-reset" id="simReset">恢复默认</button>
+  </div>
+</div>
 
 <!-- ============================================ -->
 <!-- ===== Sheet: 帐号与安全 ===== -->
@@ -8354,6 +9107,7 @@
     <div class="sheet-title">软件升级</div>
   </div>
   <div class="sheet-body">
+    <!-- 版本卡片（状态驱动，由 JS 渲染徽标/进度）-->
     <div class="version-card">
       <div class="version-card-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -8364,14 +9118,36 @@
       </div>
       <div class="version-card-main">
         <div class="version-card-title">App 版本</div>
-        <div class="version-card-num">v1.0.0-qa-a1c0f297 (Build 10000)</div>
+        <div class="version-card-num" id="appVerNum">v1.0.0-qa-a1c0f297 (Build 10000)</div>
       </div>
-      <div class="version-badge">
+      <div class="version-badge" id="appVerBadge">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"/>
         </svg>
         最新
       </div>
+    </div>
+
+    <!-- 新版本详情卡片（有新版时显示）-->
+    <div class="update-detail-card" id="appUpdateDetail" style="display:none;">
+      <div class="update-detail-ver">
+        <span class="udv-old" id="appUdvOld">v1.0.0</span>
+        <svg class="udv-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        <span class="udv-new" id="appUdvNew">v1.1.0</span>
+        <span class="udv-size" id="appUdvSize">· 48.6 MB</span>
+      </div>
+      <div class="update-detail-log" id="appUdvLog">
+        本次更新：新增快捷动作分页、优化遥控连接稳定性、修复若干已知问题。
+      </div>
+    </div>
+
+    <!-- 进度条（下载/安装中显示）-->
+    <div class="update-progress-wrap" id="appUpdateProgress" style="display:none;">
+      <div class="update-progress-head">
+        <span id="appProgLabel">正在下载…</span>
+        <span id="appProgPct">0%</span>
+      </div>
+      <div class="update-progress-track"><div class="update-progress-fill" id="appProgFill"></div></div>
     </div>
 
     <div class="auto-update-row">
@@ -8385,9 +9161,10 @@
         <div class="auto-update-title">自动更新</div>
         <div class="auto-update-desc">Wi-Fi 下自动下载新版本</div>
       </div>
-      <div class="switch on" data-onoff></div>
+      <div class="switch on" id="appAutoUpdate" data-onoff></div>
     </div>
 
+    <!-- 主操作按钮（文案随状态变）-->
     <button class="check-update-btn" id="checkUpdateBtn">检查更新</button>
   </div>
 </div>
@@ -8627,7 +9404,7 @@
         </button>
         <div class="scan-step-title">AP 直连</div>
       </div>
-      <div class="scan-step-desc">连接机器人热点后即可完成绑定</div>
+      <div class="scan-step-desc">把手机连上机器人自己的热点，即可完成绑定</div>
 
       <div class="ap-info-card">
         <div class="ap-info-row">
@@ -8649,11 +9426,15 @@
           </div>
         </div>
       </div>
-      <div class="ap-hint" id="apHint">请前往系统设置连接上述热点，连接成功后返回点击「连接」。</div>
+
+      <div class="ap-hint" id="apHint">
+        打开手机「设置 › 无线局域网」，找到并连接上面的热点，然后回到 App 点「我已连接」。
+        <div class="ap-note">机器人热点不提供上网，手机提示「无互联网连接」属正常现象，请勿断开。</div>
+      </div>
 
       <div class="ap-btn-row">
         <button class="scan-connect-btn ghost" id="apGotoSettings">去设置</button>
-        <button class="scan-connect-btn" id="apConnectBtn">连接</button>
+        <button class="scan-connect-btn" id="apConnectBtn">我已连接</button>
       </div>
     </div>
 
@@ -8704,9 +9485,9 @@
 </div>
 
 <!-- Toast -->
-<div class="galbot-toast" id="galbotToast">
-  <div class="galbot-toast-logo"><svg class="brand-svg" viewBox="0 0 463 48" preserveAspectRatio="xMinYMid meet" role="img" aria-label="GALBOT"><use href="#galbotLogo"/></svg></div>
-  <span>当前已是最新版本</span>
+<div class="galbot-toast t-info" id="galbotToast">
+  <span class="galbot-toast-icon" id="galbotToastIcon"></span>
+  <span id="galbotToastText">当前已是最新版本</span>
 </div>
 
 <!-- ============================================ -->
@@ -8864,8 +9645,55 @@
       { id: 'stand',    name: '坐→站', icon: '<line x1="12" y1="20" x2="12" y2="8"/><polyline points="6 12 12 6 18 12"/><line x1="5" y1="4" x2="19" y2="4"/>' },
       { id: 'step',     name: '踏步', icon: '<path d="M9 4c0 5-3 7-3 11"/><path d="M15 4c0 5 3 7 3 11"/><path d="M5 20l3-2"/><path d="M19 20l-3-2"/>' },
       { id: 'turn',     name: '转圈', icon: '<path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 8 16 8"/>' },
+      { id: 'salute',   name: '敬礼', icon: '<path d="M4 20h16"/><path d="M8 20v-6l4-8 4 8v6"/><path d="M6 14h12"/>' },
+      { id: 'thumbup',  name: '点赞', icon: '<path d="M7 11v8H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1z"/><path d="M7 11l3-7a2 2 0 0 1 3.8.8V9h5a2 2 0 0 1 2 2.3l-1 6a2 2 0 0 1-2 1.7H7"/>' },
+      { id: 'fist',     name: '握拳', icon: '<path d="M6 10V7a2 2 0 0 1 4 0v3"/><path d="M10 10V6a2 2 0 0 1 4 0v4"/><path d="M14 10V7a2 2 0 0 1 4 0v5a6 6 0 0 1-12 0v-2"/>' },
+      { id: 'point',    name: '指向', icon: '<path d="M9 11V4a1.5 1.5 0 0 1 3 0v6"/><path d="M12 10V6a1.5 1.5 0 0 1 3 0v5"/><path d="M15 11a1.5 1.5 0 0 1 3 0v3a6 6 0 0 1-6 6H9l-4-4a1.5 1.5 0 0 1 2.2-2L9 15"/>' },
+      { id: 'ok',       name: 'OK', icon: '<circle cx="12" cy="12" r="9"/><polyline points="8 12 11 15 16 9"/>' },
+      { id: 'victory',  name: '胜利', icon: '<path d="M9 12V5a1.5 1.5 0 0 1 3 0v6"/><path d="M13 11V6a1.5 1.5 0 0 1 3 0v6a6 6 0 0 1-6 6H8l-3-3a1.5 1.5 0 0 1 2-2l2 1"/>' },
+      { id: 'hug',      name: '拥抱', icon: '<circle cx="12" cy="6" r="3"/><path d="M4 20c0-4 3-7 8-7s8 3 8 7"/><path d="M8 13l-3 4"/><path d="M16 13l3 4"/>' },
+      { id: 'dance',    name: '跳舞', icon: '<circle cx="13" cy="4" r="2"/><path d="M13 6l-2 6 4 3"/><path d="M11 12l-4 2"/><path d="M15 15l2 5"/><path d="M11 12l-1 8"/>' },
+      { id: 'jump',     name: '跳跃', icon: '<circle cx="12" cy="4" r="2"/><path d="M12 6v6"/><path d="M8 8l4 2 4-2"/><path d="M9 20l3-5 3 5"/>' },
+      { id: 'squat',    name: '深蹲', icon: '<circle cx="12" cy="4" r="2"/><path d="M12 6v4l-3 4 3 6"/><path d="M12 14l3 6"/><path d="M8 9h8"/>' },
+      { id: 'run',      name: '跑步', icon: '<circle cx="13" cy="4" r="2"/><path d="M13 6l-2 5 3 3-1 6"/><path d="M11 11l-4 1"/><path d="M14 14l4 1"/>' },
+      { id: 'walk',     name: '行走', icon: '<circle cx="12" cy="4" r="2"/><path d="M12 6v6"/><path d="M12 12l-3 8"/><path d="M12 12l3 8"/><path d="M9 9l6 0"/>' },
+      { id: 'balance',  name: '平衡', icon: '<circle cx="12" cy="4" r="2"/><path d="M12 6v7"/><path d="M5 9h14"/><path d="M12 13l-3 7"/><path d="M12 13l3 7"/>' },
+      { id: 'stretch',  name: '伸展', icon: '<circle cx="12" cy="4" r="2"/><path d="M12 6v8"/><path d="M3 8l9-2 9 2"/><path d="M12 14l-4 6"/><path d="M12 14l4 6"/>' },
+      { id: 'yoga',     name: '瑜伽', icon: '<circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M6 20c0-3 2-5 6-5s6 2 6 5"/><path d="M8 15l-4 3"/><path d="M16 15l4 3"/>' },
+      { id: 'kick',     name: '踢腿', icon: '<circle cx="10" cy="4" r="2"/><path d="M10 6v6"/><path d="M10 12l8-2"/><path d="M10 12l-2 8"/>' },
+      { id: 'punch',    name: '出拳', icon: '<circle cx="10" cy="5" r="2"/><path d="M10 7v5"/><path d="M10 9l9 1"/><path d="M10 12l-3 8"/><path d="M10 12l3 5"/>' },
+      { id: 'spin',     name: '旋转', icon: '<path d="M12 3a9 9 0 1 0 9 9"/><polyline points="12 3 16 3 16 7"/><circle cx="12" cy="12" r="2"/>' },
+      { id: 'pose',     name: '摆拍', icon: '<circle cx="12" cy="4" r="2"/><path d="M12 6v6"/><path d="M12 8l-5 1"/><path d="M12 8l5-3"/><path d="M12 12l-3 8"/><path d="M12 12l3 8"/>' },
+      { id: 'shrug',    name: '耸肩', icon: '<circle cx="12" cy="5" r="2"/><path d="M7 11a5 5 0 0 1 10 0"/><path d="M7 11v5"/><path d="M17 11v5"/>' },
+      { id: 'facepalm', name: '扶额', icon: '<circle cx="12" cy="6" r="3"/><path d="M9 6l3-3"/><path d="M6 20c0-4 3-7 6-7s6 3 6 7"/>' },
+      { id: 'think',    name: '思考', icon: '<circle cx="12" cy="7" r="3"/><path d="M12 10v3"/><circle cx="12" cy="16" r="1"/><path d="M15 8l2-1"/>' },
+      { id: 'sleep',    name: '睡觉', icon: '<path d="M8 6h5l-5 6h5"/><path d="M15 4h3l-3 4h3"/><circle cx="6" cy="18" r="2"/>' },
+      { id: 'stretch2', name: '扭腰', icon: '<circle cx="12" cy="4" r="2"/><path d="M12 6c-2 2-2 4 0 6s2 4 0 6"/><path d="M8 9h4"/><path d="M12 15h4"/>' },
+      { id: 'highfive', name: '击掌', icon: '<path d="M6 12l4-4"/><path d="M18 12l-4-4"/><path d="M8 6l4 4 4-4"/><path d="M8 6a1.5 1.5 0 0 0-2 2l4 4"/><path d="M16 6a1.5 1.5 0 0 1 2 2l-4 4"/>' },
+      { id: 'raise',    name: '举手', icon: '<path d="M12 20v-8"/><path d="M12 12l-4-6a1.5 1.5 0 0 1 2.5-1.5L12 8"/><path d="M12 12l4-6a1.5 1.5 0 0 0-2.5-1.5L12 8"/><circle cx="12" cy="20" r="1"/>' },
+      { id: 'crouch',   name: '下蹲', icon: '<circle cx="12" cy="5" r="2"/><path d="M12 7l-3 5 3 3 3-3-3-5"/><path d="M9 15l-2 5"/><path d="M15 15l2 5"/>' },
+      { id: 'lie',      name: '躺下', icon: '<circle cx="5" cy="12" r="2"/><path d="M7 12h12"/><path d="M13 12v-4"/><path d="M13 12v4"/>' },
+      { id: 'rollover', name: '翻滚', icon: '<circle cx="12" cy="12" r="7"/><path d="M12 5v14"/><path d="M9 8l3-3 3 3"/>' },
+      { id: 'wink',     name: '眨眼', icon: '<circle cx="12" cy="12" r="9"/><path d="M8 10l1 1 1-1"/><circle cx="15" cy="10" r="0.5" fill="currentColor"/><path d="M8 15c1 1.5 7 1.5 8 0"/>' },
+      { id: 'smile',    name: '微笑', icon: '<circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="0.5" fill="currentColor"/><circle cx="15" cy="10" r="0.5" fill="currentColor"/><path d="M8 14c1 1.5 7 1.5 8 0"/>' },
+      { id: 'laugh',    name: '大笑', icon: '<circle cx="12" cy="12" r="9"/><path d="M8 9l2 1"/><path d="M16 9l-2 1"/><path d="M7 13c1 3 9 3 10 0z"/>' },
+      { id: 'shy',      name: '害羞', icon: '<circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="0.5" fill="currentColor"/><circle cx="15" cy="10" r="0.5" fill="currentColor"/><circle cx="7" cy="14" r="1.5"/><circle cx="17" cy="14" r="1.5"/><path d="M10 15h4"/>' },
+      { id: 'cry',      name: '哭泣', icon: '<circle cx="12" cy="12" r="9"/><path d="M8 10l2-1"/><path d="M16 10l-2-1"/><path d="M9 13v3"/><path d="M15 13v3"/><path d="M9 16c1-1 5-1 6 0"/>' },
+      { id: 'angry',    name: '生气', icon: '<circle cx="12" cy="12" r="9"/><path d="M8 9l2 1"/><path d="M16 9l-2 1"/><path d="M8 16c1-1.5 7-1.5 8 0"/>' },
+      { id: 'surprise', name: '惊讶', icon: '<circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="0.8" fill="currentColor"/><circle cx="15" cy="10" r="0.8" fill="currentColor"/><circle cx="12" cy="15" r="2"/>' },
+      { id: 'love',     name: '爱心眼', icon: '<circle cx="12" cy="12" r="9"/><path d="M9 9.5s-1.2-.8-1.6.4c-.3.9 1.6 1.6 1.6 1.6s1.9-.7 1.6-1.6c-.4-1.2-1.6-.4-1.6-.4z"/><path d="M15 9.5s-1.2-.8-1.6.4c-.3.9 1.6 1.6 1.6 1.6s1.9-.7 1.6-1.6c-.4-1.2-1.6-.4-1.6-.4z"/><path d="M9 15c1 1 5 1 6 0"/>' },
+      { id: 'greet',    name: '问好', icon: '<path d="M18 11V6.5a1.5 1.5 0 0 0-3 0V11"/><path d="M15 11V4.5a1.5 1.5 0 0 0-3 0V11"/><path d="M12 11V5.5a1.5 1.5 0 0 0-3 0V13"/><path d="M9 13V8.5a1.5 1.5 0 0 0-3 0V18a6 6 0 0 0 12 0V11a1.5 1.5 0 0 0-3 0v3"/>' },
+      { id: 'guide',    name: '引导', icon: '<path d="M4 12h12"/><polyline points="12 8 16 12 12 16"/><circle cx="20" cy="12" r="1.5"/>' },
+      { id: 'carry',    name: '搬运', icon: '<circle cx="12" cy="4" r="2"/><path d="M12 6v5"/><rect x="8" y="11" width="8" height="5" rx="1"/><path d="M9 16l-2 4"/><path d="M15 16l2 4"/>' },
+      { id: 'push',     name: '推', icon: '<circle cx="8" cy="5" r="2"/><path d="M8 7v5"/><path d="M8 9l6 0"/><path d="M8 12l-2 8"/><path d="M8 12l3 5"/><line x1="16" y1="6" x2="16" y2="18"/>' },
+      { id: 'pull',     name: '拉', icon: '<circle cx="14" cy="5" r="2"/><path d="M14 7v5"/><path d="M14 9l-6 0"/><path d="M14 12l2 8"/><path d="M14 12l-3 5"/><line x1="6" y1="6" x2="6" y2="18"/>' },
+      { id: 'grab',     name: '抓取', icon: '<path d="M6 9V6a1.5 1.5 0 0 1 3 0"/><path d="M9 9V5a1.5 1.5 0 0 1 3 0v4"/><path d="M12 9V6a1.5 1.5 0 0 1 3 0v6a5 5 0 0 1-10 0V9"/><path d="M5 12l-2-2"/>' },
+      { id: 'wave2',    name: '摆手', icon: '<path d="M12 20a7 7 0 0 0 7-7V8a1.5 1.5 0 0 0-3 0v3"/><path d="M16 11V6.5a1.5 1.5 0 0 0-3 0V11"/><path d="M13 11V6a1.5 1.5 0 0 0-3 0v3"/><path d="M10 11V9a1.5 1.5 0 0 0-3 0v4a7 7 0 0 0 5 6.7"/>' },
+      { id: 'circle',   name: '绕圈', icon: '<circle cx="12" cy="12" r="8"/><path d="M12 4v4"/><path d="M12 16v4"/><path d="M4 12h4"/><path d="M16 12h4"/>' },
+      { id: 'sidestep', name: '侧移', icon: '<circle cx="12" cy="4" r="2"/><path d="M12 6v7"/><path d="M12 13l-3 7"/><path d="M12 13l3 7"/><path d="M4 9h5"/><path d="M15 9h5"/>' },
+      { id: 'reset',    name: '复位', icon: '<path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><circle cx="12" cy="12" r="1.5"/>' },
     ],
-    // 默认选中的快捷动作（最多 7 个）
+    // 默认加入快捷区的动作（无数量上限）
     quickActionSelected: ['wave', 'heart', 'handshake', 'cheer'],
     // —— 机器人详情页：后台服务清单 ——
     services: [
@@ -8967,7 +9795,7 @@
       }
     }
 
-    return { get, isConnected, find, subscribe, connect, disconnect, addOrConnect };
+    return { get, isConnected, find, subscribe, connect, disconnect, addOrConnect, notify };
   })();
 
   /* ============================================================
@@ -8994,6 +9822,23 @@
      * @param {string} opts.variant 载体: 'remote'(默认) | 'center' | 'perform'
      * @param {number} opts.duration 显示时长(ms)，默认 1600
      */
+    // Toast 类型图标（线性图标，跟随 --toast-accent 变色）
+    const TOAST_ICONS = {
+      error:   '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/></svg>',
+      success: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8.5 12.5 11 15 15.5 9.5"/></svg>',
+      warning: '<svg viewBox="0 0 24 24"><path d="M10.3 4.3 2.8 17a1.7 1.7 0 0 0 1.5 2.5h15.4a1.7 1.7 0 0 0 1.5-2.5L13.7 4.3a1.7 1.7 0 0 0-3 0z"/><line x1="12" y1="9.5" x2="12" y2="13.5"/><line x1="12" y1="16.8" x2="12.01" y2="16.8"/></svg>',
+      info:    '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="7.8" x2="12.01" y2="7.8"/></svg>',
+    };
+
+    // 没显式给 type 时，按文案语义猜一个，省得改上百个调用点
+    function guessType(text) {
+      const t = String(text || '');
+      if (/失败|错误|不可用|超时|无法|不存在|未注册|未找到|已被|锁定|不足|请输入|请先|请检查|需要|不支持|异常|停止|过期|无效/.test(t)) return 'error';
+      if (/成功|已完成|已保存|已复制|已连接|已更新|已修改|已重置|已解除|已删除|已切换|已恢复|完成$/.test(t)) return 'success';
+      if (/请勿|注意|即将|正在|稍后|开发中|将短暂/.test(t)) return 'warning';
+      return 'info';
+    }
+
     function toast(text, opts = {}) {
       const variant = opts.variant || 'remote';
       const duration = opts.duration || 1600;
@@ -9001,10 +9846,29 @@
       if (!el) return;
 
       const DEFAULT = '未连接机器人';
-      // remote / center 载体内部是 <span> 文案；perform 载体直接是文本节点
+      const msg = text || DEFAULT;
+
+      // center 变体（.galbot-toast）：新版带类型图标与配色
+      if (variant === 'center') {
+        const type = opts.type || guessType(msg);
+        el.className = 'galbot-toast t-' + type;   // 重置类型
+        const iconEl = document.getElementById('galbotToastIcon');
+        const textEl = document.getElementById('galbotToastText');
+        if (iconEl) iconEl.innerHTML = TOAST_ICONS[type] || TOAST_ICONS.info;
+        if (textEl) textEl.textContent = msg;
+        // 重新触发进场动画（连续弹同类提示时也有反馈）
+        el.classList.remove('show');
+        void el.offsetWidth;
+        el.classList.add('show');
+        clearTimeout(toastTimers[variant]);
+        toastTimers[variant] = setTimeout(() => el.classList.remove('show'), duration);
+        return;
+      }
+
+      // remote / perform 变体：保持原行为
       const span = el.querySelector('span');
       if (span) {
-        span.textContent = text || DEFAULT;
+        span.textContent = msg;
       } else {
         el.textContent = text || '';
       }
@@ -9102,6 +9966,10 @@
         const il = i.querySelector('span')?.textContent.trim();
         i.classList.toggle('active', il === label);
       });
+      // 切到遥控页后，快捷区才可见，通知其重算分页尺寸
+      if (label === '遥控') {
+        requestAnimationFrame(() => document.dispatchEvent(new CustomEvent('remoteTabShown')));
+      }
     }
 
     function init() {
@@ -9299,57 +10167,141 @@
       });
     }
 
-    // ----- 麦克风：点按进对话页 / 长按录音后发送并进对话页 -----
+    // ----- 麦克风：点按进对话页 / 长按录音（支持上滑取消）后发送并进对话页 -----
     let homeRecording = false;
     let homePressTimer = null;
     let homeDidRecord = false; // 标记本次按下是否进入了录音态（用于区分"点按"和"长按"）
+    let homeCancel = false;    // 是否已滑入取消区
+    let homeStartY = 0;
+    const CANCEL_DY = 60;      // 上滑超过 60px 即进入取消态
 
     const homeVoiceHint = document.createElement('div');
     homeVoiceHint.id = 'homeVoiceHint';
-    homeVoiceHint.style.cssText = `
-      position: fixed; bottom: 50%; left: 50%; transform: translate(-50%, 50%);
-      background: rgba(20,22,28,0.95); border: 0.5px solid rgba(91,143,255,0.4);
-      border-radius: 20px; padding: 24px 36px; text-align: center; z-index: 500;
-      display: none; backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-    `;
+    homeVoiceHint.className = 'hv-panel';
     homeVoiceHint.innerHTML = `
-      <div style="display:flex;gap:3px;align-items:center;justify-content:center;height:40px;margin-bottom:12px;">
-        <span style="width:3px;background:#5b8fff;border-radius:2px;animation:voice-pulse 1s ease-in-out infinite;animation-delay:0s"></span>
-        <span style="width:3px;background:#5b8fff;border-radius:2px;animation:voice-pulse 1s ease-in-out infinite;animation-delay:0.1s"></span>
-        <span style="width:3px;background:#5b8fff;border-radius:2px;animation:voice-pulse 1s ease-in-out infinite;animation-delay:0.2s"></span>
-        <span style="width:3px;background:#5b8fff;border-radius:2px;animation:voice-pulse 1s ease-in-out infinite;animation-delay:0.3s"></span>
-        <span style="width:3px;background:#5b8fff;border-radius:2px;animation:voice-pulse 1s ease-in-out infinite;animation-delay:0.2s"></span>
-        <span style="width:3px;background:#5b8fff;border-radius:2px;animation:voice-pulse 1s ease-in-out infinite;animation-delay:0.1s"></span>
-        <span style="width:3px;background:#5b8fff;border-radius:2px;animation:voice-pulse 1s ease-in-out infinite;animation-delay:0s"></span>
+      <div class="hv-body">
+        <!-- 录音中：波形 -->
+        <div class="hv-wave" id="hvWave">
+          <span style="animation-delay:0s"></span>
+          <span style="animation-delay:0.1s"></span>
+          <span style="animation-delay:0.2s"></span>
+          <span style="animation-delay:0.3s"></span>
+          <span style="animation-delay:0.2s"></span>
+          <span style="animation-delay:0.1s"></span>
+          <span style="animation-delay:0s"></span>
+        </div>
+        <!-- 取消态：删除图标 -->
+        <div class="hv-cancel-icon" id="hvCancelIcon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+        </div>
       </div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.85);">松开发送 · 上滑取消</div>
+      <div class="hv-hint" id="hvHint">松开发送 · <span class="hv-up">上滑取消</span></div>
     `;
     document.body.appendChild(homeVoiceHint);
+
+    const hvHint = homeVoiceHint.querySelector('#hvHint');
+
+    // 按上滑距离更新取消态
+    function updateHomeCancel(dy) {
+      const cancel = dy > CANCEL_DY;
+      if (cancel === homeCancel) return;   // 状态没变就不重绘
+      homeCancel = cancel;
+      homeVoiceHint.classList.toggle('canceling', cancel);
+      homeSendBtn.classList.toggle('canceling', cancel);
+      if (cancel) {
+        hvHint.innerHTML = '松开手指 <b>取消发送</b>';
+      } else {
+        // 滑回来：若已进入倒计时区间，恢复倒计时文案，否则恢复常规文案
+        hvHint.innerHTML = '松开发送 · <span class="hv-up">上滑取消</span>';
+        homeTick();
+      }
+    }
+
+    // 录音时长上限：30s；最后 10s 开始倒计时提醒
+    const MAX_REC_MS = 30000;
+    const COUNTDOWN_FROM = 10;   // 剩余 ≤10s 时显示倒计时
+    let homeRecTimer = null;     // 到点自动发送的定时器
+    let homeTickTimer = null;    // 每秒刷新倒计时
+    let homeRecStart = 0;
+
+    // 清掉录音相关的所有定时器
+    function clearHomeRecTimers() {
+      if (homeRecTimer) { clearTimeout(homeRecTimer); homeRecTimer = null; }
+      if (homeTickTimer) { clearInterval(homeTickTimer); homeTickTimer = null; }
+    }
+
+    // 每秒刷新：剩余 ≤10s 时把倒计时显示出来
+    function homeTick() {
+      if (!homeRecording || homeCancel) return;   // 取消态优先显示"取消发送"
+      const left = Math.ceil((MAX_REC_MS - (Date.now() - homeRecStart)) / 1000);
+      if (left <= COUNTDOWN_FROM && left > 0) {
+        homeVoiceHint.classList.add('counting');
+        hvHint.innerHTML = '还可以说 <b class="hv-count">' + left + '</b> 秒 · <span class="hv-up">上滑取消</span>';
+      }
+    }
 
     function startHomeRecord() {
       homeRecording = true;
       homeDidRecord = true;
-      homeVoiceHint.style.display = 'block';
+      homeCancel = false;
+      homeRecStart = Date.now();
+      homeVoiceHint.classList.remove('canceling', 'counting');
+      homeSendBtn.classList.remove('canceling');
+      hvHint.innerHTML = '松开发送 · <span class="hv-up">上滑取消</span>';
+      homeVoiceHint.classList.add('show');
       homeSendBtn.classList.add('recording');
+
+      clearHomeRecTimers();
+      homeTickTimer = setInterval(homeTick, 250);
+      // 到 30s：自动发送（不是丢弃——用户说满 30s 是有意的）
+      homeRecTimer = setTimeout(() => {
+        if (!homeRecording) return;
+        homeCancel = false;                 // 到点强制发送，忽略当前是否在取消区
+        endHomeRecord(true);
+      }, MAX_REC_MS);
     }
-    function endHomeRecord() {
+
+    function endHomeRecord(auto) {
       if (!homeRecording) return;
       homeRecording = false;
-      homeVoiceHint.style.display = 'none';
-      homeSendBtn.classList.remove('recording');
-      // 松手后：进对话页并补一条语音消息
+      clearHomeRecTimers();
+      homeVoiceHint.classList.remove('show', 'canceling', 'counting');
+      homeSendBtn.classList.remove('recording', 'canceling');
+
+      if (homeCancel) {
+        // 上滑取消：不发送
+        homeCancel = false;
+        UI.toast('已取消发送', { variant: 'center', type: 'info', duration: 1200 });
+        return;
+      }
+      // 松手发送 / 到 30s 自动发送
+      if (auto) UI.toast('已达 30 秒上限，已自动发送', { variant: 'center', type: 'info', duration: 1800 });
       openAgentPage();
       setTimeout(() => { Agent.addVoiceMessage(); }, 600);
     }
 
-    homeSendBtn.addEventListener('mousedown', () => {
+    homeSendBtn.addEventListener('mousedown', (e) => {
       homeDidRecord = false;
+      homeStartY = e.clientY;
       homePressTimer = setTimeout(startHomeRecord, 180);
     });
-    homeSendBtn.addEventListener('touchstart', () => {
+    homeSendBtn.addEventListener('touchstart', (e) => {
       homeDidRecord = false;
+      homeStartY = e.touches[0].clientY;
       homePressTimer = setTimeout(startHomeRecord, 180);
     });
+    // 上滑取消：手指/鼠标在录音中上移超过阈值即进入取消态
+    document.addEventListener('mousemove', (e) => {
+      if (homeRecording) updateHomeCancel(homeStartY - e.clientY);
+    });
+    document.addEventListener('touchmove', (e) => {
+      if (homeRecording) updateHomeCancel(homeStartY - e.touches[0].clientY);
+    }, { passive: true });
     // 点按麦克风（未达长按阈值）→ 直接进对话页
     homeSendBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -9811,39 +10763,95 @@
       agentStatusEl.style.display = 'flex';
     }
 
+    // 录音时长上限：30s；最后 10s 开始倒计时提醒
+    const AGENT_MAX_REC_MS = 30000;
+    const AGENT_COUNTDOWN_FROM = 10;
+    let agentRecTimer = null;
+    let agentTickTimer = null;
+    let agentRecStart = 0;
+    const vrHint = () => document.querySelector('.voice-rec-hint');
+
+    function clearAgentRecTimers() {
+      if (agentRecTimer) { clearTimeout(agentRecTimer); agentRecTimer = null; }
+      if (agentTickTimer) { clearInterval(agentTickTimer); agentTickTimer = null; }
+    }
+
+    function agentTick() {
+      if (!recording || cancelRecord) return;   // 取消态优先
+      const left = Math.ceil((AGENT_MAX_REC_MS - (Date.now() - agentRecStart)) / 1000);
+      if (left <= AGENT_COUNTDOWN_FROM && left > 0) {
+        voiceRec.classList.add('counting');
+        vrHint().innerHTML = '还可以说 <b class="hv-count">' + left + '</b> 秒 · <span class="cancel-zone">上滑取消</span>';
+      }
+    }
+
     function startRecording() {
       recording = true;
       cancelRecord = false;
+      agentRecStart = Date.now();
       pushToTalk.classList.add('recording');
+      pushToTalk.classList.remove('canceling');
       pushToTalk.textContent = '松开发送';
       voiceRec.classList.add('active');
+      voiceRec.classList.remove('canceling', 'counting');
+      vrHint().innerHTML = '松开发送 · <span class="cancel-zone">上滑取消</span>';
       setAgentStatus('聆听中…');
+
+      clearAgentRecTimers();
+      agentTickTimer = setInterval(agentTick, 250);
+      // 到 30s：自动发送
+      agentRecTimer = setTimeout(() => {
+        if (!recording) return;
+        cancelRecord = false;
+        endRecording(true);
+      }, AGENT_MAX_REC_MS);
     }
-    function endRecording() {
+
+    function endRecording(auto) {
       if (!recording) return;
       recording = false;
-      pushToTalk.classList.remove('recording');
+      clearAgentRecTimers();
+      pushToTalk.classList.remove('recording', 'canceling');
       pushToTalk.textContent = '按住说话';
-      voiceRec.classList.remove('active');
+      voiceRec.classList.remove('active', 'canceling', 'counting');
       setAgentStatus('');
-      if (!cancelRecord) addVoiceMessage();
-    }
-    function updateCancelHint(dy) {
-      if (dy > 60) {
-        cancelRecord = true;
-        document.querySelector('.voice-rec-hint').innerHTML = '<span style="color:#ff6b6b;">松开手指取消发送</span>';
-      } else {
+      if (cancelRecord) {
         cancelRecord = false;
-        document.querySelector('.voice-rec-hint').innerHTML = '松开发送 · <span class="cancel-zone">上滑取消</span>';
+        UI.toast('已取消发送', { variant: 'center', type: 'info', duration: 1200 });
+        return;
+      }
+      if (auto) UI.toast('已达 30 秒上限，已自动发送', { variant: 'center', type: 'info', duration: 1800 });
+      addVoiceMessage();
+    }
+
+    function updateCancelHint(dy) {
+      const cancel = dy > 60;
+      if (cancel === cancelRecord) return;   // 状态没变就不重绘
+      cancelRecord = cancel;
+      // 波形转红 + 按钮转红，不只是换文案
+      voiceRec.classList.toggle('canceling', cancel);
+      pushToTalk.classList.toggle('canceling', cancel);
+      pushToTalk.textContent = cancel ? '松开取消' : '松开发送';
+      if (cancel) {
+        vrHint().innerHTML = '松开手指 <b>取消发送</b>';
+      } else {
+        vrHint().innerHTML = '松开发送 · <span class="cancel-zone">上滑取消</span>';
+        agentTick();   // 滑回来时若已在倒计时区间，恢复倒计时
       }
     }
 
     pushToTalk.addEventListener('mousedown', (e) => { touchStartY = e.clientY; startRecording(); });
-    pushToTalk.addEventListener('mousemove', (e) => { if (recording) updateCancelHint(touchStartY - e.clientY); });
-    document.addEventListener('mouseup', endRecording);
     pushToTalk.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; startRecording(); });
-    pushToTalk.addEventListener('touchmove', (e) => { if (recording) updateCancelHint(touchStartY - e.touches[0].clientY); });
-    pushToTalk.addEventListener('touchend', endRecording);
+    // 注意：move 必须挂在 document 上。
+    // 挂在按钮上的话，手指一旦上滑移出按钮范围就收不到事件了，取消态永远触发不了。
+    document.addEventListener('mousemove', (e) => {
+      if (recording) updateCancelHint(touchStartY - e.clientY);
+    });
+    document.addEventListener('touchmove', (e) => {
+      if (recording) updateCancelHint(touchStartY - e.touches[0].clientY);
+    }, { passive: true });
+    document.addEventListener('mouseup', () => endRecording());
+    document.addEventListener('touchend', () => endRecording());
 
     // ----- 消息模板 -----
     function getNowTime() {
@@ -10365,10 +11373,7 @@
       });
     });
 
-    // 检查更新 → Toast（统一走 UI.toast，1800ms）
-    document.getElementById('checkUpdateBtn').addEventListener('click', () => {
-      UI.toast('当前已是最新版本', { variant: 'center', duration: 1800 });
-    });
+    // 「软件升级」的检查/下载/安装逻辑统一在 UpdateFlow 模块里初始化（见文件后段）
 
     // 连接机器人 / 绑定新设备 → 打开「添加新机器人」流程（从搜寻步骤开始）
     document.getElementById('connectBtn').addEventListener('click', (e) => {
@@ -10494,15 +11499,32 @@
     // 去设置：假装跳转系统设置，回来后标记已设置好
     document.getElementById('apGotoSettings').addEventListener('click', () => {
       apSettingsDone = true;
-      document.getElementById('apHint').textContent = '已连接到机器人热点，点击「连接」完成绑定。';
-      UI.toast('已连接到机器人热点', { variant: 'center', duration: 1500 });
+      // 只是"去过设置"，并不代表真的连上了热点——这里如实描述，别替用户下结论
+      document.getElementById('apHint').innerHTML =
+        '连接完成后回到这里点「我已连接」。' +
+        '<div class="ap-note">机器人热点不提供上网，手机提示「无互联网连接」属正常现象，请勿断开。</div>';
+      UI.toast('请在系统设置中连接热点，完成后返回', { variant: 'center', type: 'info', duration: 2000 });
     });
-    // AP 连接：必须先「去设置」连接热点，否则拦截
+
+    // AP「我已连接」：校验手机是否真的连到了机器人热点
     document.getElementById('apConnectBtn').addEventListener('click', () => {
+      const ssid = document.getElementById('apSsid').textContent.trim();
+
       if (!apSettingsDone) {
-        UI.toast('请先点「去设置」连接机器人热点', { variant: 'center', duration: 1800 });
+        // 还没去过系统设置：说清楚要做什么，而不是让他"先点某个按钮"
+        UI.toast('请先在手机「设置 › 无线局域网」中连接热点 ' + ssid,
+                 { variant: 'center', type: 'warning', duration: 2600 });
         return;
       }
+
+      // 去过设置，但手机并没有真的连上该热点（Sim 可用 wifiResult 模拟）
+      const notJoined = window.Sim && Sim.get().wifiResult === 'timeout';
+      if (notJoined) {
+        UI.toast('未检测到热点 ' + ssid + '，请确认手机已连接该网络后重试',
+                 { variant: 'center', type: 'error', duration: 2800 });
+        return;
+      }
+
       startConnecting('AP 直连');
     });
 
@@ -10531,7 +11553,17 @@
           step.classList.add('done');
         }, i * 650 + 500));
       });
-      connectTimers.push(setTimeout(() => showSuccess(method), cSteps.length * 650 + 300));
+      connectTimers.push(setTimeout(() => {
+        // 配网/绑定的服务端校验（Wi-Fi 密码错误 / 连接超时 / 设备已被绑定 …）
+        const err = (window.Sim && (Sim.check('wifiResult') || Sim.check('bindResult'))) || null;
+        if (err) {
+          // 失败：退回 Wi-Fi 输入步骤并提示原因
+          showScanStep(method === 'AP 直连' ? 'scanStepAp' : 'scanStepWifi');
+          UI.toast(err, { variant: 'center', type: 'error', duration: 2200 });
+          return;
+        }
+        showSuccess(method);
+      }, cSteps.length * 650 + 300));
     }
 
     function showSuccess(method) {
@@ -10831,10 +11863,13 @@
     document.getElementById('rcBindBtn').addEventListener('click', () => {
       const id = document.getElementById('rcIdInput').value.trim();
       if (!id) { UI.toast('请输入遥控器 ID', { variant: 'center', duration: 1500 }); return; }
+      // 服务端校验（已被他人绑定 / 设备不存在 …）
+      const err = window.Sim && Sim.check('bindResult');
+      if (err) { UI.toast(err, { variant: 'center', type: 'error', duration: 2000 }); return; }
       rcShowBound(id);
       UI.toast('遥控器绑定成功', { variant: 'center', duration: 1500 });
     });
-    document.getElementById('rdCheckOtaBtn').addEventListener('click', () => UI.toast('当前已是最新版本', { variant: 'center', duration: 1800 }));
+    // 「设备 OTA」的检查/下载/安装逻辑统一在 UpdateFlow 模块里初始化（见文件后段）
 
     // 报警信息 全部 / 仅报警 过滤
     document.querySelectorAll('#rdAlarm .rd-alarm-tab').forEach(tab => {
@@ -10934,17 +11969,24 @@
       });
     }
 
-    // ===== 需求7：可配置快捷动作 =====
-    const MAX_QUICK = 7; // 最多 7 个，留 1 格给 +
+    // ===== 可配置快捷动作（数量不限，分页展示 + 侧向滑杆翻页）=====
+    const PER_PAGE = 12;   // 每页 4 列 × 3 行
     const allActions = MockData.quickActions;
     let selectedIds = [...MockData.quickActionSelected];
     const actionsEl = document.getElementById('remoteActions');
+    const viewportEl = document.getElementById('remoteActionsViewport');
+    const sliderEl = document.getElementById('remoteActionsSlider');
+    const rasTrack = document.getElementById('rasTrack');
+    const rasThumb = document.getElementById('rasThumb');
     const rlActionsEl = document.getElementById('rlActions');
     const actById = (id) => allActions.find(a => a.id === id);
 
+    let curPage = 0;       // 当前页（竖屏分页）
+    let pageCount = 1;     // 总页数
+
     // 渲染遥控页快捷动作区（竖屏 + 横屏共用同一份 selectedIds，保持一致）
     function renderQuickActions() {
-      // —— 竖屏 ——
+      // —— 竖屏：全部选中动作平铺为网格，末尾追加「+ 添加」，再分页 ——
       if (actionsEl) {
         const cards = selectedIds.map(id => {
           const a = actById(id);
@@ -10954,21 +11996,22 @@
             <span class="action-btn-label">${a.name}</span>
           </button>`;
         }).join('');
-        const addBtn = selectedIds.length < MAX_QUICK
-          ? `<button class="action-btn action-add" id="quickAddBtn">
+        // 「+ 添加」始终在最后一格，进动作库
+        const addBtn = `<button class="action-btn action-add" id="quickAddBtn">
                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                <span class="action-btn-label">添加</span>
-             </button>`
-          : '';
+             </button>`;
         actionsEl.innerHTML = cards + addBtn;
         actionsEl.querySelectorAll('.action-btn[data-act]').forEach(btn => {
           btn.addEventListener('click', () => fireQuickAction(btn.dataset.act));
         });
         const addEl = document.getElementById('quickAddBtn');
         if (addEl) addEl.addEventListener('click', openActPicker);
+
+        layoutPages();
       }
 
-      // —— 横屏（沿用 .rl-action-btn 样式）——
+      // —— 横屏（沿用 .rl-action-btn 样式，横屏一排滚动，不分页）——
       if (rlActionsEl) {
         const cards = selectedIds.map(id => {
           const a = actById(id);
@@ -10978,12 +12021,10 @@
             <span>${a.name}</span>
           </button>`;
         }).join('');
-        const addBtn = selectedIds.length < MAX_QUICK
-          ? `<button class="rl-action-btn rl-action-add" id="rlQuickAddBtn">
+        const addBtn = `<button class="rl-action-btn rl-action-add" id="rlQuickAddBtn">
                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                <span>添加</span>
-             </button>`
-          : '';
+             </button>`;
         rlActionsEl.innerHTML = cards + addBtn;
         rlActionsEl.querySelectorAll('.rl-action-btn[data-act]').forEach(btn => {
           btn.addEventListener('click', () => fireQuickAction(btn.dataset.act));
@@ -10992,6 +12033,118 @@
         if (rlAddEl) rlAddEl.addEventListener('click', openActPicker);
       }
     }
+
+    // 计算分页：把 viewport 高度锁成 3 行，按总格子数算页数，更新滑杆
+    function layoutPages() {
+      const total = selectedIds.length + 1; // +1 是「添加」格
+      pageCount = Math.max(1, Math.ceil(total / PER_PAGE));
+      if (curPage > pageCount - 1) curPage = pageCount - 1;
+
+      // 锁定 viewport 高度 = 3 行按钮 + 2 个 gap
+      // 用第一格实际高度换算，保证不同屏幕比例都精确对齐
+      const first = actionsEl.querySelector('.action-btn');
+      if (first) {
+        const gap = 10;
+        const cellH = first.getBoundingClientRect().height;
+        const pageH = cellH * 3 + gap * 2;
+        viewportEl.style.height = pageH + 'px';
+      }
+      goToPage(curPage);
+      updateSlider();
+    }
+
+    // 翻到指定页（平移网格）
+    function goToPage(p) {
+      curPage = Math.min(Math.max(0, p), pageCount - 1);
+      const h = viewportEl.getBoundingClientRect().height;
+      const gap = 10;
+      // 每页平移 = 页高 + 一个 gap（页与页之间也留出间隙）
+      actionsEl.style.transform = `translateY(${-curPage * (h + gap)}px)`;
+      updateSliderThumb();
+    }
+
+    // 显隐滑杆 + 计算滑块高度
+    function updateSlider() {
+      if (!sliderEl) return;
+      if (pageCount <= 1) {
+        sliderEl.classList.remove('show');
+        return;
+      }
+      sliderEl.classList.add('show');
+      // 滑块高度 = 轨道高度 / 页数
+      const trackH = rasTrack.getBoundingClientRect().height;
+      const thumbH = Math.max(24, trackH / pageCount);
+      rasThumb.style.height = thumbH + 'px';
+      updateSliderThumb();
+    }
+
+    // 按当前页定位滑块
+    function updateSliderThumb() {
+      if (!sliderEl || pageCount <= 1) return;
+      const trackH = rasTrack.getBoundingClientRect().height;
+      const thumbH = rasThumb.getBoundingClientRect().height;
+      const maxTop = trackH - thumbH;
+      const top = pageCount > 1 ? (curPage / (pageCount - 1)) * maxTop : 0;
+      rasThumb.style.top = top + 'px';
+    }
+
+    // —— 滑杆拖动翻页 ——
+    (function initSlider() {
+      if (!rasThumb || !rasTrack) return;
+      let dragging = false;
+
+      function pageFromClientY(clientY) {
+        const rect = rasTrack.getBoundingClientRect();
+        const thumbH = rasThumb.getBoundingClientRect().height;
+        const maxTop = rect.height - thumbH;
+        let top = clientY - rect.top - thumbH / 2;
+        top = Math.min(Math.max(0, top), maxTop);
+        rasThumb.style.top = top + 'px';
+        // 就近吸附到某一页
+        const ratio = maxTop > 0 ? top / maxTop : 0;
+        return Math.round(ratio * (pageCount - 1));
+      }
+
+      function onMove(e) {
+        if (!dragging) return;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const p = pageFromClientY(clientY);
+        if (p !== curPage) goToPage(p);
+        e.preventDefault();
+      }
+      function onUp() {
+        if (!dragging) return;
+        dragging = false;
+        rasThumb.classList.remove('dragging');
+        goToPage(curPage); // 松手吸附到整页
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onUp);
+      }
+      function onDown(e) {
+        dragging = true;
+        rasThumb.classList.add('dragging');
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend', onUp);
+        e.preventDefault();
+      }
+      rasThumb.addEventListener('mousedown', onDown);
+      rasThumb.addEventListener('touchstart', onDown, { passive: false });
+      // 点击轨道空白处直接跳到对应页
+      rasTrack.addEventListener('click', (e) => {
+        if (e.target === rasThumb) return;
+        const p = pageFromClientY(e.clientY);
+        goToPage(p);
+      });
+    })();
+
+    // 屏幕尺寸变化时重新计算分页（比如旋转、软键盘）
+    window.addEventListener('resize', () => { if (actionsEl) layoutPages(); });
+    // 切到遥控页时快捷区才有真实尺寸，重算分页与滑杆
+    document.addEventListener('remoteTabShown', () => { if (actionsEl) layoutPages(); });
     // 触发一个快捷动作（竖横屏共用）
     function fireQuickAction(id) {
       if (!Store.isConnected()) { UI.toast(); return; }
@@ -11016,7 +12169,7 @@
           <span>${a.name}</span>
         </div>`;
       }).join('');
-      actPickerCount.textContent = `已选 ${draftIds.length} / ${MAX_QUICK}`;
+      actPickerCount.textContent = `已选 ${draftIds.length} 个`;
       actPickerGrid.querySelectorAll('.act-pick-item').forEach(item => {
         item.addEventListener('click', () => {
           const id = item.dataset.pick;
@@ -11024,11 +12177,7 @@
           if (idx > -1) {
             draftIds.splice(idx, 1); // 取消选择
           } else {
-            if (draftIds.length >= MAX_QUICK) {
-              UI.toast('最多选 ' + MAX_QUICK + ' 个动作', { variant: 'center', duration: 1500 });
-              return;
-            }
-            draftIds.push(id);
+            draftIds.push(id);       // 加入（无上限）
           }
           renderPickerGrid();
         });
@@ -11427,6 +12576,20 @@
     document.getElementById('startLearnBtn').addEventListener('click', () => {
       const name = document.getElementById('previewNameInput').value.trim();
       if (!name) { UI.toast('请输入名称', { variant: 'perform', duration: 1500 }); return; }
+
+      // ---- 上传前：网络 / 服务端 / 上传失败 → 不建任务，直接报错 ----
+      if (window.Sim) {
+        const s = Sim.get();
+        if (s.net === 'offline') {
+          UI.toast(Sim.MSG.offline, { variant: 'perform', duration: 2200 });
+          return;
+        }
+        if (s.uploadResult === 'uploadFail') {
+          UI.toast(Sim.MSG.uploadFail, { variant: 'perform', duration: 2200 });
+          return;
+        }
+      }
+
       // 新增学习中任务
       const taskId = 't' + (++seq);
       tasks.unshift({ id: taskId, name, time: '刚刚', status: 'learning', progress: 5, duration: '0:05' });
@@ -11434,6 +12597,21 @@
       UI.closePage('subpagePreview');
       setTimeout(() => UI.openPage('subpageUploadSuccess'), 350);
       pendingSource = null;
+
+      // ---- 「学习失败」：任务已建立，学习过程中失败 ----
+      if (window.Sim && Sim.get().uploadResult === 'learnFail') {
+        setTimeout(() => {
+          const t = tasks.find(x => x.id === taskId);
+          if (t) {
+            t.status = 'failed';
+            t.progress = 0;
+            t.reason = '动作幅度过大，存在安全风险，已停止生成';
+            renderTasks();
+          }
+        }, 2500);
+        return;   // 不走自动流转
+      }
+
       // 方案A：学习完成 → 自动进作品(准备中) → 自动下发同步成功
       autoAdvance(taskId, name);
     });
@@ -11603,6 +12781,28 @@
     // 暴露给对话页卡片按钮调用（查看任务 / 查看效果预览）
     window.PerformOpenTaskList = () => UI.openPage('subpageTaskList');
     window.PerformPreview = (name) => openPlayer(name || '动作预览', false);
+
+    // 暴露给状态调试面板 Sim：切换学习任务的状态剧本
+    window.PerformSim = {
+      setTasks(mode) {
+        if (mode === 'empty') {
+          tasks = [];
+        } else if (mode === 'learning') {
+          tasks = [{ id: 's1', name: '动作模仿-学习中', time: '刚刚', status: 'learning', progress: 42 }];
+        } else if (mode === 'failed') {
+          tasks = [{ id: 's2', name: '动作模仿-20:45:33', time: '昨日 20:45', status: 'failed', progress: 0,
+                     reason: '动作幅度过大，存在安全风险，已停止生成' }];
+        } else {
+          // 默认：还原 MockData 的初始任务
+          tasks = MockData.performTasks.map(t => ({ ...t }));
+        }
+        renderTasks();
+      },
+      setWorksEmpty(empty) {
+        works = empty ? [] : MockData.performWorks.map(w => ({ ...w }));
+        renderWorks();
+      },
+    };
   })();
 
   /* ============================================================
@@ -11747,6 +12947,12 @@
         UI.toast('请先阅读并同意《用户协议》和《隐私政策》', { variant: 'center', duration: 1800 });
         return;
       }
+      // 3) 服务端校验（由 Sim 决定成败：密码错误 / 验证码错误 / 账号不存在 / 锁定 …）
+      const err = window.Sim && Sim.check('loginResult');
+      if (err) {
+        UI.toast(err, { variant: 'center', type: 'error', duration: 2000 });
+        return;
+      }
       authPage.classList.remove('open');
     });
 
@@ -11789,6 +12995,13 @@
         return;
       }
       errEl.classList.remove('show');
+      // 服务端校验（手机号已注册 / 验证码错误 …）
+      const simErr = window.Sim && Sim.check('regResult');
+      if (simErr) {
+        errEl.textContent = simErr;
+        errEl.classList.add('show');
+        return;
+      }
       UI.toast('注册成功，请登录', { variant: 'center', duration: 1600 });
       showAuthView('authLogin');
     });
@@ -11830,6 +13043,12 @@
         UI.toast('请输入验证码', { variant: 'center', duration: 1500 });
         return;
       }
+      // 服务端校验（验证码错误 / 账号不存在 …）
+      const simErr = window.Sim && Sim.check('resetResult');
+      if (simErr) {
+        UI.toast(simErr, { variant: 'center', type: 'error', duration: 2000 });
+        return;
+      }
       showResetStep(3);
     });
     // 步骤3「重置」→ 校验 → 回登录
@@ -11856,15 +13075,26 @@
     document.querySelectorAll('[data-auth-go="authRegister"]').forEach(el => el.addEventListener('click', resetRegister));
     document.querySelectorAll('[data-auth-go="authReset"]').forEach(el => el.addEventListener('click', resetReset));
 
-    // 退出登录 → 回登录页（在设置页里）
+    // 退出登录 → 二次确认后回登录页（在设置页里）
     const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
-        // 关掉可能打开的设置 sheet / 设置页，回到登录页
-        UI.closeAllSheets();
-        UI.closePage('settingsPage');
-        showAuthView('authLogin');
-        authPage.classList.add('open');
+    const logoutModal = document.getElementById('logoutModal');
+    function doLogout() {
+      // 关掉可能打开的设置 sheet / 设置页，回到登录页
+      UI.closeAllSheets();
+      UI.closePage('settingsPage');
+      showAuthView('authLogin');
+      authPage.classList.add('open');
+    }
+    if (logoutBtn && logoutModal) {
+      logoutBtn.addEventListener('click', () => logoutModal.classList.add('show'));
+      document.getElementById('logoutCancel').addEventListener('click', () => logoutModal.classList.remove('show'));
+      document.getElementById('logoutConfirm').addEventListener('click', () => {
+        logoutModal.classList.remove('show');
+        doLogout();
+      });
+      // 点蒙层空白处取消
+      logoutModal.addEventListener('click', (e) => {
+        if (e.target === logoutModal) logoutModal.classList.remove('show');
       });
     }
   })();
@@ -11885,6 +13115,12 @@
     const savePwBtn = document.getElementById('savePwBtn');
     if (savePwBtn) {
       savePwBtn.addEventListener('click', () => {
+        // 服务端校验（原密码错误 / 新密码太弱 …）
+        const err = window.Sim && Sim.check('changePwResult');
+        if (err) {
+          UI.toast(err, { variant: 'center', type: 'error', duration: 2000 });
+          return;
+        }
         UI.closeTopSheet();
         UI.toast('密码已修改', { variant: 'center', duration: 1600 });
       });
@@ -11897,6 +13133,861 @@
         UI.toast('已提交，我们会尽快联系您', { variant: 'center', duration: 1800 });
       });
     }
+  })();
+
+  /* ============================================================
+   * [11] UpdateFlow：软件升级 / 设备 OTA 统一状态机
+   * ------------------------------------------------------------
+   * 两个 sheet（App 软件升级、机器人固件 OTA）共用同一套状态流转：
+   *   latest(已最新) → checking(检查中) → available(有新版)
+   *     → downloading(下载中) → readyToInstall(待安装)
+   *     → installing(安装中) → latest(完成) ；任何环节可 → failed
+   * 无后端，用 setTimeout 模拟进度。演示模式可切「已最新/有新版」剧本。
+   * OTA 安装前会弹安全二次确认（保持通电、勿断开）。
+   * ============================================================ */
+  (function UpdateFlow() {
+    // 两个渠道各自的配置：DOM id 前缀、版本号、更新内容
+    const channels = {
+      app: {
+        prefix: 'app',
+        current: 'v1.0.0',
+        latest:  'v1.1.0',
+        size: '48.6 MB',
+        log: '本次更新：新增快捷动作分页、优化遥控连接稳定性、修复若干已知问题。',
+        curFull: 'v1.0.0-qa-a1c0f297 (Build 10000)',
+        latestFull: 'v1.1.0 (Build 11000)',
+        needSafety: false,     // App 自身升级无需安全确认
+      },
+      ota: {
+        prefix: 'ota',
+        current: 'v3.4.1',
+        latest:  'v3.5.0',
+        size: '82.3 MB',
+        log: '本次固件更新：提升运动控制精度、优化电池管理、修复偶发通信中断问题。',
+        needSafety: true,      // 机器人固件升级需安全确认
+      },
+    };
+
+    // 每个渠道的运行时状态
+    // demo: 模拟"服务端是否有新版"。默认 available，点检查更新即可走完整链路。
+    // （后续接真实接口时，把 checkUpdate 里的这段判断换成接口返回即可）
+    const st = {
+      app: { status: 'latest', progress: 0, timer: null, demo: 'available' },
+      ota: { status: 'latest', progress: 0, timer: null, demo: 'available' },
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    // ---- 渲染：软件升级（app）sheet ----
+    function renderApp() {
+      const c = channels.app, s = st.app;
+      const badge = $('appVerBadge');
+      const detail = $('appUpdateDetail');
+      const prog = $('appUpdateProgress');
+      const btn = $('checkUpdateBtn');
+      if (!badge || !btn) return;
+
+      // 徽标
+      badge.className = 'version-badge';
+      detail.style.display = 'none';
+      prog.style.display = 'none';
+      btn.className = 'check-update-btn';
+
+      if (s.status === 'latest') {
+        badge.classList.add(); // 绿色默认
+        badge.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>最新';
+        $('appVerNum').textContent = c.curFull;
+        btn.textContent = '检查更新';
+      } else if (s.status === 'checking') {
+        badge.classList.add('checking');
+        badge.textContent = '检查中';
+        btn.textContent = '正在检查…';
+        btn.classList.add('disabled');
+      } else if (s.status === 'available') {
+        badge.classList.add('new');
+        badge.textContent = '有新版';
+        detail.style.display = '';
+        $('appUdvOld').textContent = c.current;
+        $('appUdvNew').textContent = c.latest;
+        $('appUdvSize').textContent = '· ' + c.size;
+        $('appUdvLog').textContent = c.log;
+        btn.textContent = '立即更新';
+        btn.classList.add('primary');
+      } else if (s.status === 'downloading') {
+        badge.classList.add('new');
+        badge.textContent = '有新版';
+        prog.style.display = '';
+        $('appProgLabel').textContent = '正在下载…';
+        $('appProgPct').textContent = Math.round(s.progress) + '%';
+        $('appProgFill').style.width = s.progress + '%';
+        btn.textContent = '取消下载';
+      } else if (s.status === 'readyToInstall') {
+        badge.classList.add('new');
+        badge.textContent = '待安装';
+        detail.style.display = '';
+        $('appUdvLog').textContent = '新版本 ' + c.latest + ' 已下载完成，可立即安装。';
+        $('appUdvOld').textContent = c.current;
+        $('appUdvNew').textContent = c.latest;
+        $('appUdvSize').textContent = '· 已就绪';
+        btn.textContent = '立即安装';
+        btn.classList.add('primary');
+      } else if (s.status === 'installing') {
+        badge.classList.add('new');
+        badge.textContent = '安装中';
+        prog.style.display = '';
+        $('appProgLabel').textContent = '正在安装，App 即将重启…';
+        $('appProgPct').textContent = Math.round(s.progress) + '%';
+        $('appProgFill').style.width = s.progress + '%';
+        btn.textContent = '安装中…';
+        btn.classList.add('disabled');
+      } else if (s.status === 'failed') {
+        badge.classList.add('failed');
+        badge.textContent = '失败';
+        detail.style.display = '';
+        $('appUdvLog').textContent = '更新失败，请检查网络后重试。';
+        $('appUdvOld').textContent = c.current;
+        $('appUdvNew').textContent = c.latest;
+        $('appUdvSize').textContent = '';
+        btn.textContent = '重试';
+        btn.classList.add('primary');
+      }
+    }
+
+    // ---- 渲染：设备 OTA sheet ----
+    function renderOta() {
+      const c = channels.ota, s = st.ota;
+      const statusText = $('otaStatusText');
+      const latestVer = $('otaLatestVer');
+      const detail = $('otaUpdateDetail');
+      const prog = $('otaUpdateProgress');
+      const note = $('otaProgNote');
+      const btn = $('rdCheckOtaBtn');
+      if (!statusText || !btn) return;
+
+      detail.style.display = 'none';
+      prog.style.display = 'none';
+      note.style.display = 'none';
+      btn.className = 'rd-sheet-btn ghost';
+      $('otaCurVer').textContent = c.current;
+
+      if (s.status === 'latest') {
+        latestVer.textContent = c.current;
+        latestVer.className = 'rd-data-val ok';
+        statusText.textContent = '已是最新版本';
+        btn.textContent = '检查更新';
+      } else if (s.status === 'checking') {
+        statusText.textContent = '正在检查…';
+        btn.textContent = '检查中…';
+        btn.classList.add('disabled');
+      } else if (s.status === 'available') {
+        latestVer.textContent = c.latest;
+        latestVer.className = 'rd-data-val';
+        statusText.textContent = '发现新版本';
+        detail.style.display = '';
+        $('otaUdvLog').textContent = c.log;
+        btn.textContent = '立即更新';
+        btn.className = 'rd-sheet-btn primary';
+      } else if (s.status === 'downloading') {
+        latestVer.textContent = c.latest;
+        latestVer.className = 'rd-data-val';
+        statusText.textContent = '下载中';
+        prog.style.display = '';
+        $('otaProgLabel').textContent = '正在下载固件…';
+        $('otaProgPct').textContent = Math.round(s.progress) + '%';
+        $('otaProgFill').style.width = s.progress + '%';
+        btn.textContent = '取消下载';
+      } else if (s.status === 'readyToInstall') {
+        latestVer.textContent = c.latest;
+        latestVer.className = 'rd-data-val';
+        statusText.textContent = '待安装';
+        detail.style.display = '';
+        $('otaUdvLog').textContent = '固件 ' + c.latest + ' 已下载完成，可开始安装。';
+        btn.textContent = '立即安装';
+        btn.className = 'rd-sheet-btn primary';
+      } else if (s.status === 'installing') {
+        statusText.textContent = '安装中';
+        prog.style.display = '';
+        note.style.display = '';
+        $('otaProgLabel').textContent = '正在安装固件…';
+        $('otaProgPct').textContent = Math.round(s.progress) + '%';
+        $('otaProgFill').style.width = s.progress + '%';
+        btn.textContent = '安装中…';
+        btn.classList.add('disabled');
+        // 同步锁定遮罩上的进度
+        const lf = $('otaLockFill'), lp = $('otaLockPct');
+        if (lf) lf.style.width = s.progress + '%';
+        if (lp) lp.textContent = Math.round(s.progress) + '%';
+      } else if (s.status === 'failed') {
+        statusText.textContent = '更新失败';
+        detail.style.display = '';
+        $('otaUdvLog').textContent = '固件更新失败，请确认机器人在线后重试。';
+        btn.textContent = '重试';
+        btn.className = 'rd-sheet-btn primary';
+      }
+    }
+
+    function render(ch) { ch === 'app' ? renderApp() : renderOta(); }
+
+    function setStatus(ch, status) {
+      st[ch].status = status;
+      render(ch);
+    }
+
+    // 清掉进行中的定时器
+    function clearTimer(ch) {
+      if (st[ch].timer) { clearInterval(st[ch].timer); st[ch].timer = null; }
+    }
+
+    // 进度模拟：从 0 跑到 100，done 回调
+    function runProgress(ch, onDone, speed) {
+      clearTimer(ch);
+      st[ch].progress = 0;
+      st[ch].timer = setInterval(() => {
+        st[ch].progress += (speed || 8) + Math.random() * 6;
+        if (st[ch].progress >= 100) {
+          st[ch].progress = 100;
+          render(ch);
+          clearTimer(ch);
+          onDone && onDone();
+        } else {
+          render(ch);
+        }
+      }, 260);
+    }
+
+    // 检查更新：先过网络/服务端，再按剧本决定结果
+    function checkUpdate(ch) {
+      // 网络/服务端异常 → 检查失败
+      const netErr = window.Sim && Sim.check('__checkUpdate');
+      if (netErr) {
+        UI.toast(netErr, { variant: 'center', type: 'error', duration: 2000 });
+        return;
+      }
+      setStatus(ch, 'checking');
+      clearTimer(ch);
+      st[ch].timer = setTimeout(() => {
+        st[ch].timer = null;
+        if (st[ch].demo === 'available') {
+          setStatus(ch, 'available');
+          if (ch === 'app' && $('appAutoUpdate') && $('appAutoUpdate').classList.contains('on')) {
+            promptNewVersion(ch);
+          }
+        } else {
+          setStatus(ch, 'latest');
+          UI.toast('当前已是最新版本', { variant: 'center', duration: 1600 });
+        }
+      }, 1400);
+    }
+
+    // 开始下载 → 完成后进入待安装（可被 Sim 设定为失败）
+    function startDownload(ch) {
+      setStatus(ch, 'downloading');
+      runProgress(ch, () => {
+        // 下载完成时问一次 Sim：这次该不该失败？（异常保持生效，直到面板改回"成功"）
+        if (window.Sim && Sim.get().updateResult === 'downloadFail') {
+          setStatus(ch, 'failed');
+          UI.toast(Sim.MSG.downloadFail, { variant: 'center', type: 'error', duration: 2000 });
+          return;
+        }
+        setStatus(ch, 'readyToInstall');
+      }, 10);
+    }
+
+    // OTA 升级期间的全局锁定遮罩
+    const otaLock = $('otaLock');
+    function lockApp(on) {
+      if (!otaLock) return;
+      otaLock.classList.toggle('show', !!on);
+    }
+
+    // 开始安装
+    // - App：安装完成后 App 会退出重启（原型里模拟为关闭所有弹层、回到首页）
+    // - OTA：安装期间锁定 App，禁止操作其他功能
+    function startInstall(ch) {
+      setStatus(ch, 'installing');
+
+      if (ch === 'ota') {
+        lockApp(true);   // 固件升级：全程锁死 App
+      }
+
+      runProgress(ch, () => {
+        // 安装完成时问一次 Sim：这次该不该失败？（异常保持生效）
+        if (window.Sim && Sim.get().updateResult === 'installFail') {
+          if (ch === 'ota') lockApp(false);     // 失败也要解锁，别把用户锁死
+          setStatus(ch, 'failed');
+          UI.toast(Sim.MSG.installFail, { variant: 'center', type: 'error', duration: 2000 });
+          return;
+        }
+
+        // 安装完成：当前版本升级为最新
+        channels[ch].current = channels[ch].latest;
+        if (ch === 'app') channels.app.curFull = channels.app.latestFull;
+        st[ch].demo = 'latest';   // 装完就没有新版了
+        setStatus(ch, 'latest');
+
+        if (ch === 'ota') {
+          lockApp(false);
+          UI.toast('固件升级完成', { variant: 'center', duration: 1800 });
+        } else {
+          // App 安装完成 → 模拟退出重启：关掉所有弹层，回到首页
+          UI.closeAllSheets();
+          // 兜底：直接摘掉 sheet 的 open（防止未走 sheet 栈打开的情况残留）
+          const us = $('sheetUpdate');
+          if (us) us.classList.remove('open');
+          const mask = document.getElementById('sheetMask');
+          if (mask) mask.classList.remove('show');
+          UI.closePage('settingsPage');
+          if (typeof Nav !== 'undefined' && Nav.switchTab) Nav.switchTab('首页');
+          UI.toast('已更新到 ' + channels.app.latest + '，App 已重启', { variant: 'center', duration: 2200 });
+        }
+      }, 6);
+    }
+
+    // 取消下载 → 回到 available
+    function cancelDownload(ch) {
+      clearTimer(ch);
+      setStatus(ch, 'available');
+    }
+
+    // 「发现新版本」提示弹窗（自动更新开启时）
+    const newVerModal = $('newVersionModal');
+    let newVerChannel = null;
+    function promptNewVersion(ch) {
+      newVerChannel = ch;
+      $('newVersionDesc').innerHTML = '检测到新版本 <b style="color:#5b8fff;">' + channels[ch].latest + '</b>，是否现在更新？';
+      newVerModal.classList.add('show');
+    }
+    if (newVerModal) {
+      $('newVersionLater').addEventListener('click', () => newVerModal.classList.remove('show'));
+      $('newVersionNow').addEventListener('click', () => {
+        newVerModal.classList.remove('show');
+        if (newVerChannel) startDownload(newVerChannel);
+      });
+      newVerModal.addEventListener('click', (e) => {
+        if (e.target === newVerModal) newVerModal.classList.remove('show');
+      });
+    }
+
+    // OTA 安装安全确认弹窗
+    const otaInstallModal = $('otaInstallModal');
+    if (otaInstallModal) {
+      $('otaInstallCancel').addEventListener('click', () => otaInstallModal.classList.remove('show'));
+      $('otaInstallConfirm').addEventListener('click', () => {
+        otaInstallModal.classList.remove('show');
+        startInstall('ota');
+      });
+      otaInstallModal.addEventListener('click', (e) => {
+        if (e.target === otaInstallModal) otaInstallModal.classList.remove('show');
+      });
+    }
+
+    // 主按钮点击：按当前状态决定动作
+    function onMainButton(ch) {
+      const s = st[ch].status;
+      if (s === 'latest' || s === 'checking') {
+        if (s === 'checking') return;
+        checkUpdate(ch);
+      } else if (s === 'available' || s === 'failed') {
+        startDownload(ch);
+      } else if (s === 'downloading') {
+        cancelDownload(ch);
+      } else if (s === 'readyToInstall') {
+        // OTA 需安全二次确认；App 直接安装
+        if (channels[ch].needSafety) {
+          otaInstallModal.classList.add('show');
+        } else {
+          startInstall(ch);
+        }
+      }
+    }
+
+    // 绑定主按钮
+    const appBtn = $('checkUpdateBtn');
+    if (appBtn) appBtn.addEventListener('click', () => onMainButton('app'));
+    const otaBtn = $('rdCheckOtaBtn');
+    if (otaBtn) otaBtn.addEventListener('click', () => onMainButton('ota'));
+
+    // 强制更新：点「立即更新」→ 关掉强制弹窗，打开升级 sheet 并直接开始下载
+    const fBtn = $('forceUpdateBtn');
+    if (fBtn) {
+      fBtn.addEventListener('click', () => {
+        $('forceUpdateModal').classList.remove('show');
+        const sheet = $('sheetUpdate');
+        const mask = document.getElementById('sheetMask');
+        if (sheet) sheet.classList.add('open');
+        if (mask) mask.classList.add('show');
+        st.app.demo = 'available';
+        startDownload('app');
+      });
+    }
+
+    // 初始渲染
+    render('app');
+    render('ota');
+
+    // 暴露给状态调试面板 Sim：外部可设置"服务端是否有新版"并重置状态
+    window.UpdateFlow = {
+      setAvailable(ch, hasNew) {
+        clearTimer(ch);
+        st[ch].demo = hasNew ? 'available' : 'latest';
+        st[ch].status = 'latest';
+        st[ch].progress = 0;
+        render(ch);
+      },
+      // 强制更新：进 App 即弹不可关闭的更新提示
+      setForce(on) {
+        const modal = $('forceUpdateModal');
+        if (!modal) return;
+        modal.classList.toggle('show', !!on);
+        if (on) $('forceUpdateVer').textContent = channels.app.latest;
+      },
+      forceStatus(ch, status) {
+        clearTimer(ch);
+        st[ch].demo = 'available';
+        st[ch].status = status;
+        st[ch].progress = status === 'installing' || status === 'downloading' ? 40 : 0;
+        if (ch === 'ota') lockApp(status === 'installing');
+        render(ch);
+      },
+      isLocked() { return otaLock && otaLock.classList.contains('show'); },
+      reset() {
+        ['app','ota'].forEach(ch => { clearTimer(ch); st[ch].status = 'latest'; st[ch].progress = 0; });
+        lockApp(false);
+        const fm = $('forceUpdateModal');
+        if (fm) fm.classList.remove('show');
+        render('app'); render('ota');
+      },
+    };
+  })();
+  /* ============================================================
+   * [12] Sim：状态调试中枢 + 悬浮面板
+   * ------------------------------------------------------------
+   * 在原型里随时切到任意"外部/内部条件"组合，无需刷新、不侵入产品 UI。
+   *
+   * 条件分两类：
+   *  - 状态类（state）：选中后立即改变 UI。如网络、机器人、电量、版本。
+   *  - 异常类（arm）：选中后只是"埋雷"，等你实际去操作时才触发。
+   *      例如把「登录结果」设为"密码错误"，然后去登录页点登录，才会报错。
+   *      面板上这类条件被埋雷后会标橙并显示"● 待触发"。
+   *      异常会「保持生效」——设成密码错误就一直错，直到手动改回"成功"。
+   *
+   * 用法：面板点选；或控制台 Sim.set({loginResult:'wrongPw'}) / Sim.list()
+   * 状态存 localStorage，刷新后保持。
+   * ============================================================ */
+  const Sim = (function () {
+    const KEY = 'galbot_sim_state_v2';
+
+    /* ------------------------------------------------------------
+     * SCHEMA：面板结构 + 全部条件定义（改这里就能加条件）
+     *   kind: 'seg' 分段按钮 | 'select' 下拉 | 'range' 滑杆
+     *   err:  true 表示这是"异常类"条件（非默认值时标橙、待触发）
+     * ---------------------------------------------------------- */
+    const SCHEMA = [
+      { group: '环境', fields: [
+        { key: 'net',    label: '网络',   kind: 'seg', def: 'online',
+          opts: [['online','在线'], ['offline','离线'], ['slow','弱网']] },
+        { key: 'server', label: '服务端', kind: 'seg', def: 'ok', err: true,
+          opts: [['ok','正常'], ['timeout','超时'], ['error','500']] },
+      ]},
+
+      { group: '设备', fields: [
+        { key: 'robot', label: '机器人', kind: 'seg', def: 'connected',
+          opts: [['connected','已连接'], ['available','可连接'], ['offline','离线']] },
+        { key: 'batt',  label: '电量',   kind: 'range', def: 90, min: 0, max: 100 },
+        { key: 'bound', label: '绑定设备', kind: 'seg', def: 'some',
+          opts: [['some','有设备'], ['none','0 台']] },
+        { key: 'connMode', label: '连接方式', kind: 'seg', def: 'wifi',
+          opts: [['wifi','Wi-Fi'], ['ap','AP 直连']] },
+      ]},
+
+      { group: '账号', fields: [
+        { key: 'auth', label: '登录态', kind: 'seg', def: 'in',
+          opts: [['in','已登录'], ['out','未登录'], ['expired','已过期']] },
+        { key: 'loginResult', label: '登录结果', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['wrongPw','密码错误'], ['wrongCode','验证码错误'],
+                 ['noAccount','账号不存在'], ['locked','账号被锁定']] },
+        { key: 'regResult', label: '注册结果', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['exists','手机号已注册'], ['wrongCode','验证码错误']] },
+        { key: 'resetResult', label: '重置密码', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['wrongCode','验证码错误'], ['noAccount','账号不存在']] },
+        { key: 'changePwResult', label: '修改密码', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['wrongOld','原密码错误'], ['weak','新密码太弱']] },
+      ]},
+
+      { group: '操作', fields: [
+        { key: 'wifiResult', label: '配网结果', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['wrongPw','Wi-Fi 密码错误'], ['timeout','连接超时']] },
+        { key: 'bindResult', label: '绑定结果', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['taken','已被他人绑定'], ['notFound','设备不存在']] },
+        { key: 'uploadResult', label: '动作上传', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['uploadFail','上传失败'], ['learnFail','学习失败']] },
+        { key: 'updateResult', label: '升级结果', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['downloadFail','下载失败'], ['installFail','安装失败']] },
+      ]},
+
+      { group: '版本', fields: [
+        { key: 'appUpdate', label: 'App 版本', kind: 'seg', def: 'latest',
+          opts: [['latest','最新'], ['available','有新版'], ['force','强制更新']] },
+        { key: 'otaUpdate', label: '固件 OTA', kind: 'seg', def: 'latest',
+          opts: [['latest','最新'], ['available','有新版']] },
+      ]},
+
+      { group: '内容', fields: [
+        { key: 'task',  label: '学习任务', kind: 'seg', def: 'mixed',
+          opts: [['mixed','默认'], ['learning','学习中'], ['failed','失败'], ['empty','空']] },
+        { key: 'works', label: '作品列表', kind: 'seg', def: 'some',
+          opts: [['some','有'], ['empty','空']] },
+      ]},
+    ];
+
+    // 扁平化：key -> field 定义
+    const FIELDS = {};
+    SCHEMA.forEach(g => g.fields.forEach(f => { FIELDS[f.key] = f; }));
+
+    // 默认状态由 SCHEMA 的 def 生成
+    const DEFAULT = {};
+    Object.keys(FIELDS).forEach(k => { DEFAULT[k] = FIELDS[k].def; });
+
+    let state = { ...DEFAULT };
+
+    // 设备列表母本快照。
+    // 注意：Store.get() 返回的就是 MockData.devices 本身（同一引用），
+    // 清空设备时不能靠 MockData 还原，必须先深拷一份留底。
+    const DEVICES_SNAPSHOT = Store.get().map(d => ({ ...d }));
+
+    // ---------- 持久化 ----------
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* 受限环境忽略 */ }
+    }
+    function load() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (raw) state = { ...DEFAULT, ...JSON.parse(raw) };
+      } catch (e) { /* ignore */ }
+    }
+
+    /* ------------------------------------------------------------
+     * apply()：把"状态类"条件落到 UI。
+     * 异常类条件不在这里生效——它们只是埋雷，等业务代码来问 Sim.check()。
+     * ---------------------------------------------------------- */
+    function apply() {
+      const devices = Store.get();
+
+      // ---- 绑定设备数 ----
+      if (state.bound === 'none') {
+        devices.length = 0;                              // 模拟从未绑定过
+      } else if (devices.length === 0) {
+        DEVICES_SNAPSHOT.forEach(d => devices.push({ ...d }));  // 用快照还原
+      }
+
+      // ---- 机器人连接态 / 电量 / 连接方式 ----
+      if (devices.length > 0) {
+        // 网络断开时机器人必然离线（物理约束，覆盖手动选择）
+        const robotState = (state.net === 'offline') ? 'offline' : state.robot;
+        devices.forEach((d, i) => {
+          if (i === 0) {
+            d.status = robotState;
+            d.batt = Number(state.batt);
+            d.connMode = state.connMode;
+          } else if (d.status === 'connected') {
+            d.status = 'available';   // 保持"只有一台已连接"的互斥
+          }
+        });
+      }
+      Store.notify();   // 首页/遥控页/设置页/详情页全部自动跟随
+
+      // ---- 网络 ----
+      const bar = document.getElementById('netOfflineBar');
+      if (bar) {
+        const off = state.net === 'offline';
+        bar.classList.toggle('show', off);
+        const span = bar.querySelector('span');
+        if (span) span.textContent = off ? '网络不可用，请检查网络连接' : '';
+      }
+      const agentPage = document.getElementById('agentPage');
+      if (agentPage) agentPage.classList.toggle('offline', state.net === 'offline');
+
+      // ---- 版本 ----
+      // 只在版本条件变化时才重置升级状态机，
+      // 否则下载/安装途中的一次拆雷会把进度打回原形
+      if (window.UpdateFlow) {
+        if (apply._lastApp !== state.appUpdate) {
+          UpdateFlow.setAvailable('app', state.appUpdate !== 'latest');
+          UpdateFlow.setForce(state.appUpdate === 'force');
+          apply._lastApp = state.appUpdate;
+        }
+        if (apply._lastOta !== state.otaUpdate) {
+          UpdateFlow.setAvailable('ota', state.otaUpdate !== 'latest');
+          apply._lastOta = state.otaUpdate;
+        }
+      }
+
+      // ---- 登录态 ----
+      // 只在"登录态条件本身发生变化"时才强制开关登录页。
+      // 否则任何一次 set()（比如异常拆雷）都会把登录页关掉，
+      // 导致"密码错误"提示完还是登录进去了。
+      const authPage = document.getElementById('authPage');
+      if (authPage && apply._lastAuth !== state.auth) {
+        authPage.classList.toggle('open', state.auth !== 'in');
+        apply._lastAuth = state.auth;
+      }
+      // 登录已过期：进来先提示一次
+      if (state.auth === 'expired' && !apply._expiredToasted) {
+        apply._expiredToasted = true;
+        setTimeout(() => UI.toast('登录已过期，请重新登录', { variant: 'center', duration: 2000 }), 400);
+      }
+      if (state.auth !== 'expired') apply._expiredToasted = false;
+
+      // ---- 内容 ----
+      // 同样只在条件变化时才重置，否则一次拆雷就会把用户刚建的任务/作品冲掉
+      if (window.PerformSim) {
+        if (apply._lastTask !== state.task) {
+          PerformSim.setTasks(state.task);
+          apply._lastTask = state.task;
+        }
+        if (apply._lastWorks !== state.works) {
+          PerformSim.setWorksEmpty(state.works === 'empty');
+          apply._lastWorks = state.works;
+        }
+      }
+
+      syncPanel();
+    }
+
+    // 各类失败的提示文案
+    const MSG = {
+      // 通用
+      offline:      '网络不可用，请检查网络连接',
+      timeout:      '请求超时，请稍后重试',
+      error:        '服务器开小差了，请稍后重试',
+      // 登录
+      wrongPw:      '密码错误，请重新输入',
+      wrongCode:    '验证码错误或已失效',
+      noAccount:    '该账号未注册',
+      locked:       '密码错误次数过多，账号已锁定，请 30 分钟后重试',
+      // 注册
+      exists:       '该手机号已注册，请直接登录',
+      // 改密
+      wrongOld:     '原密码错误',
+      weak:         '新密码强度不足，需 8 位以上且含字母和数字',
+      // 配网
+      wifiWrongPw:  'Wi-Fi 密码错误，请重新输入',
+      wifiTimeout:  '连接超时，请确认机器人在信号范围内',
+      // 绑定
+      taken:        '该设备已被其他账号绑定',
+      notFound:     '未找到该设备，请检查 ID 是否正确',
+      // 上传/学习
+      uploadFail:   '上传失败，请检查网络后重试',
+      learnFail:    '动作学习失败：动作幅度过大，存在安全风险',
+      // 升级
+      downloadFail: '下载失败，请检查网络后重试',
+      installFail:  '安装失败，请重试',
+    };
+
+    // 每个异常条件的取值 → 提示语
+    const RESULT_MSG = {
+      loginResult:    { wrongPw:'wrongPw', wrongCode:'wrongCode', noAccount:'noAccount', locked:'locked' },
+      regResult:      { exists:'exists', wrongCode:'wrongCode' },
+      resetResult:    { wrongCode:'wrongCode', noAccount:'noAccount' },
+      changePwResult: { wrongOld:'wrongOld', weak:'weak' },
+      wifiResult:     { wrongPw:'wifiWrongPw', timeout:'wifiTimeout' },
+      bindResult:     { taken:'taken', notFound:'notFound' },
+      uploadResult:   { uploadFail:'uploadFail', learnFail:'learnFail' },
+      updateResult:   { downloadFail:'downloadFail', installFail:'installFail' },
+    };
+
+    /* ------------------------------------------------------------
+     * check(key)：业务代码调它来问"这次操作该不该失败"。
+     * 返回 null 表示放行；返回字符串表示失败原因（业务据此弹 toast）。
+     *
+     * 优先级：网络离线 > 服务端异常 > 该操作自身的异常设定
+     * 异常条件会「保持生效」——设成密码错误就一直错，
+     * 直到你在面板上手动把它改回"成功"。
+     * ---------------------------------------------------------- */
+    function check(key) {
+      // 1) 网络离线：一切联网操作直接失败
+      if (state.net === 'offline') return MSG.offline;
+
+      // 2) 服务端异常
+      if (state.server !== 'ok') return MSG[state.server];
+
+      // 3) 该操作自身的异常设定
+      const val = state[key];
+      const map = RESULT_MSG[key];
+      if (map && val && val !== 'ok' && map[val]) return MSG[map[val]];
+
+      return null;   // 放行
+    }
+
+    // ---------- 对外 API ----------
+    function set(patch, val) {
+      if (typeof patch === 'string') patch = { [patch]: val };
+      Object.assign(state, patch);
+      save();
+      apply();
+    }
+    function reset() {
+      state = { ...DEFAULT };
+      save();
+      // 清掉"上次值"缓存，强制 apply() 完整重新落一遍
+      apply._lastAuth = apply._lastTask = apply._lastWorks =
+        apply._lastApp = apply._lastOta = undefined;
+      apply._expiredToasted = false;
+      if (window.UpdateFlow) UpdateFlow.reset();
+      apply();
+    }
+    function get() { return { ...state }; }
+    function list() {
+      console.table(state);
+      console.log('可用条件：');
+      SCHEMA.forEach(g => {
+        console.log('【' + g.group + '】');
+        g.fields.forEach(f => {
+          const vals = f.kind === 'range' ? `${f.min}-${f.max}` : f.opts.map(o => o[0]).join(' | ');
+          console.log(`   ${f.key}  (${f.label})  →  ${vals}${f.err ? '   [异常·待触发]' : ''}`);
+        });
+      });
+      return get();
+    }
+
+    /* ------------------------------------------------------------
+     * 面板渲染（由 SCHEMA 生成，加条件不用改 HTML）
+     * ---------------------------------------------------------- */
+    const panel = document.getElementById('simPanel');
+
+    function renderPanel() {
+      const box = document.getElementById('simFields');
+      if (!box) return;
+      box.innerHTML = SCHEMA.map(g => {
+        const fields = g.fields.map(f => {
+          let ctrl = '';
+          if (f.kind === 'seg') {
+            ctrl = `<div class="sim-seg" data-sim="${f.key}">` +
+              f.opts.map(([v, t]) => `<button data-val="${v}">${t}</button>`).join('') +
+              `</div>`;
+          } else if (f.kind === 'select') {
+            ctrl = `<select class="sim-select" data-sim="${f.key}">` +
+              f.opts.map(([v, t]) => `<option value="${v}">${t}</option>`).join('') +
+              `</select>`;
+          } else if (f.kind === 'range') {
+            ctrl = `<input type="range" class="sim-range" data-sim="${f.key}" min="${f.min}" max="${f.max}">`;
+          }
+          const labelExtra = f.kind === 'range' ? ` <b data-simval="${f.key}"></b>` : '';
+          return `<div class="sim-sec" data-sec="${f.key}">
+                    <div class="sim-label">${f.label}${labelExtra}</div>
+                    ${ctrl}
+                  </div>`;
+        }).join('');
+        return `<div class="sim-group">${g.group}</div>${fields}`;
+      }).join('');
+
+      // 绑定事件
+      box.querySelectorAll('.sim-seg').forEach(seg => {
+        seg.querySelectorAll('button').forEach(b => {
+          b.addEventListener('click', () => set(seg.dataset.sim, b.dataset.val));
+        });
+      });
+      box.querySelectorAll('.sim-select').forEach(sel => {
+        sel.addEventListener('change', () => set(sel.dataset.sim, sel.value));
+      });
+      box.querySelectorAll('.sim-range').forEach(r => {
+        r.addEventListener('input', () => set(r.dataset.sim, Number(r.value)));
+      });
+    }
+
+    // 把 state 同步到面板控件（含异常条件的"待触发"标记）
+    function syncPanel() {
+      if (!panel) return;
+      Object.keys(FIELDS).forEach(key => {
+        const f = FIELDS[key];
+        const val = state[key];
+        const sec = panel.querySelector(`.sim-sec[data-sec="${key}"]`);
+        // 异常类且非默认值 → 标橙"生效中"
+        const armed = !!f.err && String(val) !== String(f.def);
+        if (sec) sec.classList.toggle('armed', armed);
+
+        if (f.kind === 'seg') {
+          panel.querySelectorAll(`.sim-seg[data-sim="${key}"] button`).forEach(b => {
+            const on = String(val) === b.dataset.val;
+            b.classList.toggle('active', on);
+            b.classList.toggle('err', on && armed);
+          });
+        } else if (f.kind === 'select') {
+          const sel = panel.querySelector(`.sim-select[data-sim="${key}"]`);
+          if (sel) { sel.value = val; sel.classList.toggle('armed', armed); }
+        } else if (f.kind === 'range') {
+          const r = panel.querySelector(`.sim-range[data-sim="${key}"]`);
+          if (r) r.value = val;
+          const b = panel.querySelector(`b[data-simval="${key}"]`);
+          if (b) b.textContent = val + '%';
+        }
+      });
+    }
+
+    // 折叠 / 重置
+    function bindChrome() {
+      const rst = document.getElementById('simReset');
+      if (rst) rst.addEventListener('click', reset);
+      const min = document.getElementById('simPanelMin');
+      if (min) {
+        min.addEventListener('click', (e) => {
+          e.stopPropagation();
+          panel.classList.toggle('collapsed');
+          min.textContent = panel.classList.contains('collapsed') ? '+' : '–';
+        });
+      }
+    }
+
+    // 拖动（按住标题栏）
+    function bindDrag() {
+      const head = document.getElementById('simPanelHead');
+      if (!head || !panel) return;
+      let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+
+      function onDown(e) {
+        if (e.target.id === 'simPanelMin') return;
+        dragging = true;
+        panel.classList.add('dragging');
+        const p = e.touches ? e.touches[0] : e;
+        const r = panel.getBoundingClientRect();
+        sx = p.clientX; sy = p.clientY;
+        ox = r.left; oy = r.top;
+        panel.style.left = ox + 'px';
+        panel.style.top = oy + 'px';
+        panel.style.right = 'auto';
+        panel.style.bottom = 'auto';
+        e.preventDefault();
+      }
+      function onMove(e) {
+        if (!dragging) return;
+        const p = e.touches ? e.touches[0] : e;
+        const r = panel.getBoundingClientRect();
+        let nx = Math.min(Math.max(0, ox + (p.clientX - sx)), window.innerWidth - r.width);
+        let ny = Math.min(Math.max(0, oy + (p.clientY - sy)), window.innerHeight - 40);
+        panel.style.left = nx + 'px';
+        panel.style.top = ny + 'px';
+        e.preventDefault();
+      }
+      function onUp() { dragging = false; panel.classList.remove('dragging'); }
+
+      head.addEventListener('mousedown', onDown);
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      head.addEventListener('touchstart', onDown, { passive: false });
+      document.addEventListener('touchmove', onMove, { passive: false });
+      document.addEventListener('touchend', onUp);
+    }
+
+    // ---------- 初始化 ----------
+    load();
+    renderPanel();
+    bindChrome();
+    bindDrag();
+    apply();
+
+    const api = { set, get, check, reset, list, MSG };
+    window.Sim = api;
+    return api;
   })();
 </script>
 </body>
