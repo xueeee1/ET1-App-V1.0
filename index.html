@@ -1020,6 +1020,20 @@
     border-radius: 50%;
     animation: msg-spin 0.7s linear infinite;
   }
+  /* E-A2 语音识别失败 */
+  .voice-transcript.failed { color: #d0393e; }
+  .voice-transcript-fail {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 12px; color: #d0393e;
+  }
+  .voice-transcript-fail::before {
+    content: "!";
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 13px; height: 13px; flex-shrink: 0;
+    border-radius: 50%;
+    background: #d0393e; color: #fff;
+    font-size: 9px; font-weight: 700;
+  }
 
   /* ===== 语音播放进度（H）===== */
   .msg-voice.playing .voice-icon { color: #fff; }
@@ -1890,11 +1904,20 @@
     display: flex;
   }
 
+  /* 波形 + 删除图标叠放的容器（取消态切换用，与首页 hv-body 一致） */
+  .voice-rec-body {
+    position: relative;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .voice-rec-wave {
     height: 50px;
     display: flex;
     align-items: center;
     gap: 3px;
+    transition: opacity 0.16s ease, transform 0.16s ease;
   }
   .voice-rec-wave span {
     width: 3px;
@@ -1902,6 +1925,22 @@
     border-radius: 2px;
     animation: voice-pulse 1s ease-in-out infinite;
   }
+  /* 删除图标（取消态）：默认隐藏，取消时弹入并转红 */
+  .voice-rec-cancel-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff6b6b;
+    opacity: 0;
+    transform: scale(0.7);
+    transition: opacity 0.16s ease, transform 0.2s cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none;
+  }
+  .voice-rec-cancel-icon svg { width: 26px; height: 26px; }
+  .voice-recording.canceling .voice-rec-wave { opacity: 0; transform: scale(0.8); }
+  .voice-recording.canceling .voice-rec-cancel-icon { opacity: 1; transform: scale(1); }
   @keyframes voice-pulse {
     0%, 100% { height: 6px; }
     50% { height: 36px; }
@@ -2165,6 +2204,8 @@
     padding: 0 32px;
   }
   .confirm-modal.show { display: flex; }
+  /* 横屏遥控里弹出时，旋转 -90° 与横屏画面对齐 */
+  .confirm-modal.landscape .confirm-box { transform: rotate(-90deg); }
   .confirm-box {
     background: #1c1f24;
     border-radius: 16px;
@@ -3709,7 +3750,7 @@
   .feedback-submit:active { transform: scale(0.97); }
 
   /* ============================================ */
-  /* ===== 搜寻设备 sheet（核心扫描动画） ===== */
+  /* ===== 搜索设备 sheet（核心扫描动画） ===== */
   /* ============================================ */
   .scan-sheet-body {
     display: flex;
@@ -3834,7 +3875,7 @@
   /* 步骤切换：默认隐藏，加 .active 显示 */
   .scan-step { display: none; }
   .scan-step.active { display: block; }
-  /* 搜寻步骤用 flex 居中布局 */
+  /* 搜索步骤用 flex 居中布局 */
   .scan-step.scan-step-search.active { display: flex; flex-direction: column; align-items: center; }
 
   /* 发现设备：步骤头部 */
@@ -3881,6 +3922,24 @@
   .scan-device-rssi { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 3px; }
   .scan-device-signal { color: #5b8fff; flex-shrink: 0; }
   .scan-device-signal svg { width: 20px; height: 20px; }
+  /* 已被他人绑定：置灰、不可选 */
+  .scan-device.taken { opacity: 0.55; }
+  .scan-device.taken .scan-device-icon { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); }
+  .scan-device.taken .scan-device-signal { color: rgba(255,255,255,0.35); }
+  /* 小标识：挂在设备名旁的中性徽标（非红字） */
+  .scan-device-badge {
+    display: inline-block;
+    margin-left: 7px;
+    padding: 1.5px 8px;
+    font-size: 10.5px;
+    font-weight: 500;
+    line-height: 1.5;
+    vertical-align: middle;
+    color: rgba(255,255,255,0.65);
+    background: rgba(255,255,255,0.1);
+    border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: 100px;
+  }
 
   /* 选择连接方式 / Wi-Fi配置 步骤头部（带返回） */
   .scan-step-head {
@@ -4179,6 +4238,14 @@
   .remote-guide-btn:active { transform: scale(0.97); opacity: 0.9; }
 
   /* 大标题 REMOTE */
+  .remote-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 4px 2px 12px;
+  }
+  .remote-head .remote-title { margin: 0; }
+  .remote-head .status-chip { position: static; }
   .remote-title {
     font-size: 28px;
     font-weight: 800;
@@ -4190,10 +4257,10 @@
   /* 视频/状态预览框 */
   .remote-preview {
     width: 100%;
-    aspect-ratio: 16 / 11;
+    aspect-ratio: 16 / 10;
     background: #0e1014;
     border-radius: 18px;
-    margin-bottom: 22px;
+    margin-bottom: 14px;
     position: relative;
     display: flex;
     align-items: center;
@@ -4234,33 +4301,28 @@
     display: flex;
     align-items: stretch;
     gap: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
+  /* 快捷动作：原生纵向滑动（超出高度可上下滑；横竖屏统一）*/
   .remote-actions-viewport {
     flex: 1;
-    overflow: hidden;   /* 分页：超出高度的内容被裁掉，靠翻页看到 */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     min-width: 0;
   }
-  /* 每页 4 列 × 3 行 = 12 个，多页时靠 translateY 切换 */
+  .remote-actions-viewport::-webkit-scrollbar { width: 4px; }
+  .remote-actions-viewport::-webkit-scrollbar-thumb { background: rgba(91,143,255,0.5); border-radius: 100px; }
+  /* 每页 4 列，超出行数可滑动查看 */
   .remote-actions {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: 1fr;
+    grid-auto-rows: auto;
     gap: 10px;
-    transition: transform 0.28s cubic-bezier(.22,.61,.36,1);
-    will-change: transform;
+    transform: none !important;   /* 用原生滑动替代 translateY 翻页 */
   }
-
-  /* 右侧竖向翻页滑杆 */
-  .remote-actions-slider {
-    width: 22px;
-    flex-shrink: 0;
-    display: none;              /* 单页时隐藏，JS 控制 */
-    align-items: center;
-    justify-content: center;
-    touch-action: none;         /* 拖动时不触发页面滚动 */
-  }
-  .remote-actions-slider.show { display: flex; }
+  /* 旧的翻页滑杆停用（改为原生滑动）*/
+  .remote-actions-slider { display: none !important; }
   .ras-track {
     position: relative;
     width: 6px;
@@ -4285,31 +4347,31 @@
   .ras-thumb:active { cursor: grabbing; }
   .ras-thumb.dragging { transition: none; }
   .action-btn {
-    aspect-ratio: 1 / 1;
+    height: 56px;                 /* 紧凑：不再用 1:1 方块，腾出空间给摇杆 */
     background: rgba(255,255,255,0.04);
     border: 0.5px solid rgba(255,255,255,0.06);
-    border-radius: 14px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 5px;
     cursor: pointer;
     transition: all 0.15s;
     color: rgba(255,255,255,0.85);
-    padding: 8px;
+    padding: 6px;
   }
   .action-btn:active {
     background: rgba(255,255,255,0.08);
     transform: scale(0.96);
   }
   .action-btn svg {
-    width: 26px; height: 26px;
+    width: 20px; height: 20px;
     color: rgba(255,255,255,0.85);
     stroke-width: 1.6;
   }
   .action-btn-label {
-    font-size: 13px;
+    font-size: 11px;
     color: rgba(255,255,255,0.85);
     line-height: 1;
   }
@@ -4440,7 +4502,7 @@
   .mode-pills {
     display: flex;
     gap: 9px;
-    margin: 20px 0 24px;
+    margin: 4px 0 12px;
     flex-wrap: nowrap;
     overflow-x: auto;
     padding-bottom: 4px;
@@ -4472,6 +4534,25 @@
   .mode-pill.danger:active {
     background: #e63956;
   }
+
+  /* 模式切换：长按蓄满即切换（防误触） */
+  .mode-hint {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    margin: 18px 0 8px;
+  }
+  .mode-pill { position: relative; overflow: hidden; }
+  /* 长按进度填充：从左到右蓄满 */
+  .mp-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0;
+    background: rgba(91,143,255,0.45);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .mp-text { position: relative; z-index: 1; }
+  .mode-pill.holding { border-color: rgba(91,143,255,0.6); }
 
   /* ============================================
    * 横屏遥控 overlay（#11）：点全屏按钮进入
@@ -4615,20 +4696,49 @@
   .remote-landscape .rl-joy-right { right: 22px; left: auto; }
 
   /* 底部中间：一排动作按钮，动作多时横向滚动（左右摇杆之间的空间内）*/
-  .rl-actions {
+  /* 横屏快捷动作：每页 6 列 × 2 行 = 12，纵向分页 + 右侧竖向滑杆 */
+  .rl-actions-wrap {
     position: absolute;
-    bottom: 30px;
+    bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 10px;
+    align-items: stretch;
+    gap: 8px;
     z-index: 4;
-    max-width: calc(100vw - 220px);  /* 给左右摇杆留出空间 */
-    overflow-x: auto;
-    padding: 4px;
-    scrollbar-width: none;
   }
-  .rl-actions::-webkit-scrollbar { display: none; }
+  .rl-actions-viewport {
+    overflow-y: auto;                /* 只露出 2 行，超出可原生滑动 */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 2px;
+  }
+  .rl-actions-viewport::-webkit-scrollbar { width: 4px; }
+  .rl-actions-viewport::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.45); border-radius: 100px; }
+  .rl-actions {
+    display: grid;
+    grid-template-columns: repeat(6, 52px);
+    grid-auto-rows: 52px;
+    gap: 10px;
+    transform: none !important;      /* 用原生滑动替代 translateY 翻页 */
+  }
+  /* 旧的翻页滑杆停用（改为原生滑动）*/
+  .rl-actions-slider { display: none !important; }
+  .rl-as-track {
+    position: relative;
+    width: 4px; height: 100%;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.12);
+  }
+  .rl-as-thumb {
+    position: absolute; left: 0; top: 0;
+    width: 4px; min-height: 24px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.55);
+    cursor: pointer;
+    transition: top 0.2s;
+  }
+  .rl-as-thumb.dragging { transition: none; background: rgba(255,255,255,0.85); }
   .rl-action-btn {
     width: 52px; height: 52px;
     border-radius: 13px;
@@ -4672,7 +4782,7 @@
     position: relative;
   }
   .joysticks.single { justify-content: center; }
-  .joysticks.single .joystick { flex: 0 0 auto; width: 200px; max-width: 60%; }
+  .joysticks.single .joystick { flex: 0 0 auto; width: 168px; max-width: 55%; }
   .joystick {
     flex: 1;
     aspect-ratio: 1 / 1;
@@ -5940,6 +6050,30 @@
   }
   .mini-toast.show { opacity: 1; }
 
+  /* 统一 Toast：全局唯一样式，屏幕顶部、深色胶囊、不区分颜色 */
+  .uni-toast {
+    position: fixed;
+    left: 50%;
+    top: calc(var(--safe-top, 44px) + 10px);
+    transform: translate(-50%, -12px);
+    background: rgba(20,22,28,0.94);
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.45;
+    padding: 11px 20px;
+    border-radius: 14px;
+    max-width: calc(100% - 40px);
+    text-align: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease, transform 0.28s ease;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 10px 34px rgba(0,0,0,0.5);
+  }
+  .uni-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
   /* ============================================ */
   /* ===== 登录 / 注册 / 重置密码 页 ===== */
   /* ============================================ */
@@ -5993,6 +6127,7 @@
   /* Tab：手机号/邮箱 */
   .auth-tabs {
     display: flex;
+    justify-content: center;     /* tab 居中 */
     gap: 28px;
     border-bottom: 0.5px solid rgba(255,255,255,0.08);
     margin-bottom: 28px;
@@ -6008,6 +6143,7 @@
   }
   .auth-tab svg { width: 17px; height: 17px; }
   .auth-tab.active { color: #fff; font-weight: 600; }
+  .auth-tab.active svg { color: #5b8fff; }   /* 选中的 tab 图标变蓝（手机/邮箱各自高亮） */
   .auth-tab.active::after {
     content: "";
     position: absolute;
@@ -6093,6 +6229,11 @@
     font-size: 13px;
     cursor: pointer;
   }
+  /* 忘记密码：灰色（其余链接保持蓝色） */
+  .auth-link[data-auth-go="authReset"] { color: rgba(255,255,255,0.4); }
+  /* 登录页「还没有账号？立即注册」固定到屏幕底部（颜色不变） */
+  #authLogin.active { display: flex; flex-direction: column; flex: 1 0 auto; }
+  #authLogin .auth-bottom { margin-top: auto; padding-top: 28px; }
 
   .auth-submit {
     width: 100%;
@@ -6431,25 +6572,43 @@
   .launch-btn.confirm.disabled { opacity: 0.4; pointer-events: none; }
   .launch-btn:active { transform: scale(0.98); }
 /* ============================================================
- * 全局离线横幅（网络断开时出现在手机框顶部）
+ * 顶部机器人通信横幅（断连 W-02 / 弱网 W-03）
+ * 轻量样式：居中小胶囊 + 彩色文字，弱化存在感
  * ============================================================ */
-.net-offline-bar {
+.robot-status-bar {
   position: absolute;
-  top: calc(var(--safe-top, 44px));
-  left: 0; right: 0;
+  top: calc(var(--safe-top, 44px) + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
   z-index: 480;
   display: none;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 9px 14px;
-  background: rgba(255,77,77,0.92);
-  color: #fff;
-  font-size: 12.5px;
-  backdrop-filter: blur(6px);
+  gap: 6px;
+  max-width: calc(100% - 40px);
+  padding: 5px 13px;
+  background: rgba(22,24,30,0.72);
+  border: 0.5px solid rgba(255,255,255,0.08);
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.28);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
-.net-offline-bar.show { display: flex; }
-.net-offline-bar svg { width: 15px; height: 15px; flex-shrink: 0; }
+.robot-status-bar.show {
+  display: inline-flex;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.robot-status-bar svg { width: 13px; height: 13px; flex-shrink: 0; }
+/* 彩色文字：断连 = 红；弱网 = 琥珀 */
+.robot-status-bar.disconnect { color: #ff7a7a; }
+.robot-status-bar.weak { color: #ffc061; }
 
 /* ============================================================
  * 状态调试面板（悬浮 / 可拖动 / 半透明；非产品 UI）
@@ -6630,6 +6789,75 @@
   border-bottom: 0.5px solid rgba(255,255,255,0.08);
 }
 .sim-group:first-child { margin-top: 0; }
+
+/* 面板两大部分的分区标题 */
+.sim-part {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin: 16px -12px 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+.sim-part:first-child { margin-top: 0; }
+.sim-part-state { color: #cfe0ff; background: rgba(91,143,255,0.16); border-left: 3px solid #5b8fff; }
+.sim-part-error { color: #ffdcae; background: rgba(255,168,64,0.14); border-left: 3px solid #ffa840; }
+.sim-part-preview { color: #c9f5d8; background: rgba(64,200,120,0.14); border-left: 3px solid #3fca7a; }
+
+/* 组件预览：可折叠的清单 + 可点触发的小胶囊 */
+.sim-preview details {
+  margin-bottom: 7px;
+  border: 0.5px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.sim-preview summary {
+  cursor: pointer;
+  padding: 7px 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #cfe0ff;
+  background: rgba(255,255,255,0.05);
+  list-style: none;
+  user-select: none;
+}
+.sim-preview summary::-webkit-details-marker { display: none; }
+.sim-preview summary::before { content: '▸ '; opacity: 0.7; }
+.sim-preview details[open] > summary::before { content: '▾ '; }
+.sim-chips { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px; }
+.sim-chip {
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 100px;
+  border: 0.5px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.82);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.1s, background 0.12s;
+}
+.sim-chip:active { transform: scale(0.95); background: rgba(91,143,255,0.22); }
+.sim-chip.on { background: rgba(91,143,255,0.28); border-color: rgba(91,143,255,0.6); color: #cfe0ff; }
+.sim-chip .c { color: #5b8fff; font-weight: 700; margin-right: 3px; }
+
+/* 组件预览的内联提示直接复用各页面自带的真实内联元素（如 .auth-error），不再注入浮层 */
+/* 各页面顶部的内联提示槽（页内红字，默认隐藏；由预览或真实校验触发显示） */
+.page-inline {
+  display: none;
+  margin: 8px 16px 0;
+  padding: 7px 12px;
+  border-left: 2.5px solid #ff5a5f;
+  background: rgba(255,90,95,0.10);
+  border-radius: 4px;
+  color: #ff8a8c;
+  font-size: 12.5px;
+  line-height: 1.45;
+  text-align: left;
+  position: relative;
+  z-index: 30;
+}
+.page-inline.show { display: block; }
 
 /* 异常类条件：非默认值时高亮成橙色，提示"该异常持续生效中" */
 .sim-seg button.active.err {
@@ -6856,6 +7084,9 @@
       </div>
     </div>
 
+    <!-- 登录内联错误【I-05】：输入框下方红字（默认隐藏） -->
+    <div class="auth-error" id="loginError">手机号 / 邮箱 / 密码格式错误</div>
+
     <button class="auth-submit" id="authLoginBtn">登录 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
 
     <div class="auth-agree">
@@ -6912,7 +7143,7 @@
         <svg class="auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         <input type="text" id="regAccountEcho" readonly />
       </div>
-      <div class="auth-pw-tip">请输入 8 位以上密码，同时包括字母和数字</div>
+      <div class="auth-pw-tip">密码长度至少 8 位，且同时包含字母与数字</div>
       <div class="auth-input auth-input-pw">
         <svg class="auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <input type="password" id="regPw" placeholder="密码" />
@@ -6971,7 +7202,7 @@
 
     <!-- 重置 步骤3：设置新密码 -->
     <div class="auth-substep" id="resetStep3">
-      <div class="auth-pw-tip">请输入 8 位以上密码，同时包括字母和数字</div>
+      <div class="auth-pw-tip">密码长度至少 8 位，且同时包含字母与数字</div>
       <div class="auth-input auth-input-pw">
         <svg class="auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <input type="password" id="resetPw" placeholder="新密码" />
@@ -7058,6 +7289,9 @@
       </div>
     </div>
 
+    <!-- 首页内联提示槽（如胶囊短按提示【I-07】）：默认隐藏 -->
+    <div class="page-inline" id="inlineHome"></div>
+
     <!-- 底部操作区 -->
     <div class="bottom-area">
       <!-- 未连接：连接机器人 -->
@@ -7119,7 +7353,14 @@
     </div>
 
     <div class="remote-body">
-      <div class="remote-title">REMOTE</div>
+      <div class="remote-head">
+        <div class="remote-title">REMOTE</div>
+        <!-- 机器人状态胶囊（电量 + 连接模式，同首页；未连接隐藏）-->
+        <div class="status-chip" id="remoteStatusChip" style="display:none;">
+          <div class="chip-battery-icon"></div><span id="remoteChipBatt">--%</span>
+          <span class="chip-divider">|</span><span id="remoteChipMode">Wi-Fi</span>
+        </div>
+      </div>
 
       <!-- 未连接引导态：盖住遥控内容，引导用户去连接 -->
       <div class="remote-guide" id="remoteGuide">
@@ -7166,12 +7407,15 @@
 
 
       <!-- 模式胶囊 -->
-      <div class="mode-pills">
-        <div class="mode-pill">零力矩</div>
-        <div class="mode-pill">阻尼</div>
-        <div class="mode-pill">站立</div>
-        <div class="mode-pill">运控</div>
-        <div class="mode-pill danger">急停</div>
+      <!-- 内联提示槽（如零力矩警示【I-09】/ 动作下限）：默认隐藏 -->
+      <div class="page-inline" id="inlineRemote"></div>
+      <!-- 模式切换：点击即切换 + 独立急停 -->
+      <div class="mode-pills" id="modePillsPortrait">
+        <div class="mode-pill" data-mode="零力矩">零力矩</div>
+        <div class="mode-pill" data-mode="阻尼">阻尼</div>
+        <div class="mode-pill active" data-mode="站立">站立</div>
+        <div class="mode-pill" data-mode="运控">运控</div>
+        <button class="mode-pill danger" id="estopPortrait">急停</button>
       </div>
 
       <!-- 双摇杆 -->
@@ -7221,18 +7465,13 @@
       </button>
     </div>
 
-    <!-- 左上角：摄像头图标 + 模式按钮 2×2 竖排 -->
+    <!-- 左上角：模式按钮（点击即切换，同竖屏交互） -->
     <div class="rl-topleft">
-      <div class="rl-cam">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>
-        </svg>
-      </div>
-      <div class="rl-modes">
-        <div class="mode-pill">零力矩</div>
-        <div class="mode-pill">阻尼</div>
-        <div class="mode-pill">运控</div>
-        <div class="mode-pill">站立</div>
+      <div class="rl-modes" id="modePillsLandscape">
+        <div class="mode-pill" data-mode="零力矩">零力矩</div>
+        <div class="mode-pill" data-mode="阻尼">阻尼</div>
+        <div class="mode-pill active" data-mode="站立">站立</div>
+        <div class="mode-pill" data-mode="运控">运控</div>
       </div>
     </div>
 
@@ -7249,8 +7488,17 @@
       <div class="joystick-stick"></div>
     </div>
 
-    <!-- 底部中间：一排 8 个动作按钮 -->
-    <div class="rl-actions" id="rlActions"></div>
+    <!-- 底部中间：快捷动作（每页 6 列 × 2 行 = 12，超出一页右侧竖向滑杆翻页） -->
+    <div class="rl-actions-wrap" id="rlActionsWrap">
+      <div class="rl-actions-viewport" id="rlActionsViewport">
+        <div class="rl-actions" id="rlActions"></div>
+      </div>
+      <div class="rl-actions-slider" id="rlActionsSlider">
+        <div class="rl-as-track" id="rlAsTrack">
+          <div class="rl-as-thumb" id="rlAsThumb"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- 未连接 Toast -->
@@ -7288,6 +7536,9 @@
     </div>
 
     <div class="perform-body">
+
+      <!-- 内联提示槽（如学习失败原因【I-08】/ 命名重复【I-17】）：默认隐藏 -->
+      <div class="page-inline" id="inlinePerform"></div>
 
       <!-- 头部 -->
       <div class="perform-header">
@@ -7493,7 +7744,7 @@
       </div>
     </div>
 
-    <div class="mocap-footer-hint">支持 MP4 / MOV 格式 · 建议 10-60 秒</div>
+    <div class="mocap-footer-hint">支持 MP4 / MOV 格式 · 60 秒以内</div>
   </div>
 </div>
 
@@ -7923,11 +8174,6 @@
       </button>
     </div>
 
-    <!-- 断网提示条（B4）：仅在对话页顶部导航下方出现 -->
-    <div class="agent-net-banner" id="agentNetBanner">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
-      <span>网络连接已断开，消息将在恢复后重发</span>
-    </div>
 
     <!-- 消息流 -->
     <div class="agent-messages" id="agentMessages">
@@ -8093,19 +8339,30 @@
 
     </div>
 
-    <!-- 长按语音录制浮层 -->
+    <!-- 长按语音录制浮层（取消态视觉与首页语音一致：波形淡出→删除图标弹入+整体转红） -->
     <div class="voice-recording" id="voiceRec">
-      <div class="voice-rec-wave">
-        <span style="animation-delay:0s"></span>
-        <span style="animation-delay:0.1s"></span>
-        <span style="animation-delay:0.2s"></span>
-        <span style="animation-delay:0.3s"></span>
-        <span style="animation-delay:0.2s"></span>
-        <span style="animation-delay:0.1s"></span>
-        <span style="animation-delay:0s"></span>
-        <span style="animation-delay:0.15s"></span>
-        <span style="animation-delay:0.25s"></span>
-        <span style="animation-delay:0.1s"></span>
+      <div class="voice-rec-body">
+        <div class="voice-rec-wave">
+          <span style="animation-delay:0s"></span>
+          <span style="animation-delay:0.1s"></span>
+          <span style="animation-delay:0.2s"></span>
+          <span style="animation-delay:0.3s"></span>
+          <span style="animation-delay:0.2s"></span>
+          <span style="animation-delay:0.1s"></span>
+          <span style="animation-delay:0s"></span>
+          <span style="animation-delay:0.15s"></span>
+          <span style="animation-delay:0.25s"></span>
+          <span style="animation-delay:0.1s"></span>
+        </div>
+        <!-- 取消态：删除图标（与首页 hv-cancel-icon 同一视觉） -->
+        <div class="voice-rec-cancel-icon" id="vrCancelIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+        </div>
       </div>
       <div class="voice-rec-hint">
         松开发送 · <span class="cancel-zone">上滑取消</span>
@@ -8360,6 +8617,9 @@
 
   <div class="settings-body">
 
+    <!-- 内联提示槽（如 OTA 电量拦截【I-11】/ 原密码错误【I-13】）：默认隐藏 -->
+    <div class="page-inline" id="inlineSettings"></div>
+
     <div class="settings-group-label">我的设备</div>
 
     <!-- 我的设备列表（由 JS 渲染）-->
@@ -8422,7 +8682,6 @@
       </div>
     </div>
 
-    <div class="settings-version">GALBOT App v1.0.0 · © 2026 Galbot Inc.</div>
   </div>
 </div>
 
@@ -8453,12 +8712,6 @@
   </div>
 
   <div class="rd-body">
-    <!-- 非连接态：最后一次连接信息提示 -->
-    <div class="rd-history-note" id="rdHistoryNote">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span id="rdHistoryText">以下为最后一次连接时的信息</span>
-    </div>
-
     <!-- 设备卡 -->
     <div class="rd-device-card">
       <div class="rd-device-badge" id="rdBadge">已连接</div>
@@ -8473,7 +8726,7 @@
       <div class="rd-device-main">
         <div class="rd-device-name" id="rdName">G-ET1-3743</div>
         <div class="rd-device-sn" id="rdSn">R111AAAEAAAA3743</div>
-        <div class="rd-device-batt">
+        <div class="rd-device-batt" id="rdBattWrap">
           <svg width="16" height="11" viewBox="0 0 20 12" fill="none"><rect x="0.5" y="0.5" width="16" height="11" rx="2.5" stroke="currentColor"/><rect x="2" y="2" width="11" height="8" rx="1" fill="currentColor"/><rect x="17.5" y="3.5" width="2" height="5" rx="1" fill="currentColor"/></svg>
           <span id="rdBatt">90%</span>
         </div>
@@ -8561,8 +8814,6 @@
       <div class="rd-data-row"><div class="rd-data-key">固件版本<span class="rd-data-note">机器人底层控制程序</span></div><div class="rd-data-val">FW v3.4.1</div></div>
       <div class="rd-data-row"><div class="rd-data-key">软件版本<span class="rd-data-note">机器人系统应用版本</span></div><div class="rd-data-val">v1.0.0</div></div>
       <div class="rd-data-row"><div class="rd-data-key">IP 地址</div><div class="rd-data-val mono">192.168.1.37</div></div>
-      <div class="rd-data-row"><div class="rd-data-key">遥控器 ID</div><div class="rd-data-val mono">RC-9364</div></div>
-      <div class="rd-data-row"><div class="rd-data-key">当前模式</div><div class="rd-data-val ok">Idle</div></div>
     </div>
   </div>
 </div>
@@ -8639,7 +8890,7 @@
     </div>
 
     <!-- 两种连接方式说明（只读引导） -->
-    <div class="conn-section-label" style="margin-top:20px;">两种连接方式</div>
+    <div class="conn-section-label" style="margin-top:20px;">两种连接模式</div>
     <div class="conn-ways">
       <div class="conn-way" id="connWayWifi">
         <div class="conn-way-icon">
@@ -8647,7 +8898,7 @@
         </div>
         <div class="conn-way-main">
           <div class="conn-way-title">Wi-Fi 模式</div>
-          <div class="conn-way-desc">机器人和手机连同一 Wi-Fi，家里 / 办公室日常使用</div>
+          <div class="conn-way-desc">机器人和手机连同一个 Wi-Fi，适合家里 / 办公室日常使用</div>
         </div>
         <div class="conn-way-cur" style="display:none;">当前</div>
       </div>
@@ -8657,15 +8908,14 @@
         </div>
         <div class="conn-way-main">
           <div class="conn-way-title">AP 模式（热点直连）</div>
-          <div class="conn-way-desc">手机直连机器人热点，户外或没有 Wi-Fi 时使用</div>
+          <div class="conn-way-desc">手机直接连机器人热点，适合户外或没有 Wi-Fi 的场景</div>
         </div>
         <div class="conn-way-cur" style="display:none;">当前</div>
       </div>
     </div>
 
     <!-- 重新配网 -->
-    <button class="rd-sheet-btn" id="connReconfigBtn" style="margin-top:16px;">重新配网</button>
-    <div class="conn-switch-hint" style="margin-top:10px; margin-bottom:0;">切换连接方式请点「重新配网」按引导操作。配网过程中机器人会短暂断开，完成后将自动重连。</div>
+    <button class="rd-sheet-btn" id="connReconfigBtn" style="margin-top:16px;">切换连接模式</button>
 
   </div>
 </div>
@@ -8685,7 +8935,7 @@
         </div>
         <div class="conn-way-main">
           <div class="conn-way-title">Wi-Fi 模式</div>
-          <div class="conn-way-desc">已有 Wi-Fi，让机器人连上它</div>
+          <div class="conn-way-desc">机器人和手机连同一个 Wi-Fi，适合家里 / 办公室日常使用</div>
         </div>
         <svg class="conn-way-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -8695,7 +8945,7 @@
         </div>
         <div class="conn-way-main">
           <div class="conn-way-title">AP 模式（热点直连）</div>
-          <div class="conn-way-desc">没有 Wi-Fi，手机直连机器人热点</div>
+          <div class="conn-way-desc">手机直接连机器人热点，适合户外或没有 Wi-Fi 的场景</div>
         </div>
         <svg class="conn-way-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -8876,6 +9126,46 @@
   </div>
 </div>
 
+<!-- 断开连接二次确认弹窗 -->
+<div class="confirm-modal" id="rdDisconnectModal">
+  <div class="confirm-box">
+    <div class="confirm-title">断开连接</div>
+    <div class="confirm-desc">
+      断开后需重新连接才能控制机器人。<br/>确认断开吗？
+    </div>
+    <div class="confirm-buttons">
+      <button class="confirm-btn cancel" id="rdDisconnectCancel">取消</button>
+      <button class="confirm-btn danger" id="rdDisconnectOk">断开连接</button>
+    </div>
+  </div>
+</div>
+
+<!-- 连接失败弹窗（机器端未响应 / 网络不佳）：给出重试入口 -->
+<div class="confirm-modal" id="rdConnFailModal">
+  <div class="confirm-box">
+    <div class="confirm-title">连接失败</div>
+    <div class="confirm-desc" id="rdConnFailDesc">
+      未能连接到机器人。请确认机器人已开机、靠近手机，稍后重试。
+    </div>
+    <div class="confirm-buttons">
+      <button class="confirm-btn cancel" id="rdConnFailCancel">取消</button>
+      <button class="confirm-btn" id="rdConnFailRetry">重试</button>
+    </div>
+  </div>
+</div>
+
+<!-- 遥控模式切换二次确认（零力矩 / 阻尼 等有安全后果的模式）-->
+<div class="confirm-modal" id="modeConfirmModal" style="z-index:600;">
+  <div class="confirm-box">
+    <div class="confirm-title" id="modeConfirmTitle">切换模式</div>
+    <div class="confirm-desc" id="modeConfirmDesc"></div>
+    <div class="confirm-buttons">
+      <button class="confirm-btn cancel" id="modeConfirmCancel">取消</button>
+      <button class="confirm-btn" id="modeConfirmOk">确认切换</button>
+    </div>
+  </div>
+</div>
+
 <!-- 遥控器解绑确认 -->
 <div class="confirm-modal" id="rcUnbindModal">
   <div class="confirm-box">
@@ -8931,37 +9221,17 @@
   </div>
 </div>
 
-<!-- 发现新版本提示（自动更新开启时） -->
-<div class="confirm-modal" id="newVersionModal" style="z-index:400;">
-  <div class="confirm-box">
-    <div class="confirm-title">发现新版本</div>
-    <div class="confirm-desc" id="newVersionDesc">
-      检测到新版本，是否现在更新？
-    </div>
-    <div class="confirm-buttons">
-      <button class="confirm-btn cancel" id="newVersionLater">稍后</button>
-      <button class="confirm-btn ok" id="newVersionNow">立即更新</button>
-    </div>
-  </div>
-</div>
 
 <!-- 通用 sheet 蒙层 -->
 <div class="sheet-mask" id="sheetMask"></div>
 
-<!-- ============================================ -->
-<!-- ===== 全局离线横幅（网络断开时出现） ===== -->
-<!-- ============================================ -->
-<div class="net-offline-bar" id="netOfflineBar">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="1" y1="1" x2="23" y2="23"/>
-    <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
-    <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
-    <path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
-    <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
-    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-    <line x1="12" y1="20" x2="12.01" y2="20"/>
-  </svg>
-  <span>网络不可用，请检查网络连接</span>
+<!-- 全局统一 Toast（唯一样式，屏幕顶部） -->
+<div class="uni-toast" id="uniToast"><span></span></div>
+
+<!-- 机器人连接横幅：断连【W-02】/ 弱网【W-03】 -->
+<div class="robot-status-bar" id="robotStatusBar">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"/><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 15.5a5 5 0 0 1 7 0"/></svg>
+  <span id="robotStatusText">与机器人连接中断，请尝试重连…</span>
 </div>
 
 <!-- 强制更新（不可关闭） -->
@@ -9150,20 +9420,6 @@
       <div class="update-progress-track"><div class="update-progress-fill" id="appProgFill"></div></div>
     </div>
 
-    <div class="auto-update-row">
-      <div class="auto-update-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <polyline points="12 6 12 12 16 14"/>
-        </svg>
-      </div>
-      <div class="auto-update-main">
-        <div class="auto-update-title">自动更新</div>
-        <div class="auto-update-desc">Wi-Fi 下自动下载新版本</div>
-      </div>
-      <div class="switch on" id="appAutoUpdate" data-onoff></div>
-    </div>
-
     <!-- 主操作按钮（文案随状态变）-->
     <button class="check-update-btn" id="checkUpdateBtn">检查更新</button>
   </div>
@@ -9279,7 +9535,7 @@
 
     <div class="feedback-contact">
       <span class="feedback-contact-label">联系方式</span>
-      <input class="feedback-contact-value" type="text" value="18600333403"/>
+      <input class="feedback-contact-value" type="text" placeholder="请填写您的手机或邮箱"/>
     </div>
 
     <div class="feedback-submit-row">
@@ -9289,13 +9545,16 @@
 </div>
 
 <!-- ============================================ -->
-<!-- ===== Sheet: 正在搜寻设备 ===== -->
+<!-- ===== Sheet: 正在搜索设备 ===== -->
 <!-- ============================================ -->
 <div class="sheet" id="sheetScan" style="z-index: 280;">
   <div class="sheet-handle"></div>
   <div class="scan-sheet-body" style="align-items: stretch;">
 
-    <!-- 步骤1：搜寻设备 -->
+    <!-- 内联提示槽（如配网说明【I-12】/ 热点未连接【I-16】）：默认隐藏 -->
+    <div class="page-inline" id="inlineScan"></div>
+
+    <!-- 步骤1：搜索设备 -->
     <div class="scan-step scan-step-search active" id="scanStepSearch">
       <div class="scan-radar">
         <div class="scan-radar-core">
@@ -9305,8 +9564,8 @@
           </svg>
         </div>
       </div>
-      <div class="scan-title">正在搜寻设备...</div>
-      <div class="scan-subtitle">请确保机器人已开机并处于配对模式</div>
+      <div class="scan-title">正在搜索设备...</div>
+      <div class="scan-subtitle">请确保机器人已开机并处于手机信号范围内</div>
       <div class="scan-progress"></div>
       <button class="scan-cancel-btn" id="scanCancelBtn">取消</button>
     </div>
@@ -9314,7 +9573,7 @@
     <!-- 步骤2：发现设备 -->
     <div class="scan-step" id="scanStepResult">
       <div class="scan-result-head">
-        <div class="scan-result-title">发现 1 台设备</div>
+        <div class="scan-result-title">发现 2 台设备</div>
         <div class="scan-result-sub">选择要绑定的机器人</div>
         <div class="scan-result-searching">正在搜索更多设备...</div>
         <div class="scan-mini-progress"></div>
@@ -9331,6 +9590,20 @@
           </div>
           <div class="scan-device-signal">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="15"/><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="5" stroke="rgba(255,255,255,0.25)"/></svg>
+          </div>
+        </div>
+        <!-- 已被其他账号绑定的设备：可见但不可绑定 -->
+        <div class="scan-device taken" data-dev-name="G-ET1-6207" data-dev-sn="R111AAAEAAAA6207" data-taken="1">
+          <div class="scan-device-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+          </div>
+          <div class="scan-device-main">
+            <div class="scan-device-name">G-ET1-6207 <span class="scan-device-badge">已被他人绑定</span></div>
+            <div class="scan-device-sn">R111AAAEAAAA6207</div>
+            <div class="scan-device-rssi">-63 dBm · 良好</div>
+          </div>
+          <div class="scan-device-signal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="15"/><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="5"/></svg>
           </div>
         </div>
       </div>
@@ -9366,7 +9639,7 @@
         </div>
       </div>
 
-      <div class="conn-footnote">Wi-Fi 与 AP 直连无法同时使用，切换将会导致另一个网络断开连接，使用 AP 直连将无法使用 OTA 功能。</div>
+      <div class="conn-footnote">Wi-Fi 与 AP 直连无法同时使用，切换会断开另一个网络。机器人热点不提供上网，手机提示「无互联网连接」属正常现象，请勿断开。</div>
     </div>
 
     <!-- 步骤4：Wi-Fi 配置 -->
@@ -9532,6 +9805,53 @@
   </div>
 </div>
 
+<!-- ============================================ -->
+<!-- ===== 低电量弹窗【D-02】：电量 ≤20% 触发 ===== -->
+<!-- ============================================ -->
+<div class="launch-mask" id="lowBattMask"></div>
+<div class="launch-modal" id="lowBattModal" role="dialog" aria-modal="true">
+  <div class="launch-icon" style="color:#ff5a5f;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/><line x1="6" y1="10" x2="6" y2="14"/></svg>
+  </div>
+  <div class="launch-title">机器人电量不足</div>
+  <div class="launch-sub">机器人电量已低于 20%，为避免运动中断电，请及时充电后再执行动作。</div>
+  <div class="launch-btns">
+    <button class="launch-btn confirm" id="lowBattOk" style="width:100%;">知道了</button>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- ===== 机器人报警弹窗【D-03】：关节异常/温度过高等 ===== -->
+<!-- ============================================ -->
+<div class="launch-mask" id="alarmMask"></div>
+<div class="launch-modal" id="alarmModal" role="dialog" aria-modal="true">
+  <div class="launch-icon" style="color:#ffb84d;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  </div>
+  <div class="launch-title">机器人报警</div>
+  <div class="launch-sub" id="alarmSub">检测到关节异常，已暂停运动指令。请检查机器人状态后重试。</div>
+  <div class="launch-btns">
+    <button class="launch-btn cancel" id="alarmDetail">查看详情</button>
+    <button class="launch-btn confirm" id="alarmOk">知道了</button>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- ===== AP 模式拦截弹窗【D-05】：AP 直连下点联网功能 ===== -->
+<!-- ============================================ -->
+<div class="launch-mask" id="apInterceptMask"></div>
+<div class="launch-modal" id="apInterceptModal" role="dialog" aria-modal="true">
+  <div class="launch-icon" style="color:#5b8fff;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+  </div>
+  <div class="launch-title">该功能需要联网</div>
+  <div class="launch-sub">当前为 AP 直连模式、无外网，该功能需要机器人联网，请切换到 Wi-Fi 模式后重试。</div>
+  <div class="launch-btns">
+    <button class="launch-btn cancel" id="apInterceptCancel">取消</button>
+    <button class="launch-btn confirm" id="apInterceptGo">去切换</button>
+  </div>
+</div>
+
 <!-- ===== 消息长按菜单：复制（C）===== -->
 <div class="msg-ctx-mask" id="msgCtxMask"></div>
 <div class="msg-ctx-menu" id="msgCtxMenu">
@@ -9590,7 +9910,7 @@
     // —— 状态/模式文案（设备相关）——
     deviceModeLabel:   { wifi: 'Wi-Fi 模式', ap: 'AP 模式（热点直连）' },
     deviceStatusLabel: { connected: '已连接', available: '可连接', offline: '离线' },
-    // —— 搜寻设备：可被搜到的设备尾号池 ——
+    // —— 搜索设备：可被搜到的设备尾号池 ——
     scanPool: ['7421', '3056', '8890', '5134', '6207', '9885'],
     // —— Agent 对话页：模拟系统相册缩略图配色（含视频时长）——
     fakePhotos: [
@@ -9714,8 +10034,8 @@
     performOfficialWorks: [
       { id: 'o1', name: '风吹一夏',     duration: '0:24', date: '官方', syncState: 'synced',   musicOn: true },
       { id: 'o2', name: '太极',         duration: '0:48', date: '官方', syncState: 'synced',   musicOn: true },
-      { id: 'o3', name: 'Billie Jean',  duration: '0:36', date: '官方', syncState: 'unsynced', musicOn: true },
-      { id: 'o4', name: 'Uptown Funk',  duration: '0:30', date: '官方', syncState: 'unsynced', musicOn: true },
+      { id: 'o3', name: 'Billie Jean',  duration: '0:36', date: '官方', syncState: 'synced', musicOn: true },
+      { id: 'o4', name: 'Uptown Funk',  duration: '0:30', date: '官方', syncState: 'synced', musicOn: true },
     ],
     // —— 编排页：学习任务（learning | failed）——
     performTasks: [
@@ -9738,6 +10058,149 @@
       { grad: ['#3a3a6b', '#1a1a2a'], dur: '0:05' },
     ],
   };
+
+  /* ============================================================
+   * [COPY] 全局文案注册表（单一数据源）
+   * ------------------------------------------------------------
+   * 所有 Toast / 横幅 / 弹窗 / 内联 / App 内提示文案集中在此，按文档编号索引。
+   * 业务代码与调试面板都从这里取文案 —— 改文案只改这一处，
+   * 避免"原型与文档不一致"或"新提示加了、旧提示没删"的问题。
+   *
+   *   COPY.toasts['T-09'].t          → toast 文案
+   *   COPY.banners['W-02']           → 横幅 { t, kind }
+   *   COPY.dialogs['D-05']           → 弹窗 { label, el:[元素id…] }
+   *   COPY.inlines['I-05']           → 内联 { t, page:目标页面容器id }
+   *   COPY.app.configWip             → App 内非文档提示（"开发中"等）
+   * ============================================================ */
+  const COPY = {
+    // —— Toast（T 系列）编号与文案对齐《产品设计文档》文案清单 T1–T70 ——
+    toasts: {
+      'T-01': { t: '未连接机器人', type: 'error' },
+      'T-02': { t: '请输入手机号', type: 'error' },
+      'T-03': { t: '请输入邮箱', type: 'error' },
+      'T-04': { t: '请输入密码', type: 'error' },
+      'T-05': { t: '请输入验证码', type: 'error' },
+      'T-06': { t: '请先输入手机号', type: 'error' },
+      'T-07': { t: '验证码已发送', type: 'success' },
+      'T-08': { t: '请先阅读并同意《用户协议》和《隐私政策》', type: 'error' },
+      'T-09': { t: '密码长度至少 8 位，且同时包含字母与数字', type: 'error' },
+      'T-10': { t: '两次输入的密码不一致', type: 'error' },
+      'T-11': { t: '密码错误，请重新输入', type: 'error' },
+      'T-12': { t: '验证码错误或已失效', type: 'error' },
+      'T-13': { t: '该账号未注册', type: 'error' },
+      'T-14': { t: '密码错误次数过多，账号已锁定，请 30 分钟后重试', type: 'error' },
+      'T-15': { t: '该手机号已注册，请直接登录', type: 'error' },
+      'T-16': { t: '注册成功，请登录', type: 'success' },
+      'T-17': { t: '密码已重置，请登录', type: 'success' },
+      'T-18': { t: '密码已修改', type: 'success' },
+      'T-19': { t: '登录已过期，请重新登录', type: 'info' },
+      'T-20': { t: '正在连接…', type: 'info' },
+      'T-21': { t: '已连接到「X」', type: 'success' },
+      'T-22': { t: '已断开连接', type: 'success' },
+      'T-23': { t: '已解除绑定', type: 'success' },
+      'T-24': { t: '连接此设备后可查看', type: 'info' },
+      'T-25': { t: '未搜索到附近的机器人，请确认已开机并靠近后重试', type: 'error' },
+      'T-26': { t: '该设备已被其他账号绑定，无法绑定', type: 'error' },
+      'T-27': { t: '请输入 Wi-Fi 名称', type: 'error' },
+      'T-28': { t: 'Wi-Fi 密码错误，请重新输入', type: 'error' },
+      'T-29': { t: '连接超时，请确认机器人在信号范围内', type: 'error' },
+      'T-30': { t: '配网失败，请重试或返回上一步重新配置', type: 'error' },
+      'T-31': { t: '请在系统设置中连接热点，完成后返回', type: 'info' },
+      'T-32': { t: '正在配网，机器人将短暂断开…', type: 'warning' },
+      'T-33': { t: '已切换为 Wi-Fi 模式', type: 'success' },
+      'T-34': { t: '已复制', type: 'success' },
+      'T-35': { t: '遥控器绑定成功', type: 'success' },
+      'T-36': { t: '未找到该设备，请检查 ID 是否正确', type: 'error' },
+      'T-37': { t: '已急停 · 机器人已停止所有动作', type: 'success' },
+      'T-38': { t: '请长按急停按钮以确认停止', type: 'info' },
+      'T-39': { t: '机器人正在执行动作，请稍后', type: 'warning' },
+      'T-40': { t: '正在执行「X」', type: 'warning' },
+      'T-41': { t: '请至少保留 1 个动作', type: 'error' },
+      'T-42': { t: '已取消发送', type: 'warning' },
+      'T-43': { t: '已达 30 秒上限，已自动发送', type: 'warning' },
+      'T-44': { t: '请输入名称', type: 'error' },
+      'T-45': { t: '「X」已学会并同步到机器人～', type: 'success' },
+      'T-46': { t: '名称已更新', type: 'success' },
+      'T-47': { t: '已删除', type: 'success' },
+      'T-48': { t: '加载中…', type: 'info' },
+      'T-49': { t: '正在准备…', type: 'info' },
+      'T-50': { t: '正在执行…', type: 'warning' },
+      'T-51': { t: '请先连接 / 开机机器人', type: 'error' },
+      'T-52': { t: '同步作品需联网，请检查机器人网络后重试', type: 'error' },
+      'T-53': { t: '上传失败，请检查网络后重试', type: 'error' },
+      'T-54': { t: '动作学习失败：动作幅度过大，存在安全风险', type: 'error' },
+      'T-55': { t: '与机器人连接中断，请稍后重试', type: 'error' },
+      'T-56': { t: '机器人未响应，请稍后重试', type: 'error' },
+      'T-57': { t: '当前已是最新版本', type: 'info' },
+      'T-58': { t: '下载失败，请检查网络后重试', type: 'error' },
+      'T-59': { t: '固件升级完成', type: 'success' },
+      'T-60': { t: '已更新到 vX，App 已重启', type: 'success' },
+      'T-61': { t: '电量不足 50%，请充电后再升级', type: 'warning' },
+      'T-62': { t: '即将打开使用手册', type: 'info' },
+      'T-63': { t: '已提交，我们会尽快联系您', type: 'success' },
+      'T-64': { t: '对话配置开发中', type: 'warning' },
+      'T-65': { t: '服务器开小差了，请稍后重试', type: 'error' },
+      'T-66': { t: '视频格式不支持，请选择 mp4 / mov 格式', type: 'error' },
+      'T-67': { t: '视频时长超出限制，请选择 60 秒以内的视频', type: 'error' },
+      'T-68': { t: '请在系统设置中开启相册访问权限', type: 'error' },
+      'T-69': { t: '已达 60 秒上限，已自动结束录制', type: 'info' },
+      'T-70': { t: '名称已存在，请更换后重试', type: 'error' },
+    },
+    // —— 横幅 / 遮罩（W 系列）对齐文档 W1–W3 ——
+    banners: {
+      'W-01': { t: 'App 与机器人通信信号不佳', kind: 'weak' },
+      'W-02': { t: '与机器人连接中断，请尝试重连…', kind: 'disconnect' },
+      'W-03': { t: '固件升级中，请勿操作机器人' },
+    },
+    // —— 弹窗（D 系列）对齐文档 D1–D14；el = 对应 DOM 元素 id（mask + modal）——
+    dialogs: {
+      'D-01': { label: '启动确认',       el: ['launchMask', 'launchModal'] },
+      'D-02': { label: '机器人电量不足', el: ['lowBattMask', 'lowBattModal'] },
+      'D-03': { label: '机器人报警',     el: ['alarmMask', 'alarmModal'] },
+      'D-04': { label: '该功能需要联网', el: ['apInterceptMask', 'apInterceptModal'] },
+      'D-05': { label: '删除任务',       el: ['taskDeleteModal'] },
+      'D-06': { label: '解除绑定',       el: ['rdUnbindModal'] },
+      'D-07': { label: '断开连接',       el: ['rdDisconnectModal'] },
+      'D-08': { label: '连接失败',       el: ['rdConnFailModal'] },
+      'D-09': { label: '切换到「零力矩」', el: ['modeConfirmModal'] },
+      'D-10': { label: '急停',           el: ['modeConfirmModal'] },
+      'D-11': { label: '解除遥控器绑定', el: ['rcUnbindModal'] },
+      'D-12': { label: '退出登录',       el: ['logoutModal'] },
+      'D-13': { label: '开始安装固件',   el: ['otaInstallModal'] },
+      'D-14': { label: '需要更新',       el: ['forceUpdateModal'] },
+    },
+    // —— 内联（I 系列）对齐文档 I1–I15：t 文案 + page 目标页面容器 id ——
+    inlines: {
+      'I-01': { t: '按住和 ET1 说话', page: 'phone' },
+      'I-02': { t: '还没传给机器人，机器人联网后自动同步', page: 'performPage' },
+      'I-03': { t: '密码长度至少 8 位，且同时包含字母与数字', page: 'authPage' },
+      'I-04': { t: '密码长度至少 8 位，且同时包含字母与数字 ／ 两次输入的密码不一致', page: 'authPage' },
+      'I-05': { t: '请输入注册时使用的手机号 ／ 验证码已发送至 xxx', page: 'authPage' },
+      'I-06': { t: 'Wi-Fi 与 AP 直连无法同时使用，切换会断开另一个网络。机器人热点不提供上网，手机提示「无互联网连接」属正常现象，请勿断开。', page: 'sheetScan' },
+      'I-07': { t: '选择要用哪种方式连接机器人： ／ 为机器人填写要连接的 Wi-Fi。配网过程中机器人会短暂断开，完成后将自动连上网络。', page: 'sheetScan' },
+      'I-08': { t: '输入 Wi-Fi 信息以完成连接 ／ 把手机连上机器人自己的热点，即可完成绑定', page: 'sheetScan' },
+      'I-09': { t: '打开手机「设置 › 无线局域网」，找到并连接上面的热点，然后回到 App 点「我已连接」。', page: 'sheetScan' },
+      'I-10': { t: '机器人热点不提供上网，手机提示「无互联网连接」属正常现象，请勿断开。', page: 'sheetScan' },
+      'I-11': { t: '请确保机器人已开机并处于手机信号范围内', page: 'sheetScan' },
+      'I-12': { t: '松开发送 · 上滑取消 ／ 松开手指 取消发送', page: 'phone' },
+      'I-13': { t: '还可以说 N 秒', page: 'phone' },
+      'I-14': { t: '机器人前后左右预留 ≥1.5 米空间', page: 'phone' },
+      'I-15': { t: '请输入正确的手机号 / 邮箱', page: 'authPage' },
+    },
+    // —— "进行中 / 加载中"类提示（异步过程的即时反馈）——
+    progress: {
+      previewLoading: '加载中…',
+      quickAction:    (name) => '正在执行「' + name + '」',
+      workExecuting:  '正在执行…',
+    },
+    // —— App 内非文档 UI 文案（集中管理，便于统一修改/删除）——
+    app: {
+      configWip:       '对话配置开发中',
+      trackWip:        '多轨道编辑器开发中',
+    },
+  };
+  // 便捷取值
+  const tCopy = (code) => (COPY.toasts[code] || { t: code, type: 'info' });
 
   /* ============================================================
    * [S] 设备状态中枢 Store（发布订阅）
@@ -9839,45 +10302,23 @@
       return 'info';
     }
 
+    // 统一 Toast：所有页面、所有场景共用同一个顶部深灰胶囊，单一样式，不区分颜色/类型/位置（文档 G1）。
+    // opts.variant / opts.type 仍可传入但已忽略（保留参数兼容旧调用点）。
+    const uniToast = document.getElementById('uniToast');
+    let uniTimer = null;
     function toast(text, opts = {}) {
-      const variant = opts.variant || 'remote';
-      const duration = opts.duration || 1600;
-      const el = toastEls[variant];
-      if (!el) return;
-
-      const DEFAULT = '未连接机器人';
-      const msg = text || DEFAULT;
-
-      // center 变体（.galbot-toast）：新版带类型图标与配色
-      if (variant === 'center') {
-        const type = opts.type || guessType(msg);
-        el.className = 'galbot-toast t-' + type;   // 重置类型
-        const iconEl = document.getElementById('galbotToastIcon');
-        const textEl = document.getElementById('galbotToastText');
-        if (iconEl) iconEl.innerHTML = TOAST_ICONS[type] || TOAST_ICONS.info;
-        if (textEl) textEl.textContent = msg;
-        // 重新触发进场动画（连续弹同类提示时也有反馈）
-        el.classList.remove('show');
-        void el.offsetWidth;
-        el.classList.add('show');
-        clearTimeout(toastTimers[variant]);
-        toastTimers[variant] = setTimeout(() => el.classList.remove('show'), duration);
-        return;
-      }
-
-      // remote / perform 变体：保持原行为
-      const span = el.querySelector('span');
-      if (span) {
-        span.textContent = msg;
-      } else {
-        el.textContent = text || '';
-      }
-      el.classList.add('show');
-      clearTimeout(toastTimers[variant]);
-      toastTimers[variant] = setTimeout(() => {
-        el.classList.remove('show');
-        if (variant === 'remote' && span) span.textContent = DEFAULT; // 复位默认文案
-      }, duration);
+      if (!uniToast) return;
+      // 文案长度上限 2 行；停留时长与文案长度正相关（短 1.6s / 长 2.8s）——见文档 G1
+      const _len = String(text || '').length;
+      const duration = opts.duration || Math.min(2800, Math.max(1600, 1600 + (_len - 8) * 55));
+      const msg = text || '未连接机器人';
+      const span = uniToast.querySelector('span') || uniToast;
+      span.textContent = msg;
+      uniToast.classList.remove('show');
+      void uniToast.offsetWidth;   // 重新触发进场动画
+      uniToast.classList.add('show');
+      clearTimeout(uniTimer);
+      uniTimer = setTimeout(() => uniToast.classList.remove('show'), duration);
     }
 
     /* --------------------------------------------------------
@@ -10022,7 +10463,9 @@
     function fire() {
       reset();
       fab.classList.remove('holding');
-      UI.toast('已急停 · 机器人已停止所有动作', { variant: 'center', duration: 2200 });
+      // 急停安全态（文档 G4/G5）：作品 / 舞蹈执行时急停 → 机器人先停止再恢复「站立」态稳住。
+      // （遥控场景的急停走遥控页专用急停，进入「阻尼」模式，见遥控模块）
+      UI.toast('已急停 · 机器人已停止所有动作', { variant: 'center' });   // 文档 T37
     }
     function startHold() {
       if (!fab.classList.contains('show')) return;
@@ -10054,6 +10497,80 @@
   window.Motion = Motion;
 
   /* ============================================================
+   * [E2] 机器人状态告警：低电量【D-02】/ 报警【D-03】
+   * ------------------------------------------------------------
+   * 由状态调试面板的「电量」「机器人报警」驱动：
+   *  · 电量 ≤20%（E-S1）：状态胶囊电量数字变红 + 弹低电量弹窗，阻断高耗电操作
+   *  · 报警 on（E-S2）：弹报警弹窗，拦截运动指令
+   * ============================================================ */
+  const Alerts = (function () {
+    const $ = (id) => document.getElementById(id);
+    let lastLow = false;          // 上次是否处于低电量（用于"跨过阈值才弹一次"）
+    let alarmOn = false;
+
+    function show(mask, modal) { if (mask) mask.classList.add('show'); if (modal) modal.classList.add('show'); }
+    function hide(mask, modal) { if (mask) mask.classList.remove('show'); if (modal) modal.classList.remove('show'); }
+
+    function showLowBatt() { show($('lowBattMask'), $('lowBattModal')); }
+    function hideLowBatt() { hide($('lowBattMask'), $('lowBattModal')); }
+    function showAlarm()   { show($('alarmMask'), $('alarmModal')); }
+    function hideAlarm()   { hide($('alarmMask'), $('alarmModal')); }
+
+    // 电量变化时调用：connected 为 true 且 batt ≤20 视为危急
+    function checkLowBatt(batt, connected) {
+      const low = connected && Number(batt) <= 20;
+      if (low && !lastLow) showLowBatt();   // 刚跨入低电量 → 弹一次
+      lastLow = low;
+      return low;
+    }
+    // 高耗电操作（执行作品/遥控运动）前调用：低电量则拦截并弹窗
+    function guardLowBatt(batt, connected) {
+      if (connected && Number(batt) <= 20) { showLowBatt(); return false; }
+      return true;
+    }
+
+    function setAlarm(on, reason) {
+      alarmOn = !!on;
+      if (on) {
+        const sub = $('alarmSub');
+        if (sub && reason) sub.textContent = reason;
+        showAlarm();
+      } else {
+        hideAlarm();
+      }
+    }
+    // 运动指令前调用：报警中则拦截并弹窗
+    function guardAlarm() {
+      if (alarmOn) { showAlarm(); return false; }
+      return true;
+    }
+    function isAlarm() { return alarmOn; }
+
+    // AP 模式拦截弹窗【D-05】：AP 直连下点联网功能 → 弹窗提示切 Wi-Fi
+    function showApIntercept() { show($('apInterceptMask'), $('apInterceptModal')); }
+    function hideApIntercept() { hide($('apInterceptMask'), $('apInterceptModal')); }
+    // 联网功能守卫：AP 模式下拦截并弹 D-05，返回 false 表示已拦截
+    function guardApMode() {
+      const dev = Store.get().find(d => d.status === 'connected');
+      if (dev && dev.connMode === 'ap') { showApIntercept(); return false; }
+      return true;
+    }
+
+    // 弹窗按钮
+    ['lowBattOk'].forEach(id => { const b = $(id); if (b) b.addEventListener('click', hideLowBatt); });
+    ['alarmOk','alarmDetail'].forEach(id => { const b = $(id); if (b) b.addEventListener('click', hideAlarm); });
+    ['lowBattMask'].forEach(id => { const m = $(id); if (m) m.addEventListener('click', hideLowBatt); });
+    ['alarmMask'].forEach(id => { const m = $(id); if (m) m.addEventListener('click', hideAlarm); });
+    ['apInterceptCancel','apInterceptMask'].forEach(id => { const b = $(id); if (b) b.addEventListener('click', hideApIntercept); });
+    const apGo = $('apInterceptGo');
+    if (apGo) apGo.addEventListener('click', () => { hideApIntercept(); if (window.UI) UI.openPage('settingsPage'); });
+
+    function resetAlerts() { lastLow = false; hideLowBatt(); setAlarm(false); hideApIntercept(); }
+    return { checkLowBatt, guardLowBatt, setAlarm, guardAlarm, isAlarm, showLowBatt, hideLowBatt, showApIntercept, hideApIntercept, guardApMode, resetAlerts };
+  })();
+  window.Alerts = Alerts;
+
+  /* ============================================================
    * [L] 启动确认（需求3）：真机执行前的二次确认
    * ------------------------------------------------------------
    * 「启动」会让机器人当场动起来，有物理后果。统一走这个弹窗：
@@ -10083,6 +10600,12 @@
     }
     function open(opts = {}) {
       const cb = typeof opts.onConfirm === 'function' ? opts.onConfirm : null;
+      // 真机执行前的机器人状态拦截：报警【E-S2·D-03】/ 电量危急【E-S1·D-02】
+      if (window.Alerts) {
+        const connDev = Store.get().find(d => d.status === 'connected');
+        if (!Alerts.guardAlarm()) return;
+        if (!Alerts.guardLowBatt(connDev ? connDev.batt : 100, !!connDev)) return;
+      }
       // 本次会话已选择不再提醒 → 直接执行，跳过弹窗
       if (skipConfirm) { if (cb) cb(); return; }
       onConfirm = cb;
@@ -10122,7 +10645,7 @@
       name: btn.dataset.actName || '动作',
       dur: btn.dataset.actDur || '—',
       onConfirm: () => {
-        UI.toast('已启动 · 机器人开始执行', { variant: 'center', duration: 1800 });
+        UI.toast('已下发执行指令', { variant: 'center' });   // 作品/动作执行下发
         Motion.start();
         // 演示：执行一段时间后自动结束（真机由动作完成回调控制）
         setTimeout(() => Motion.stop(), 4000);
@@ -10335,7 +10858,10 @@
           ? (dev.connMode === 'ap' ? 'AP 直连' : 'Wi-Fi')
           : '已连接';
         chip.style.display = '';
-        chip.innerHTML = '<div class="chip-battery-icon"></div><span>' + batt + '</span>'
+        // 电量 ≤20%：数字变红（文档 H3-H4 / E-S1）
+        const low = dev && Number(dev.batt) <= 20;
+        const battStyle = low ? ' style="color:#ff5a5f;font-weight:600;"' : '';
+        chip.innerHTML = '<div class="chip-battery-icon"></div><span' + battStyle + '>' + batt + '</span>'
           + '<span class="chip-divider">|</span><span>' + modeText + '</span>';
       }
       // 遥控页同步为已连接
@@ -10875,7 +11401,7 @@
     const pendingResend = []; // 断网期间失败、待网络恢复重发的元素
     function setOffline(off) {
       isOffline = off;
-      netBanner.classList.toggle('show', off);
+      if (netBanner) netBanner.classList.toggle('show', off);
       if (!off) {
         // 恢复网络 → 自动重发排队的消息
         const queue = pendingResend.splice(0);
@@ -11058,6 +11584,14 @@
         });
         function showText(tip) {
           tip.classList.remove('loading');
+          // E-A2 语音识别失败：转写区提示失败，语音条本身仍可正常播放
+          if (window.Sim && Sim.get().asrResult === 'fail') {
+            tip.classList.add('failed');
+            tip.innerHTML = '<span class="voice-transcript-fail">识别失败，请重试</span>';
+            scrollToBottom();
+            return;
+          }
+          tip.classList.remove('failed');
           tip.innerHTML = escapeHTML(text) + '<span class="voice-transcript-tag">语音转文字</span>';
           scrollToBottom();
         }
@@ -11293,7 +11827,7 @@
     // 从对话页右上角「…」打开配置
     // Agent 右上角「⋮」：配置功能开发中（与轨道编排一致的占位提示）
     // 注：配置页 HTML/JS 保留，开发完成后改回 UI.openPage('configPage') 即可
-    document.getElementById('agentMenuBtn').addEventListener('click', () => UI.toast('对话配置开发中', { variant: 'center', duration: 1500 }));
+    document.getElementById('agentMenuBtn').addEventListener('click', () => UI.toast(COPY.app.configWip, { variant: 'center', duration: 1500 }));
 
     // 演示用：长按标题「小G」切换断网模拟，用于体验消息失败/重发/恢复
     (function bindOfflineDemo() {
@@ -11323,7 +11857,7 @@
   })();
 
   /* ============================================================
-   * [6] 设置页 Settings + 系统 Sheet（账号 / 升级 / 帮助 / 客服 / 搜寻设备）
+   * [6] 设置页 Settings + 系统 Sheet（账号 / 升级 / 帮助 / 客服 / 搜索设备）
    * Sheet 显隐统一走 UI 的 Sheet 子系统。
    * ============================================================ */
   (function SettingsModule() {
@@ -11375,11 +11909,11 @@
 
     // 「软件升级」的检查/下载/安装逻辑统一在 UpdateFlow 模块里初始化（见文件后段）
 
-    // 连接机器人 / 绑定新设备 → 打开「添加新机器人」流程（从搜寻步骤开始）
+    // 连接机器人 / 绑定新设备 → 打开「添加新机器人」流程（从搜索步骤开始）
     document.getElementById('connectBtn').addEventListener('click', (e) => {
       e.preventDefault();
       // 已绑定过设备（只是都断开了）→ 跳设置页「我的设备」让用户重连；
-      // 一台都没绑定 → 才走搜寻新设备流程。
+      // 一台都没绑定 → 才走搜索新设备流程。
       const hasBound = Store.get().length > 0;
       if (hasBound) {
         UI.openPage('settingsPage');
@@ -11396,6 +11930,7 @@
     let scanTimer = null;
     let scanSelected = null;        // 当前选中的待绑定设备
     let apSettingsDone = false;     // AP 模式是否已"去设置"
+    let reconfigMode = false;       // true = 重新配网（复用同一套配网 UI，但跳过搜索步骤）
     function showScanStep(id) {
       steps.forEach(s => document.getElementById(s).classList.toggle('active', s === id));
     }
@@ -11416,25 +11951,36 @@
       card.querySelector('.scan-device-sn').textContent = dev.sn;
     }
     function startScanFlow() {
+      reconfigMode = false;
       showScanStep('scanStepSearch');
       UI.openSheet('scan');
-      // 模拟搜寻 ~2.2s 后发现设备
+      // 模拟搜索 ~2.2s 后发现设备
       clearTimeout(scanTimer);
       scanTimer = setTimeout(() => {
         if (document.getElementById('sheetScan').classList.contains('open')) {
+          // 搜索不到设备【E-B1】：由调试面板「搜索设备」埋雷 → 中断搜索，提示重试
+          if (window.Sim && Sim.get().searchResult === 'none') {
+            UI.toast('未搜索到附近的机器人，请确认已开机并靠近后重试', { variant: 'center', type: 'error' });
+            return;   // 停留在搜索步骤，用户可取消或重试
+          }
           fillScanResult();
           showScanStep('scanStepResult');
         }
       }, 2200);
     }
     window.startScanFlow = startScanFlow;
-    // 取消搜寻时清掉定时器（避免关闭后还跳到结果页）
+    // 取消搜索时清掉定时器（避免关闭后还跳到结果页）
     document.getElementById('scanCancelBtn').addEventListener('click', () => clearTimeout(scanTimer));
 
     // 发现的设备 → 选择连接方式
     document.getElementById('scanDeviceList').addEventListener('click', (e) => {
       const dev = e.target.closest('.scan-device');
       if (!dev) return;
+      // 已被他人绑定的设备：不可绑定，提示后返回（对应「该设备已被其他账号绑定」）
+      if (dev.dataset.taken) {
+        UI.toast('该设备已被其他账号绑定，无法绑定');
+        return;
+      }
       scanSelected = { name: dev.dataset.devName, sn: dev.dataset.devSn };
       document.getElementById('scanConnDevName').textContent = '机器人蓝牙名：' + scanSelected.name;
       showScanStep('scanStepConn');
@@ -11463,8 +12009,17 @@
       document.getElementById('apHint').textContent = '请前往系统设置连接上述热点，连接成功后返回点击「连接」。';
       showScanStep('scanStepAp');
     }
+    // 暴露：重新配网 → 复用绑定设备的「选择连接方式」流程（跳过搜索/结果步骤）
+    window.openReconfig = function (device) {
+      reconfigMode = true;
+      scanSelected = { name: device.name, sn: device.sn };
+      document.getElementById('scanConnDevName').textContent = '机器人蓝牙名：' + device.name;
+      showScanStep('scanStepConn');
+      UI.openSheet('scan');
+    };
     // 暴露：重新配网选 AP 时复用原 AP 页（针对已绑定的当前设备）
     window.openApReconfig = function (device) {
+      reconfigMode = true;
       scanSelected = { name: device.name, sn: device.sn };
       window.__lastBindMode = 'ap';
       enterApStep();
@@ -11473,7 +12028,12 @@
 
     // 步骤内返回
     document.querySelectorAll('[data-scan-back]').forEach(btn => {
-      btn.addEventListener('click', () => showScanStep(btn.dataset.scanBack));
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.scanBack;
+        // 重新配网没有"搜索结果"可回退：在「选择连接方式」按返回 = 关闭配网
+        if (reconfigMode && target === 'scanStepResult') { UI.closeTopSheet(); return; }
+        showScanStep(target);
+      });
     });
 
     // Wi-Fi 密码显隐
@@ -11621,7 +12181,7 @@
           <div class="my-device-name">${d.name}
             <span class="my-device-conn ${dotCls}"><span class="my-device-conn-dot"></span>${STATUS_LABEL[d.status]}</span>
           </div>
-          <div class="my-device-sn">${d.sn}${d.status === 'offline' ? ' · 上次在线 ' + d.lastSeen : ' · ' + d.batt + '%'}</div>
+          <div class="my-device-sn">${d.sn}${d.status === 'offline' ? ' · 上次在线 ' + d.lastSeen : d.status === 'connected' ? ' · ' + d.batt + '%' : ''}</div>
         </div>
         <div class="my-device-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -11648,6 +12208,16 @@
     // 订阅 Store：任何设备状态变更都会自动重渲染列表
     Store.subscribe(renderDevices);
 
+    // 订阅 Store：详情页打开时，设备状态变化（电量/连接模式/连接态等）实时重渲染，
+    // 避免"在调试面板改了连接模式，详情页 UI 不跟随"的问题。
+    Store.subscribe(() => {
+      const dp = document.getElementById('robotDetailPage');
+      if (dp && dp.classList.contains('open') && dp.dataset.sn) {
+        const still = devices.find(x => x.sn === dp.dataset.sn);
+        if (still) openDetail(dp.dataset.sn);
+      }
+    });
+
     // 兼容旧接口：散落各处的 window.DeviceStore 调用无需改动
     window.DeviceStore = { addOrConnect, connectDevice, get: Store.get };
 
@@ -11657,10 +12227,12 @@
       if (!d) return;
       detailPage.dataset.sn = sn;
 
-      // 名称 / SN / 电量
+      // 名称 / SN / 电量（电量仅「已连接」时显示；可连接 / 离线不显示）
       document.getElementById('rdName').textContent = d.name;
       document.getElementById('rdSn').textContent = d.sn;
-      document.getElementById('rdBatt').textContent = d.status === 'offline' ? '—' : d.batt + '%';
+      document.getElementById('rdBatt').textContent = d.batt + '%';
+      const battWrap = document.getElementById('rdBattWrap');
+      if (battWrap) battWrap.style.display = d.status === 'connected' ? '' : 'none';
 
       // 状态徽章（三态）
       const badge = document.getElementById('rdBadge');
@@ -11688,19 +12260,7 @@
       wayWifi.querySelector('.conn-way-cur').style.display = isWifi ? '' : 'none';
       wayAp.querySelector('.conn-way-cur').style.display = isWifi ? 'none' : '';
 
-      // 非连接态：显示「最后一次连接信息」提示
-      const note = document.getElementById('rdHistoryNote');
-      if (d.status === 'connected') {
-        note.classList.remove('show');
-      } else {
-        note.classList.add('show');
-        document.getElementById('rdHistoryText').textContent =
-          d.status === 'available'
-            ? '以下为最后一次连接时的信息，连接后可查看与操作'
-            : '该设备已离线（上次在线 ' + d.lastSeen + '），连接后可查看与操作';
-      }
-
-      // 状态操作按钮：已连接→断开 / 可连接→去连接 / 离线→重新搜索
+      // 状态操作按钮：已连接→断开 / 可连接→去连接 / 离线→搜索
       const actBtn = document.getElementById('rdConnActionBtn');
       if (d.status === 'connected') {
         actBtn.textContent = '断开连接';
@@ -11754,6 +12314,37 @@
     }
     rdMask.addEventListener('click', closeRdSheet);
 
+    // 抽屉：从把手/头部向下滑 → 收起（除了点空白处）
+    (function initRdSheetSwipe() {
+      let startY = null, curSheet = null;
+      function grab(target, y) {
+        const grip = target.closest && target.closest('.sheet-handle, .sheet-header');
+        if (!grip) return;
+        const sheet = grip.closest('.sheet');
+        if (!sheet || sheet.id !== openSheetId) return;   // 只作用于当前打开的详情抽屉
+        curSheet = sheet; startY = y;
+      }
+      function move(y) {
+        if (!curSheet || startY == null) return;
+        const dy = y - startY;
+        if (dy > 0) { curSheet.style.transition = 'none'; curSheet.style.transform = 'translateY(' + Math.min(dy, 500) + 'px)'; }
+      }
+      function release(y) {
+        if (!curSheet) return;
+        const dy = (y == null ? startY : y) - startY;
+        curSheet.style.transition = '';
+        curSheet.style.transform = '';
+        if (dy > 70) closeRdSheet();
+        curSheet = null; startY = null;
+      }
+      document.addEventListener('touchstart', (e) => grab(e.target, e.touches[0].clientY), { passive: true });
+      document.addEventListener('touchmove', (e) => { if (curSheet) move(e.touches[0].clientY); }, { passive: true });
+      document.addEventListener('touchend', (e) => release((e.changedTouches[0] || {}).clientY));
+      document.addEventListener('mousedown', (e) => grab(e.target, e.clientY));
+      document.addEventListener('mousemove', (e) => { if (curSheet) move(e.clientY); });
+      document.addEventListener('mouseup', (e) => release(e.clientY));
+    })();
+
     // 详情菜单行 → 打开对应 sheet
     document.querySelectorAll('[data-rd-sheet]').forEach(row => {
       row.addEventListener('click', () => {
@@ -11778,10 +12369,14 @@
     const connReconfigBtn = document.getElementById('connReconfigBtn');
     if (connReconfigBtn) {
       connReconfigBtn.addEventListener('click', () => {
-        reconfReset();
-        // rdConnWifi 是详情子 sheet（z-index 271），直接显示并保证蒙层在
-        document.getElementById('rdConnWifi').classList.add('open');
-        document.getElementById('rdSheetMask').classList.add('show');
+        const sn = detailPage.dataset.sn;
+        const d = devices.find(x => x.sn === sn);
+        if (!d) return;
+        // 关掉「连接模式」子 sheet 及蒙层
+        document.getElementById('rdConn').classList.remove('open');
+        document.getElementById('rdSheetMask').classList.remove('show');
+        // 复用「绑定设备」里的「选择连接方式」流程，UI 完全一致
+        if (window.openReconfig) window.openReconfig({ name: d.name, sn: d.sn });
       });
     }
     // 选 Wi-Fi
@@ -11889,31 +12484,62 @@
       <div class="rd-svc-row"><span class="rd-svc-name">${s}</span><span class="rd-svc-dot"></span></div>
     `).join('');
 
-    // 状态操作按钮：断开 / 去连接 / 重新搜索
+    // 连接一台可连接设备：可能因机器端未响应 / 网络不佳而失败 → 弹失败弹窗给重试入口
+    const disconnectModal = document.getElementById('rdDisconnectModal');
+    const connFailModal = document.getElementById('rdConnFailModal');
+    // isRetry=true 时不再触发"偶发失败"，保证重试能连上（除非被调试面板强制失败）
+    function doConnect(sn, isRetry) {
+      const d = devices.find(x => x.sn === sn);
+      if (!d) return;
+      UI.toast('正在连接…');
+      setTimeout(() => {
+        // 失败条件：① 调试面板强制（网络离线 / 机器端未响应）；② 首次连接的偶发失败（演示用，约 35%）
+        const st = window.Sim ? Sim.get() : {};
+        let reason = null;
+        if (st.comm === 'lost') reason = '与机器人连接中断，请确认机器人在信号范围内后重试。';
+        else if (st.robotResp === 'noResp') reason = '机器人未响应，请确认机器人已开机、靠近手机后重试。';
+        else if (!isRetry && Math.random() < 0.35) reason = '机器人未响应，请确认机器人已开机、靠近手机后重试。';
+        if (reason) {
+          document.getElementById('rdConnFailDesc').textContent = reason;
+          connFailModal.classList.add('show');
+          return;
+        }
+        connectDevice(sn);
+        if (window.HomeSyncConnState) window.HomeSyncConnState();
+        openDetail(sn);
+        UI.toast('已连接到「' + d.name + '」');
+      }, 1300);
+    }
+
+    // 状态操作按钮：断开（二次确认）/ 去连接（可能失败）/ 搜索
     document.getElementById('rdConnActionBtn').addEventListener('click', () => {
       const sn = detailPage.dataset.sn;
       const d = devices.find(x => x.sn === sn);
       if (!d) return;
       if (d.status === 'connected') {
-        // 断开 → 可连接
-        disconnectDevice(sn);
-        if (window.HomeSyncConnState) window.HomeSyncConnState();
-        openDetail(sn);
-        UI.toast('已断开连接', { variant: 'center', duration: 1500 });
+        disconnectModal.classList.add('show');          // 断开 → 二次确认
       } else if (d.status === 'available') {
-        // 去连接 → 连上它（互斥）
-        UI.toast('正在连接…', { variant: 'center', duration: 1200 });
-        setTimeout(() => {
-          connectDevice(sn);
-          if (window.HomeSyncConnState) window.HomeSyncConnState();
-          openDetail(sn);
-          UI.toast('已连接到「' + d.name + '」', { variant: 'center', duration: 1500 });
-        }, 1300);
+        doConnect(sn);                                    // 去连接（含失败兜底）
       } else {
-        // 离线 → 重新搜索：关详情页，跳搜索配网流程
-        UI.closePage('robotDetailPage');
+        UI.closePage('robotDetailPage');                 // 离线 → 搜索
         setTimeout(() => { if (window.startScanFlow) window.startScanFlow(); }, 320);
       }
+    });
+    // 断开连接二次确认
+    document.getElementById('rdDisconnectCancel').addEventListener('click', () => disconnectModal.classList.remove('show'));
+    document.getElementById('rdDisconnectOk').addEventListener('click', () => {
+      disconnectModal.classList.remove('show');
+      const sn = detailPage.dataset.sn;
+      disconnectDevice(sn);
+      if (window.HomeSyncConnState) window.HomeSyncConnState();
+      openDetail(sn);
+      UI.toast('已断开连接');
+    });
+    // 连接失败：取消 / 重试
+    document.getElementById('rdConnFailCancel').addEventListener('click', () => connFailModal.classList.remove('show'));
+    document.getElementById('rdConnFailRetry').addEventListener('click', () => {
+      connFailModal.classList.remove('show');
+      doConnect(detailPage.dataset.sn, true);   // 重试：不再偶发失败
     });
 
     // 解除绑定（二次确认）
@@ -11947,15 +12573,31 @@
   (function RemoteModule() {
     const remotePage = document.getElementById('remotePage');
 
-    /* ===== 需求4：未连接 → 整页引导态 ===== */
+    /* ===== 需求4：未连接 → 整页引导态；同步状态胶囊（电量 + 连接模式）===== */
     function syncRemoteConn() {
       if (!remotePage) return;
       remotePage.classList.toggle('disconnected', !Store.isConnected());
+      // 状态胶囊：已连接显示真实电量 + 连接模式；未连接隐藏（同首页）
+      const chip = document.getElementById('remoteStatusChip');
+      if (chip) {
+        const dev = Store.get().find(d => d.status === 'connected');
+        if (dev) {
+          chip.style.display = '';
+          const battEl = document.getElementById('remoteChipBatt');
+          const low = Number(dev.batt) <= 20;
+          battEl.textContent = dev.batt + '%';
+          battEl.style.color = low ? '#ff5a5f' : '';
+          battEl.style.fontWeight = low ? '600' : '';
+          document.getElementById('remoteChipMode').textContent = dev.connMode === 'ap' ? 'AP 直连' : 'Wi-Fi';
+        } else {
+          chip.style.display = 'none';
+        }
+      }
     }
     Store.subscribe(syncRemoteConn);
     syncRemoteConn();
 
-    // 引导按钮：有已绑定设备 → 去设置页重连；否则搜寻新设备
+    // 引导按钮：有已绑定设备 → 去设置页重连；否则搜索新设备
     const remoteGuideBtn = document.getElementById('remoteGuideBtn');
     if (remoteGuideBtn) {
       remoteGuideBtn.addEventListener('click', () => {
@@ -11979,6 +12621,14 @@
     const rasTrack = document.getElementById('rasTrack');
     const rasThumb = document.getElementById('rasThumb');
     const rlActionsEl = document.getElementById('rlActions');
+    // 横屏快捷区分页元素（6 列 × 2 行 = 12/页，纵向翻页 + 右侧竖滑杆）
+    const rlViewportEl = document.getElementById('rlActionsViewport');
+    const rlSliderEl = document.getElementById('rlActionsSlider');
+    const rlAsTrack = document.getElementById('rlAsTrack');
+    const rlAsThumb = document.getElementById('rlAsThumb');
+    const RL_PER_PAGE = 12;   // 横屏每页 6 列 × 2 行
+    const RL_ROWS = 2;
+    let rlCurPage = 0, rlPageCount = 1;
     const actById = (id) => allActions.find(a => a.id === id);
 
     let curPage = 0;       // 当前页（竖屏分页）
@@ -12011,7 +12661,7 @@
         layoutPages();
       }
 
-      // —— 横屏（沿用 .rl-action-btn 样式，横屏一排滚动，不分页）——
+      // —— 横屏（沿用 .rl-action-btn 样式，每页 6 列 × 2 行 = 12，纵向分页 + 右侧竖滑杆）——
       if (rlActionsEl) {
         const cards = selectedIds.map(id => {
           const a = actById(id);
@@ -12031,8 +12681,90 @@
         });
         const rlAddEl = document.getElementById('rlQuickAddBtn');
         if (rlAddEl) rlAddEl.addEventListener('click', openActPicker);
+        rlLayoutPages();
       }
     }
+
+    // —— 横屏快捷区分页：把 viewport 高度锁成 2 行，按总格子数算页数 ——
+    function rlLayoutPages() {
+      if (!rlActionsEl || !rlViewportEl) return;
+      const total = selectedIds.length + 1; // +1 是「添加」格
+      rlPageCount = Math.max(1, Math.ceil(total / RL_PER_PAGE));
+      if (rlCurPage > rlPageCount - 1) rlCurPage = rlPageCount - 1;
+      const first = rlActionsEl.querySelector('.rl-action-btn');
+      const gap = 10;
+      const cellH = first ? first.getBoundingClientRect().height : 52;
+      const pageH = cellH * RL_ROWS + gap * (RL_ROWS - 1);
+      rlViewportEl.style.height = pageH + 'px';
+      rlGoToPage(rlCurPage);
+      rlUpdateSlider();
+    }
+    function rlGoToPage(p) {
+      rlCurPage = Math.min(Math.max(0, p), rlPageCount - 1);
+      const h = rlViewportEl.getBoundingClientRect().height;
+      const gap = 10;
+      rlActionsEl.style.transform = `translateY(${-rlCurPage * (h + gap)}px)`;
+      rlUpdateSliderThumb();
+    }
+    function rlUpdateSlider() {
+      if (!rlSliderEl) return;
+      if (rlPageCount <= 1) { rlSliderEl.classList.remove('show'); return; }
+      rlSliderEl.classList.add('show');
+      const trackH = rlAsTrack.getBoundingClientRect().height;
+      rlAsThumb.style.height = Math.max(24, trackH / rlPageCount) + 'px';
+      rlUpdateSliderThumb();
+    }
+    function rlUpdateSliderThumb() {
+      if (!rlSliderEl || rlPageCount <= 1) return;
+      const trackH = rlAsTrack.getBoundingClientRect().height;
+      const thumbH = rlAsThumb.getBoundingClientRect().height;
+      const maxTop = trackH - thumbH;
+      rlAsThumb.style.top = (rlPageCount > 1 ? (rlCurPage / (rlPageCount - 1)) * maxTop : 0) + 'px';
+    }
+    // 横屏滑杆拖动翻页
+    (function initRlSlider() {
+      if (!rlAsThumb || !rlAsTrack) return;
+      let dragging = false;
+      function pageFromClientY(clientY) {
+        const rect = rlAsTrack.getBoundingClientRect();
+        const thumbH = rlAsThumb.getBoundingClientRect().height;
+        const maxTop = rect.height - thumbH;
+        let top = Math.min(Math.max(0, clientY - rect.top - thumbH / 2), maxTop);
+        rlAsThumb.style.top = top + 'px';
+        const ratio = maxTop > 0 ? top / maxTop : 0;
+        return Math.round(ratio * (rlPageCount - 1));
+      }
+      function onMove(e) {
+        if (!dragging) return;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const p = pageFromClientY(clientY);
+        if (p !== rlCurPage) rlGoToPage(p);
+        e.preventDefault();
+      }
+      function onUp() {
+        if (!dragging) return;
+        dragging = false; rlAsThumb.classList.remove('dragging');
+        rlGoToPage(rlCurPage);
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onUp);
+      }
+      function onDown(e) {
+        dragging = true; rlAsThumb.classList.add('dragging');
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend', onUp);
+        e.preventDefault();
+      }
+      rlAsThumb.addEventListener('mousedown', onDown);
+      rlAsThumb.addEventListener('touchstart', onDown, { passive: false });
+      rlAsTrack.addEventListener('click', (e) => {
+        if (e.target === rlAsThumb) return;
+        rlGoToPage(pageFromClientY(e.clientY));
+      });
+    })();
 
     // 计算分页：把 viewport 高度锁成 3 行，按总格子数算页数，更新滑杆
     function layoutPages() {
@@ -12040,13 +12772,12 @@
       pageCount = Math.max(1, Math.ceil(total / PER_PAGE));
       if (curPage > pageCount - 1) curPage = pageCount - 1;
 
-      // 锁定 viewport 高度 = 3 行按钮 + 2 个 gap
-      // 用第一格实际高度换算，保证不同屏幕比例都精确对齐
+      // 锁定 viewport 高度 = 2 行按钮 + 1 个 gap（紧凑，给摇杆留空间；超出可原生滑动）
       const first = actionsEl.querySelector('.action-btn');
       if (first) {
         const gap = 10;
         const cellH = first.getBoundingClientRect().height;
-        const pageH = cellH * 3 + gap * 2;
+        const pageH = cellH * 2 + gap;
         viewportEl.style.height = pageH + 'px';
       }
       goToPage(curPage);
@@ -12142,14 +12873,19 @@
     })();
 
     // 屏幕尺寸变化时重新计算分页（比如旋转、软键盘）
-    window.addEventListener('resize', () => { if (actionsEl) layoutPages(); });
+    window.addEventListener('resize', () => { if (actionsEl) layoutPages(); if (rlActionsEl) rlLayoutPages(); });
     // 切到遥控页时快捷区才有真实尺寸，重算分页与滑杆
     document.addEventListener('remoteTabShown', () => { if (actionsEl) layoutPages(); });
     // 触发一个快捷动作（竖横屏共用）
     function fireQuickAction(id) {
       if (!Store.isConnected()) { UI.toast(); return; }
+      // 动作冲突【E-T1·T-12】：上一个动作未执行完又点下一个 → 丢弃并提示
+      if (window.Sim && Sim.get().remoteConflict === 'conflict') {
+        UI.toast('机器人正在执行动作，请稍后', { type: 'warning', duration: 1600 });
+        return;
+      }
       const a = actById(id);
-      UI.toast('已发送「' + (a ? a.name : '动作') + '」', { duration: 1500 });
+      UI.toast(COPY.progress.quickAction(a ? a.name : '动作'));   // 进行中：正在执行「XX」
       // 注：遥控页有自己的急停（模式行/横屏右上角），不触发全局浮动急停
     }
 
@@ -12209,20 +12945,61 @@
 
     renderQuickActions();
 
-    // 模式胶囊（含页内专用急停 .danger）
-    document.querySelectorAll('.mode-pill').forEach(pill => {
+    /* ===== 模式切换：点击即切换（竖屏 / 横屏共享状态，互相同步；急停独立）===== */
+    let currentMode = '站立';
+    function setModeActive(mode) {
+      document.querySelectorAll('#modePillsPortrait .mode-pill[data-mode], #modePillsLandscape .mode-pill[data-mode]')
+        .forEach(p => p.classList.toggle('active', p.dataset.mode === mode));
+    }
+    function commitMode(mode) { currentMode = mode; setModeActive(mode); }
+
+    // 通用二次确认（切换有安全后果的模式 / 急停）
+    const modeConfirmModal = document.getElementById('modeConfirmModal');
+    const modeConfirmOk = document.getElementById('modeConfirmOk');
+    let pendingAction = null;
+    function askConfirm(title, desc, okLabel, onOk, danger) {
+      pendingAction = onOk;
+      document.getElementById('modeConfirmTitle').textContent = title;
+      document.getElementById('modeConfirmDesc').textContent = desc;
+      modeConfirmOk.textContent = okLabel || '确认';
+      modeConfirmOk.classList.toggle('danger', !!danger);
+      // 横屏 overlay 打开时旋转对齐
+      modeConfirmModal.classList.toggle('landscape', document.getElementById('remoteLandscape').classList.contains('open'));
+      modeConfirmModal.classList.add('show');
+    }
+    document.getElementById('modeConfirmCancel').addEventListener('click', () => { modeConfirmModal.classList.remove('show'); pendingAction = null; });
+    modeConfirmOk.addEventListener('click', () => {
+      modeConfirmModal.classList.remove('show');
+      const fn = pendingAction; pendingAction = null;
+      if (fn) fn();
+    });
+
+    // 需要二次确认的模式（仅零力矩：会让机器人失去支撑）
+    const MODE_CONFIRM = {
+      '零力矩': '切换到「零力矩」后机器人将失去支撑，可能瘫软或倒下。请确保已扶稳或周围安全，确认切换吗？',
+    };
+    ['modePillsPortrait', 'modePillsLandscape'].forEach(id => {
+      const box = document.getElementById(id);
+      if (!box) return;
+      box.addEventListener('click', (e) => {
+        const p = e.target.closest('.mode-pill[data-mode]');
+        if (!p) return;                                   // 急停等无 data-mode 的不在此处理
+        if (!Store.isConnected()) { UI.toast(); return; }  // 未连接：提示，不切换
+        const mode = p.dataset.mode;
+        if (MODE_CONFIRM[mode]) askConfirm('切换到「' + mode + '」', MODE_CONFIRM[mode], '确认切换', () => commitMode(mode));
+        else commitMode(mode);                             // 阻尼 / 站立 / 运控 → 直接切换
+      });
+    });
+
+    // 独立急停（竖屏 estopPortrait + 横屏 rl-estop，均带 .danger）：二次确认后生效
+    function doEstop() {
+      Motion.reset();
+      commitMode('阻尼');   // 急停安全态（G4/G5）：遥控急停 → 进入「阻尼」（见按钮高亮）
+      UI.toast('已急停 · 机器人已停止所有动作');   // 文档 T37
+    }
+    document.querySelectorAll('.mode-pill.danger').forEach(pill => {
       pill.addEventListener('click', () => {
-        const label = pill.textContent.trim();
-        if (pill.classList.contains('danger')) {
-          // 遥控页专用急停：拇指可达区，直接生效
-          Motion.reset(); // 顺带清掉其它场景可能残留的运动计数
-          UI.toast('已发送急停指令', { duration: 2200 });
-          return;
-        }
-        document.querySelectorAll('.mode-pill:not(.danger)').forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        if (!Store.isConnected()) { UI.toast(); return; }
-        UI.toast('已切换到「' + label + '」', { duration: 1500 });
+        askConfirm('急停', '确认立即急停？机器人将停止所有动作并进入「阻尼」保护。', '确认急停', doEstop, true);
       });
     });
 
@@ -12272,6 +13049,8 @@
     // 全屏按钮（#11）：进入横屏遥控 overlay
     document.querySelector('.remote-preview-fullscreen').addEventListener('click', () => {
       UI.openPage('remoteLandscape');
+      // 横屏 overlay 显示后尺寸才为真实值，重算横屏快捷区分页
+      setTimeout(rlLayoutPages, 60);
     });
     // 横屏退出 → 回竖屏遥控
     document.getElementById('rlExit').addEventListener('click', () => {
@@ -12338,7 +13117,7 @@
           <div class="work-info">
             <div class="work-name">${esc(w.name)}</div>
             <div class="work-tag ${synced ? 'synced' : ''}">${SYNC_LABEL[w.syncState] || '未同步'}</div>
-            ${synced ? '' : '<div class="work-sync-tip">还没传给机器人，等它上线就自动同步～</div>'}
+            ${synced ? '' : '<div class="work-sync-tip">还没传给机器人，机器人联网后自动同步</div>'}
             <div class="work-meta">
               <span>动作时长 ${w.duration}</span>
               <span>${w.date}</span>
@@ -12369,23 +13148,39 @@
       const actionBtn = e.target.closest('.work-action-btn');
       if (actionBtn) {
         e.stopPropagation();
-        const musicOn = document.getElementById('worksMusicGlobal').classList.contains('on');
-        const musicTip = musicOn ? '（含音频）' : '（静音）';
+        // AP 直连模式下，未同步作品需联网同步/下发 → 按 E-G7 拦截并提示切 Wi-Fi（D-05）
+        // （已同步作品在 AP 模式下可本地执行，不拦截）
+        const connDev = Store.get().find(d => d.status === 'connected');
+        if (work.syncState !== 'synced' && connDev && connDev.connMode === 'ap') {
+          if (window.Alerts) Alerts.showApIntercept();
+          return;
+        }
+        // 作品执行异常拦截【E-P9~E-P13】：由调试面板「作品执行」埋雷
+        if (window.Sim) {
+          const ex = Sim.get().execResult;
+          if (ex && ex !== 'ok') {
+            if (ex === 'offline')        UI.toast('请先连接 / 开机机器人', { variant: 'perform', type: 'error' });        // T-21 / E-P10
+            else if (ex === 'preparing') UI.toast('正在准备…', { variant: 'perform', type: 'info' });                      // T-22 / E-P11
+            else if (ex === 'busy')      UI.toast('机器人正在执行动作，请稍后', { variant: 'perform', type: 'warning' });   // T-12 / E-P12
+            else if (ex === 'notSynced') UI.toast('同步作品需联网，请检查机器人网络后重试', { variant: 'perform', type: 'error' }); // D-08 / E-P13
+            return;
+          }
+        }
         // 执行有物理后果 → 先二次确认（含安全勾选）
         LaunchConfirm.open({
           name: work.name,
           dur: '约 ' + (work.duration || '—'),
           onConfirm: () => {
             if (work.syncState === 'synced') {
-              UI.toast('已下发执行指令' + musicTip, { variant: 'perform', duration: 1500 });
+              UI.toast(COPY.progress.workExecuting);   // 进行中：正在执行…
               Motion.start();
               setTimeout(() => Motion.stop(), 4000);
             } else {
-              UI.toast('正在同步到机器人…', { variant: 'perform', duration: 1500 });
+              UI.toast('正在准备…');   // 文档 T49（先同步）
               setTimeout(() => {
                 work.syncState = 'synced';
                 rerender();
-                UI.toast('已同步，开始执行' + musicTip, { variant: 'perform', duration: 1500 });
+                UI.toast(COPY.progress.workExecuting);   // 进行中：正在执行…
                 Motion.start();
                 setTimeout(() => Motion.stop(), 4000);
               }, 1600);
@@ -12498,7 +13293,7 @@
 
     // ==================== 入口卡 ====================
     document.getElementById('cardMocap').addEventListener('click', () => UI.openPage('subpageMocap'));
-    document.getElementById('cardEdit').addEventListener('click', () => UI.toast('多轨道编辑器开发中', { variant: 'perform', duration: 1500 }));
+    document.getElementById('cardEdit').addEventListener('click', () => UI.toast(COPY.app.trackWip, { variant: 'perform', duration: 1500 }));
 
     // ==================== 上传 / 拍摄流程 ====================
     // 当前正在创建的动作来源：'upload' | 'record'
@@ -12580,8 +13375,8 @@
       // ---- 上传前：网络 / 服务端 / 上传失败 → 不建任务，直接报错 ----
       if (window.Sim) {
         const s = Sim.get();
-        if (s.net === 'offline') {
-          UI.toast(Sim.MSG.offline, { variant: 'perform', duration: 2200 });
+        if (s.comm === 'lost') {
+          UI.toast('与机器人连接中断，请稍后重试', { variant: 'perform', duration: 2200 });
           return;
         }
         if (s.uploadResult === 'uploadFail') {
@@ -12703,7 +13498,7 @@
       if (playerTimer) clearInterval(playerTimer);
       playerIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
       updatePlayerProgress();
-      UI.toast('动作预览加载中', { variant: 'perform', duration: 1500 });
+      UI.toast(COPY.progress.previewLoading);   // 进行中：加载中…
       setTimeout(() => UI.openPage('subpagePlayer'), 700);
     }
 
@@ -12909,7 +13704,7 @@
     }
     // 校验两个密码框，返回错误文案（无错返回空串）
     function checkPwPair(pw, pw2) {
-      if (!pwValid(pw)) return '密码长度少 8 位，且需同时包含字母和数字。';
+      if (!pwValid(pw)) return '密码长度至少 8 位，且同时包含字母与数字';
       if (pw !== pw2) return '两次输入的密码不一致。';
       return '';
     }
@@ -13368,10 +14163,7 @@
       st[ch].timer = setTimeout(() => {
         st[ch].timer = null;
         if (st[ch].demo === 'available') {
-          setStatus(ch, 'available');
-          if (ch === 'app' && $('appAutoUpdate') && $('appAutoUpdate').classList.contains('on')) {
-            promptNewVersion(ch);
-          }
+          setStatus(ch, 'available');   // 无自动更新：检查到新版直接进入"可更新"态，不再弹"发现新版本"
         } else {
           setStatus(ch, 'latest');
           UI.toast('当前已是最新版本', { variant: 'center', duration: 1600 });
@@ -13440,6 +14232,13 @@
           if (typeof Nav !== 'undefined' && Nav.switchTab) Nav.switchTab('首页');
           UI.toast('已更新到 ' + channels.app.latest + '，App 已重启', { variant: 'center', duration: 2200 });
         }
+
+        // 更新完成后，把调试面板的"版本"状态也同步为最新（避免重渲染又冒出"有新版"）
+        if (window.Sim) {
+          const cur = Sim.get();
+          const patch = ch === 'app' ? { appUpdate: 'latest' } : { otaUpdate: 'latest' };
+          if (cur[ch === 'app' ? 'appUpdate' : 'otaUpdate'] !== 'latest') Sim.set(patch);
+        }
       }, 6);
     }
 
@@ -13449,24 +14248,7 @@
       setStatus(ch, 'available');
     }
 
-    // 「发现新版本」提示弹窗（自动更新开启时）
-    const newVerModal = $('newVersionModal');
-    let newVerChannel = null;
-    function promptNewVersion(ch) {
-      newVerChannel = ch;
-      $('newVersionDesc').innerHTML = '检测到新版本 <b style="color:#5b8fff;">' + channels[ch].latest + '</b>，是否现在更新？';
-      newVerModal.classList.add('show');
-    }
-    if (newVerModal) {
-      $('newVersionLater').addEventListener('click', () => newVerModal.classList.remove('show'));
-      $('newVersionNow').addEventListener('click', () => {
-        newVerModal.classList.remove('show');
-        if (newVerChannel) startDownload(newVerChannel);
-      });
-      newVerModal.addEventListener('click', (e) => {
-        if (e.target === newVerModal) newVerModal.classList.remove('show');
-      });
-    }
+    // 「发现新版本」弹窗已移除：无自动更新，检查到新版直接在升级页显示可更新态
 
     // OTA 安装安全确认弹窗
     const otaInstallModal = $('otaInstallModal');
@@ -13494,6 +14276,12 @@
       } else if (s === 'readyToInstall') {
         // OTA 需安全二次确认；App 直接安装
         if (channels[ch].needSafety) {
+          // 电量 <50% 拦截 OTA 启动（文档 I-11 / T-18 / 表26）
+          const batt = window.Sim ? Number(Sim.get().batt) : 100;
+          if (batt < 50) {
+            UI.toast('电量不足 50%，请充电后再升级', { variant: 'center', type: 'warning' });
+            return;
+          }
           otaInstallModal.classList.add('show');
         } else {
           startInstall(ch);
@@ -13582,17 +14370,22 @@
      *   kind: 'seg' 分段按钮 | 'select' 下拉 | 'range' 滑杆
      *   err:  true 表示这是"异常类"条件（非默认值时标橙、待触发）
      * ---------------------------------------------------------- */
+    // 面板分两大部分：
+    //  ① state：非异常"状态设置"——选中后立即改变界面（机器人/电量/版本/登录…）
+    //  ② error：异常清单——多数为"埋雷"，等你实际去操作时才触发；部分（报警/断连/弱网/电量）即时生效
     const SCHEMA = [
-      { group: '环境', fields: [
-        { key: 'net',    label: '网络',   kind: 'seg', def: 'online',
-          opts: [['online','在线'], ['offline','离线'], ['slow','弱网']] },
-        { key: 'server', label: '服务端', kind: 'seg', def: 'ok', err: true,
-          opts: [['ok','正常'], ['timeout','超时'], ['error','500']] },
+      /* ============ ① 状态设置（即时改变界面）============ */
+      { part: 'state', group: '通信', fields: [
+        // 机器人通信状态：良好 / 信号弱【W-03】/ 连接中断【W-02】——后两者即时出顶部横幅
+        { key: 'comm',   label: '机器人通信状态', kind: 'seg', def: 'good',
+          opts: [['good','良好'], ['weak','信号弱'], ['lost','连接中断']] },
       ]},
 
-      { group: '设备', fields: [
+      { part: 'state', group: '设备', fields: [
+        // 已连接 / 可连接 / 离线【断连 E-G4·W-02】
         { key: 'robot', label: '机器人', kind: 'seg', def: 'connected',
           opts: [['connected','已连接'], ['available','可连接'], ['offline','离线']] },
+        // 电量 ≤20% 触发低电量【D-02·E-S1】：胶囊变红 + 弹窗
         { key: 'batt',  label: '电量',   kind: 'range', def: 90, min: 0, max: 100 },
         { key: 'bound', label: '绑定设备', kind: 'seg', def: 'some',
           opts: [['some','有设备'], ['none','0 台']] },
@@ -13600,43 +14393,87 @@
           opts: [['wifi','Wi-Fi'], ['ap','AP 直连']] },
       ]},
 
-      { group: '账号', fields: [
+      { part: 'state', group: '账号', fields: [
         { key: 'auth', label: '登录态', kind: 'seg', def: 'in',
           opts: [['in','已登录'], ['out','未登录'], ['expired','已过期']] },
-        { key: 'loginResult', label: '登录结果', kind: 'select', def: 'ok', err: true,
-          opts: [['ok','成功'], ['wrongPw','密码错误'], ['wrongCode','验证码错误'],
-                 ['noAccount','账号不存在'], ['locked','账号被锁定']] },
-        { key: 'regResult', label: '注册结果', kind: 'select', def: 'ok', err: true,
-          opts: [['ok','成功'], ['exists','手机号已注册'], ['wrongCode','验证码错误']] },
-        { key: 'resetResult', label: '重置密码', kind: 'select', def: 'ok', err: true,
-          opts: [['ok','成功'], ['wrongCode','验证码错误'], ['noAccount','账号不存在']] },
-        { key: 'changePwResult', label: '修改密码', kind: 'select', def: 'ok', err: true,
-          opts: [['ok','成功'], ['wrongOld','原密码错误'], ['weak','新密码太弱']] },
       ]},
 
-      { group: '操作', fields: [
-        { key: 'wifiResult', label: '配网结果', kind: 'select', def: 'ok', err: true,
-          opts: [['ok','成功'], ['wrongPw','Wi-Fi 密码错误'], ['timeout','连接超时']] },
-        { key: 'bindResult', label: '绑定结果', kind: 'select', def: 'ok', err: true,
-          opts: [['ok','成功'], ['taken','已被他人绑定'], ['notFound','设备不存在']] },
-        { key: 'uploadResult', label: '动作上传', kind: 'select', def: 'ok', err: true,
-          opts: [['ok','成功'], ['uploadFail','上传失败'], ['learnFail','学习失败']] },
-        { key: 'updateResult', label: '升级结果', kind: 'select', def: 'ok', err: true,
-          opts: [['ok','成功'], ['downloadFail','下载失败'], ['installFail','安装失败']] },
-      ]},
-
-      { group: '版本', fields: [
-        { key: 'appUpdate', label: 'App 版本', kind: 'seg', def: 'latest',
+      { part: 'state', group: '版本', fields: [
+        // 默认"有新版"：软件升级页默认非最新，走完更新流程后显示最新版
+        { key: 'appUpdate', label: 'App 版本', kind: 'seg', def: 'available',
           opts: [['latest','最新'], ['available','有新版'], ['force','强制更新']] },
         { key: 'otaUpdate', label: '固件 OTA', kind: 'seg', def: 'latest',
           opts: [['latest','最新'], ['available','有新版']] },
       ]},
 
-      { group: '内容', fields: [
+      { part: 'state', group: '内容', fields: [
         { key: 'task',  label: '学习任务', kind: 'seg', def: 'mixed',
           opts: [['mixed','默认'], ['learning','学习中'], ['failed','失败'], ['empty','空']] },
         { key: 'works', label: '作品列表', kind: 'seg', def: 'some',
           opts: [['some','有'], ['empty','空']] },
+      ]},
+
+      /* ============ ② 异常清单（按异常编号 · 埋雷 / 即时触发）============ */
+      // 说明：
+      //  · E-G1 无网络 / E-G4 断连 / E-G5 弱网 / E-S1 电量危急 属"状态类"，在上方①区设置；
+      //  · E-L1/L8/L9、E-B5、E-P1/P2/P7 等为"前端即时校验"，输入非法即触发，无需在此埋雷。
+      { part: 'error', group: '全局 · E-G', fields: [
+        { key: 'server', label: '服务端 E-G3', kind: 'seg', def: 'ok', err: true,
+          opts: [['ok','正常'], ['timeout','超时'], ['error','500']] },
+        { key: 'robotResp', label: '机器端未响应 E-G2', kind: 'seg', def: 'ok', err: true,
+          opts: [['ok','正常'], ['noResp','无响应·T56']] },
+        { key: 'incompat', label: '版本不兼容 E-G6', kind: 'seg', def: 'ok', err: true,
+          opts: [['ok','正常'], ['low','版本过低·D14']] },
+      ]},
+
+      { part: 'error', group: '机器人状态 · E-S', fields: [
+        // E-S1 电量危急由①区「电量」滑杆（≤20%）驱动，弹 D2
+        { key: 'alarm', label: '机器人报警 E-S2', kind: 'seg', def: 'off', err: true,
+          opts: [['off','正常'], ['on','报警·D3']] },
+      ]},
+
+      { part: 'error', group: '账号 · E-L', fields: [
+        { key: 'loginResult', label: '登录 E-L3/L4/L5/L6', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['wrongPw','E-L5 密码错误'], ['wrongCode','E-L3 验证码错误'],
+                 ['expired','E-L4 验证码过期'], ['noAccount','E-L6 账号未注册'], ['locked','账号被锁定']] },
+        { key: 'regResult', label: '注册 E-L7', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['exists','E-L7 手机号已注册'], ['wrongCode','验证码错误']] },
+        { key: 'resetResult', label: '重置密码 E-L6', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['wrongCode','验证码错误'], ['noAccount','E-L6 账号未注册']] },
+        { key: 'changePwResult', label: '修改密码（原密码错/新密码不合规）', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['wrongOld','原密码错误'], ['weak','新密码不合规']] },
+      ]},
+
+      { part: 'error', group: '配网 / 绑定 · E-B', fields: [
+        { key: 'searchResult', label: '搜索设备 E-B1', kind: 'seg', def: 'ok', err: true,
+          opts: [['ok','正常'], ['none','搜不到设备']] },
+        { key: 'wifiResult', label: '配网 E-B6/B7/B9', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['wrongPw','E-B6 密码错误'], ['timeout','E-B7 不可达/超时'], ['fail','E-B9 配网失败']] },
+        { key: 'bindResult', label: '绑定结果', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['taken','已被他人绑定'], ['notFound','设备不存在']] },
+      ]},
+
+      { part: 'error', group: '技能 · E-P', fields: [
+        { key: 'uploadResult', label: '上传/学习 E-P6/E-P8', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['uploadFail','E-P6 上传失败'], ['learnFail','E-P8 学习失败']] },
+        { key: 'execResult', label: '作品执行 E-P9~P13', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','正常'], ['offline','E-P10 执行不在线'], ['preparing','E-P11 未下发完'],
+                 ['busy','E-P12 机器人忙'], ['notSynced','E-P13 未同步']] },
+      ]},
+
+      { part: 'error', group: '遥控 · E-T', fields: [
+        { key: 'remoteConflict', label: '动作冲突 E-T1', kind: 'seg', def: 'ok', err: true,
+          opts: [['ok','正常'], ['conflict','动作未完·T39']] },
+      ]},
+
+      { part: 'error', group: 'Agent 对话 · E-A', fields: [
+        { key: 'asrResult', label: '语音识别 E-A2', kind: 'seg', def: 'ok', err: true,
+          opts: [['ok','正常'], ['fail','识别失败']] },
+      ]},
+
+      { part: 'error', group: '升级 · OTA', fields: [
+        { key: 'updateResult', label: '升级结果', kind: 'select', def: 'ok', err: true,
+          opts: [['ok','成功'], ['downloadFail','下载失败'], ['installFail','安装失败']] },
       ]},
     ];
 
@@ -13682,11 +14519,9 @@
 
       // ---- 机器人连接态 / 电量 / 连接方式 ----
       if (devices.length > 0) {
-        // 网络断开时机器人必然离线（物理约束，覆盖手动选择）
-        const robotState = (state.net === 'offline') ? 'offline' : state.robot;
         devices.forEach((d, i) => {
           if (i === 0) {
-            d.status = robotState;
+            d.status = state.robot;
             d.batt = Number(state.batt);
             d.connMode = state.connMode;
           } else if (d.status === 'connected') {
@@ -13696,28 +14531,57 @@
       }
       Store.notify();   // 首页/遥控页/设置页/详情页全部自动跟随
 
-      // ---- 网络 ----
-      const bar = document.getElementById('netOfflineBar');
-      if (bar) {
-        const off = state.net === 'offline';
-        bar.classList.toggle('show', off);
-        const span = bar.querySelector('span');
-        if (span) span.textContent = off ? '网络不可用，请检查网络连接' : '';
+      // ---- 机器人通信横幅：信号弱【W-01】/ 连接中断【W-02】（良好则无横幅）----
+      const rbar = document.getElementById('robotStatusBar');
+      if (rbar) {
+        const rtext = document.getElementById('robotStatusText');
+        rbar.classList.remove('show', 'weak', 'disconnect');
+        if (state.comm === 'weak') {
+          rbar.classList.add('show', 'weak');
+          if (rtext) rtext.textContent = COPY.banners['W-01'].t;
+        } else if (state.comm === 'lost') {
+          rbar.classList.add('show', 'disconnect');
+          if (rtext) rtext.textContent = COPY.banners['W-02'].t;
+        }
       }
-      const agentPage = document.getElementById('agentPage');
-      if (agentPage) agentPage.classList.toggle('offline', state.net === 'offline');
+
+      // ---- 机器人状态告警：低电量【D-02·E-S1】/ 报警【D-03·E-S2】 ----
+      if (window.Alerts) {
+        const connected = devices.length > 0 && devices[0].status === 'connected';
+        Alerts.checkLowBatt(Number(state.batt), connected);
+        Alerts.setAlarm(state.alarm === 'on', '检测到关节异常 / 电机温度过高，已暂停运动指令。请检查机器人状态后重试。');
+      }
+
+      // ---- 机器端未响应【E-G2·T-23】：切到"无响应"即时提示一次 ----
+      if (apply._lastRobotResp !== state.robotResp) {
+        if (state.robotResp === 'noResp') {
+          setTimeout(() => UI.toast('机器人未响应，请稍后重试', { variant: 'center', type: 'error' }), 200);
+        }
+        apply._lastRobotResp = state.robotResp;
+      }
+
+      // ---- 版本不兼容【E-G6·D-11】：切到"版本过低"即时提示一次 ----
+      if (apply._lastIncompat !== state.incompat) {
+        if (state.incompat === 'low') {
+          setTimeout(() => UI.toast('当前 App/固件版本过低，请升级后再使用', { variant: 'center', type: 'error' }), 200);
+        }
+        apply._lastIncompat = state.incompat;
+      }
 
       // ---- 版本 ----
       // 只在版本条件变化时才重置升级状态机，
       // 否则下载/安装途中的一次拆雷会把进度打回原形
       if (window.UpdateFlow) {
         if (apply._lastApp !== state.appUpdate) {
-          UpdateFlow.setAvailable('app', state.appUpdate !== 'latest');
+          // 非"最新"时直接进入"有新版"态（软件升级页默认就显示可更新，而非"检查更新"）
+          if (state.appUpdate === 'latest') UpdateFlow.setAvailable('app', false);
+          else UpdateFlow.forceStatus('app', 'available');
           UpdateFlow.setForce(state.appUpdate === 'force');
           apply._lastApp = state.appUpdate;
         }
         if (apply._lastOta !== state.otaUpdate) {
-          UpdateFlow.setAvailable('ota', state.otaUpdate !== 'latest');
+          if (state.otaUpdate === 'latest') UpdateFlow.setAvailable('ota', false);
+          else UpdateFlow.forceStatus('ota', 'available');
           apply._lastOta = state.otaUpdate;
         }
       }
@@ -13757,22 +14621,24 @@
     // 各类失败的提示文案
     const MSG = {
       // 通用
-      offline:      '网络不可用，请检查网络连接',
+      offline:      '网络连接不可用，请检查网络后重试',
       timeout:      '请求超时，请稍后重试',
       error:        '服务器开小差了，请稍后重试',
       // 登录
       wrongPw:      '密码错误，请重新输入',
       wrongCode:    '验证码错误或已失效',
+      expired:      '验证码已过期，请重新获取',
       noAccount:    '该账号未注册',
       locked:       '密码错误次数过多，账号已锁定，请 30 分钟后重试',
       // 注册
       exists:       '该手机号已注册，请直接登录',
       // 改密
       wrongOld:     '原密码错误',
-      weak:         '新密码强度不足，需 8 位以上且含字母和数字',
+      weak:         '密码长度至少 8 位，且同时包含字母与数字',
       // 配网
       wifiWrongPw:  'Wi-Fi 密码错误，请重新输入',
       wifiTimeout:  '连接超时，请确认机器人在信号范围内',
+      wifiFail:     '配网失败，请重试或返回上一步重新配置',
       // 绑定
       taken:        '该设备已被其他账号绑定',
       notFound:     '未找到该设备，请检查 ID 是否正确',
@@ -13786,11 +14652,11 @@
 
     // 每个异常条件的取值 → 提示语
     const RESULT_MSG = {
-      loginResult:    { wrongPw:'wrongPw', wrongCode:'wrongCode', noAccount:'noAccount', locked:'locked' },
+      loginResult:    { wrongPw:'wrongPw', wrongCode:'wrongCode', expired:'expired', noAccount:'noAccount', locked:'locked' },
       regResult:      { exists:'exists', wrongCode:'wrongCode' },
       resetResult:    { wrongCode:'wrongCode', noAccount:'noAccount' },
       changePwResult: { wrongOld:'wrongOld', weak:'weak' },
-      wifiResult:     { wrongPw:'wifiWrongPw', timeout:'wifiTimeout' },
+      wifiResult:     { wrongPw:'wifiWrongPw', timeout:'wifiTimeout', fail:'wifiFail' },
       bindResult:     { taken:'taken', notFound:'notFound' },
       uploadResult:   { uploadFail:'uploadFail', learnFail:'learnFail' },
       updateResult:   { downloadFail:'downloadFail', installFail:'installFail' },
@@ -13805,8 +14671,8 @@
      * 直到你在面板上手动把它改回"成功"。
      * ---------------------------------------------------------- */
     function check(key) {
-      // 1) 网络离线：一切联网操作直接失败
-      if (state.net === 'offline') return MSG.offline;
+      // 1) 与机器人连接中断：需机器人的操作直接失败
+      if (state.comm === 'lost') return '与机器人连接中断，请稍后重试';
 
       // 2) 服务端异常
       if (state.server !== 'ok') return MSG[state.server];
@@ -13831,8 +14697,9 @@
       save();
       // 清掉"上次值"缓存，强制 apply() 完整重新落一遍
       apply._lastAuth = apply._lastTask = apply._lastWorks =
-        apply._lastApp = apply._lastOta = undefined;
+        apply._lastApp = apply._lastOta = apply._lastRobotResp = apply._lastIncompat = undefined;
       apply._expiredToasted = false;
+      if (window.Alerts) { Alerts.resetAlerts(); }
       if (window.UpdateFlow) UpdateFlow.reset();
       apply();
     }
@@ -13855,10 +14722,225 @@
      * ---------------------------------------------------------- */
     const panel = document.getElementById('simPanel');
 
+    /* ------------------------------------------------------------
+     * 组件预览清单：一键触发/直达。
+     *  · Toast：弹一条对应文案
+     *  · 弹窗：点开、再点同一个 → 关闭（toggle）
+     *  · 横幅/遮罩：显示 3s
+     *  · 内联(I) / 异常场景(E)：跳到对应页面，并在该页面上以"页内红字"方式显示内联提示，
+     *    再点一次收起
+     *  · 页面直达：跳转到主要状态页
+     * ---------------------------------------------------------- */
+    function pvToast(text, type) { UI.toast(text, { variant: 'center', type: type || 'info' }); return false; }
+    function pvFlashBar(id, prep) {
+      const el = document.getElementById(id);
+      if (!el) return false;
+      if (prep) prep(el);
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show', 'weak', 'disconnect'), 3000);
+      return false;
+    }
+    function pvGoto(fn) { try { fn(); } catch (e) { /* ignore */ } return false; }
+
+    // ---- 页面导航助手 ----
+    const nav = {
+      login:    () => { const a = document.getElementById('authPage'); if (a) a.classList.add('open'); },
+      home:     () => Nav.switchTab('首页'),
+      skill:    () => Nav.switchTab('技能'),
+      remote:   () => Nav.switchTab('遥控'),
+      agent:    () => UI.openPage('agentPage'),
+      settings: () => UI.openPage('settingsPage'),
+      scan:     () => { window.startScanFlow && window.startScanFlow(); },
+    };
+
+    // ---- 弹窗 toggle（点开 / 再点关闭；同一时刻只开一个预览弹窗）----
+    let pvOpenKey = null, pvOpenEls = null;
+    function pvCloseDialog() {
+      if (pvOpenEls) { pvOpenEls.forEach(e => e.classList.remove('show')); pvOpenEls = null; pvOpenKey = null; }
+    }
+    function pvToggleModal(key, ids, prep) {
+      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
+      if (!els.length) return false;
+      const wasOpen = (pvOpenKey === key);
+      pvCloseDialog();
+      hideRealInline();
+      if (wasOpen) return false;
+      if (prep) prep();
+      els.forEach(e => e.classList.add('show'));
+      pvOpenEls = els; pvOpenKey = key;
+      return true;
+    }
+
+    // ---- 内联提示：跳到真实页面/步骤，显示该页面"自带的"内联红字元素（不注入浮层）----
+    let pvRealInline = null;   // { el, key }
+    function hideRealInline() { if (pvRealInline) { pvRealInline.el.classList.remove('show'); pvRealInline = null; } }
+    function openAuthView(viewId) {
+      const a = document.getElementById('authPage'); if (a) a.classList.add('open');
+      document.querySelectorAll('.auth-view').forEach(v => v.classList.toggle('active', v.id === viewId));
+    }
+    function goLogin() { openAuthView('authLogin'); }
+    function goRegisterStep2() {
+      openAuthView('authRegister');
+      // 切到"设置密码"这一步：内容用 .auth-substep（regStep1/regStep2），指示点用 [data-reg-step]
+      document.getElementById('regStep1').classList.remove('active');
+      document.getElementById('regStep2').classList.add('active');
+      document.querySelectorAll('#authRegister [data-reg-step]').forEach(s => s.classList.toggle('active', Number(s.dataset.regStep) <= 2));
+    }
+    function goResetStep3() {
+      openAuthView('authReset');
+      [1, 2, 3].forEach(i => document.getElementById('resetStep' + i).classList.toggle('active', i === 3));
+      document.querySelectorAll('#authReset [data-reset-step]').forEach(s => s.classList.toggle('active', Number(s.dataset.resetStep) <= 3));
+    }
+    // 跳到 setupFn 指定的真实页面/步骤，并点亮该页真实内联元素 elId（再点收起）
+    function showRealInline(key, setupFn, elId, text) {
+      pvGoto(setupFn);
+      pvCloseDialog();
+      const el = document.getElementById(elId);
+      if (!el) return false;
+      const wasOn = pvRealInline && pvRealInline.key === key && el.classList.contains('show');
+      hideRealInline();
+      if (wasOn) return false;
+      if (text != null) el.textContent = text;
+      el.classList.add('show');
+      pvRealInline = { el, key };
+      return true;
+    }
+
+    // ---- 弹窗触发：优先用真实弹窗元素 toggle；无元素的用等价 toast ----
+    function prepLaunch() {
+      const n = document.getElementById('launchName'); if (n) n.textContent = '示例作品';
+      const dd = document.getElementById('launchDur'); if (dd) dd.textContent = '约 8 秒';
+    }
+    function pvDialog(code) {
+      const d = COPY.dialogs[code]; if (!d) return false;
+      const prep = code === 'D-01' ? prepLaunch : ((code === 'D-09' || code === 'D-10') ? () => prepModeConfirm(code) : null);
+      if (d.el) return pvToggleModal(code, d.el, prep);
+      pvToast(d.toast, d.type); return false;
+    }
+    // D-09 零力矩 / D-10 急停共用 modeConfirmModal，预览时按文档填入对应标题/正文
+    function prepModeConfirm(code) {
+      const t = document.getElementById('modeConfirmTitle');
+      const s = document.getElementById('modeConfirmDesc');
+      if (code === 'D-10') {
+        if (t) t.textContent = '急停';
+        if (s) s.textContent = '确认立即急停？机器人将停止所有动作并进入「阻尼」保护。';
+      } else {
+        if (t) t.textContent = '切换到「零力矩」';
+        if (s) s.textContent = '切换到「零力矩」后机器人将失去支撑，可能瘫软或倒下。请确保已扶稳或周围安全，确认切换吗？';
+      }
+    }
+    // ---- 横幅触发（显示 3s）----
+    function pvBanner(code) {
+      if (code === 'W-03') { const el = document.getElementById('otaLock'); if (el) { el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 3000); } return false; }
+      const b = COPY.banners[code]; if (!b) return false;
+      return pvFlashBar('robotStatusBar', el => { if (b.kind) el.classList.add(b.kind); const t = document.getElementById('robotStatusText'); if (t) t.textContent = b.t; });
+    }
+
+    // === T / D / W 清单由 COPY 生成（单一数据源）===
+    const PV_TOASTS  = Object.keys(COPY.toasts).map(c => [c, COPY.toasts[c].t, COPY.toasts[c].type]);
+    const PV_DIALOGS = Object.keys(COPY.dialogs).map(c => [c, COPY.dialogs[c].label]);
+    const PV_BANNERS = Object.keys(COPY.banners).map(c => [c, COPY.banners[c].t]);
+    // 内联 I（除 I-10 为 Toast 外，全部为页内红字）：点一下跳到该内联所在页面，点亮该页真实内联元素
+    // 行：[I编号, 简述, 触发函数]
+    // 编号对齐文档 I1–I15；仅列出在原型里有独立内联元素、可点亮预览的条目
+    const PV_INLINES = [
+      ['I-01','首页语音胶囊提示', () => showRealInline('I-01', nav.home,        'inlineHome',     COPY.inlines['I-01'].t)],
+      ['I-03','设密码规则',       () => showRealInline('I-03', goRegisterStep2, 'regPwError',     COPY.inlines['I-03'].t)],
+      ['I-04','密码校验红字',     () => showRealInline('I-04', goRegisterStep2, 'regPwError',     COPY.inlines['I-04'].t)],
+      ['I-09','AP 配网引导',      () => showRealInline('I-09', nav.scan,        'inlineScan',     COPY.inlines['I-09'].t)],
+      ['I-10','AP 上网说明',      () => showRealInline('I-10', nav.scan,        'inlineScan',     COPY.inlines['I-10'].t)],
+      ['I-11','搜索页副标题',     () => showRealInline('I-11', nav.scan,        'inlineScan',     COPY.inlines['I-11'].t)],
+      ['I-15','账号格式红字',     () => showRealInline('I-15', goLogin,         'loginError',     COPY.inlines['I-15'].t)],
+    ];
+
+    // 异常场景 E 全量 → 点一下跳到对应页面并显示对应 UI（内联/弹窗/toast/横幅）
+    // 行：[E编号, 简述, 触发函数]；内联类用 showRealInline 点亮真实页面的内联红字
+    const T = (code) => COPY.toasts[code].t, TY = (code) => COPY.toasts[code].type;
+    const PV_SCENARIOS = [
+      ['E-G2','机器端未响应',  () => { nav.home();   return pvToast(T('T-56'), TY('T-56')); }],
+      ['E-G3','服务端错误',    () => pvToast(T('T-65'), TY('T-65'))],
+      ['E-G4','机器人断连',    () => { nav.remote(); return pvBanner('W-02'); }],
+      ['E-G5','弱网',          () => { nav.remote(); return pvBanner('W-01'); }],
+      ['E-G6','版本不兼容',    () => pvDialog('D-14')],
+      ['E-G7','AP 模式拦截',   () => pvDialog('D-04')],
+      ['E-L1','账号格式非法',  () => showRealInline('E-L1', goLogin, 'loginError', COPY.inlines['I-15'].t)],
+      ['E-L2','验证码发送频繁',() => showRealInline('E-L2', goLogin, 'loginError', '验证码已发送，60s 后可重新获取')],
+      ['E-L3','验证码错误',    () => { nav.login(); return pvToast(T('T-12'), TY('T-12')); }],
+      ['E-L4','验证码过期',    () => { nav.login(); return pvToast('验证码已过期，请重新获取','error'); }],
+      ['E-L5','密码错误',      () => { nav.login(); return pvToast(T('T-11'), TY('T-11')); }],
+      ['E-L6','账号未注册',    () => { nav.login(); return pvToast(T('T-13'), TY('T-13')); }],
+      ['E-L7','注册已存在',    () => { nav.login(); return pvToast(T('T-15'), TY('T-15')); }],
+      ['E-L8','两次密码不一致',() => showRealInline('E-L8', goRegisterStep2, 'regPwError', COPY.inlines['I-04'].t)],
+      ['E-L9','密码不合规',    () => showRealInline('E-L9', goRegisterStep2, 'regPwError', COPY.inlines['I-03'].t)],
+      ['E-B1','搜索不到设备',  () => { nav.scan(); return pvToast(T('T-25'), TY('T-25')); }],
+      ['E-B2','权限未授予',    () => { nav.scan(); return pvToast('请前往系统设置开启定位 / 蓝牙权限','error'); }],
+      ['E-B3','蓝牙未开启',    () => { nav.scan(); return pvToast('请开启蓝牙后重试','error'); }],
+      ['E-B4','设备信号弱',    () => { nav.scan(); return pvToast('信号较弱，建议靠近机器人','warning'); }],
+      ['E-B5','Wi-Fi 名称为空',() => showRealInline('E-B5', nav.scan, 'inlineScan', '请输入 Wi-Fi 名称')],
+      ['E-B6','Wi-Fi 密码错误',() => { nav.scan(); return pvToast(T('T-28'), TY('T-28')); }],
+      ['E-B7','Wi-Fi 不可达',  () => { nav.scan(); return pvToast(T('T-29'), TY('T-29')); }],
+      ['E-B8','未连热点点连接',() => { nav.scan(); return pvToast(T('T-31'), TY('T-31')); }],
+      ['E-B9','配网失败',      () => { nav.scan(); return pvToast(T('T-30'), TY('T-30')); }],
+      ['E-S1','电量危急',      () => { nav.home(); return pvDialog('D-02'); }],
+      ['E-S2','机器人报警',    () => pvDialog('D-03')],
+      ['E-P1','视频格式不支持',() => { nav.skill(); return pvToast(T('T-66'), TY('T-66')); }],
+      ['E-P2','视频时长超限',  () => { nav.skill(); return pvToast(T('T-67'), TY('T-67')); }],
+      ['E-P3','相册权限未授予',() => { nav.skill(); return pvToast(T('T-68'), TY('T-68')); }],
+      ['E-P4','录制时长异常',  () => { nav.skill(); return pvToast(T('T-69'), TY('T-69')); }],
+      ['E-P5','录制中断',      () => { nav.skill(); return pvToast('录制中断，已保存已录部分','info'); }],
+      ['E-P6','视频上传失败',  () => { nav.skill(); return pvToast(T('T-53'), TY('T-53')); }],
+      ['E-P7','命名重复',      () => { nav.skill(); return pvToast(T('T-70'), TY('T-70')); }],
+      ['E-P8','任务学习失败',  () => { nav.skill(); return pvToast(T('T-54'), TY('T-54')); }],
+      ['E-P9','下发不在线',    () => { nav.skill(); return pvToast('机器人离线，作品已标记未同步，上线后自动同步','warning'); }],
+      ['E-P10','执行不在线',   () => { nav.skill(); return pvToast(T('T-51'), TY('T-51')); }],
+      ['E-P11','未下发完执行', () => { nav.skill(); return pvToast(T('T-49'), TY('T-49')); }],
+      ['E-P12','指令冲突',     () => { nav.skill(); return pvToast(T('T-39'), TY('T-39')); }],
+      ['E-P13','未同步点执行', () => { nav.skill(); return pvToast(T('T-52'), TY('T-52')); }],
+      ['E-T1','遥控动作冲突',  () => { nav.remote(); return pvToast(T('T-39'), TY('T-39')); }],
+    ];
+
+    // 生成"组件预览"区 HTML
+    function buildPreviewHTML() {
+      const chips = (arr, kind) => arr.map((row, i) =>
+        `<button class="sim-chip" data-pv="${kind}" data-i="${i}"><span class="c">${row[0]}</span>${row[1]}</button>`
+      ).join('');
+      return `
+        <div class="sim-part sim-part-preview">② 组件预览 · 一键触发 / 跳转</div>
+        <div class="sim-preview">
+          <details><summary>Toast（T-01~T-70 · 与文档同源）</summary><div class="sim-chips">${chips(PV_TOASTS,'toast')}</div></details>
+          <details><summary>弹窗（D-01~D-14 · 再点关闭）</summary><div class="sim-chips">${chips(PV_DIALOGS,'dialog')}</div></details>
+          <details><summary>横幅 / 遮罩（W-01~W-03）</summary><div class="sim-chips">${chips(PV_BANNERS,'banner')}</div></details>
+          <details><summary>异常场景（E 全量 · 跳转页面 + 对应 UI）</summary><div class="sim-chips">${chips(PV_SCENARIOS,'scenario')}</div></details>
+          <details><summary>内联 I（跳到页面 · 页内红字）</summary><div class="sim-chips">${chips(PV_INLINES,'inline')}</div></details>
+        </div>`;
+    }
+    function bindPreview(box) {
+      const clearOn = () => box.querySelectorAll('.sim-chip.on').forEach(c => c.classList.remove('on'));
+      box.querySelectorAll('.sim-chip[data-pv]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const kind = btn.dataset.pv, i = Number(btn.dataset.i);
+          let opened = false;
+          if (kind === 'toast')         { const [c] = PV_TOASTS[i]; pvToast(COPY.toasts[c].t, COPY.toasts[c].type); }
+          else if (kind === 'banner')   { pvBanner(PV_BANNERS[i][0]); }
+          else if (kind === 'dialog')     opened = !!pvDialog(PV_DIALOGS[i][0]);
+          else if (kind === 'scenario')   opened = !!PV_SCENARIOS[i][2]();
+          else if (kind === 'inline')     opened = !!PV_INLINES[i][2]();
+          clearOn();
+          if (opened) btn.classList.add('on');
+        });
+      });
+    }
+
     function renderPanel() {
       const box = document.getElementById('simFields');
       if (!box) return;
-      box.innerHTML = SCHEMA.map(g => {
+      const PART_TITLE = {
+        state: '① 状态设置 · 即时改变界面',
+      };
+      let lastPart = null;
+      // 只渲染"状态设置"（①）；异常清单已并入"② 组件预览 · 异常场景"，此处不再重复
+      box.innerHTML = SCHEMA.filter(g => (g.part || 'state') === 'state').map(g => {
         const fields = g.fields.map(f => {
           let ctrl = '';
           if (f.kind === 'seg') {
@@ -13878,8 +14960,18 @@
                     ${ctrl}
                   </div>`;
         }).join('');
-        return `<div class="sim-group">${g.group}</div>${fields}`;
+        // 进入新的一大部分时，插一条部分标题
+        const part = g.part || 'state';
+        let head = '';
+        if (part !== lastPart) {
+          head = `<div class="sim-part sim-part-${part}">${PART_TITLE[part] || ''}</div>`;
+          lastPart = part;
+        }
+        return `${head}<div class="sim-group">${g.group}</div>${fields}`;
       }).join('');
+
+      // 追加"③ 组件预览"区
+      box.insertAdjacentHTML('beforeend', buildPreviewHTML());
 
       // 绑定事件
       box.querySelectorAll('.sim-seg').forEach(seg => {
@@ -13893,6 +14985,8 @@
       box.querySelectorAll('.sim-range').forEach(r => {
         r.addEventListener('input', () => set(r.dataset.sim, Number(r.value)));
       });
+      // 绑定组件预览的点击
+      bindPreview(box);
     }
 
     // 把 state 同步到面板控件（含异常条件的"待触发"标记）
